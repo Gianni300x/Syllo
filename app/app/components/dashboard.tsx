@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -10,7 +10,8 @@ import {
   List,
   Search,
 } from "lucide-react";
-import Sidebar, { colorParaCurso, type UsuarioSidebar } from "./sidebar";
+import { colorParaCurso } from "./sidebar";
+import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import {
   Tarea,
   diasHastaVencimiento,
@@ -47,17 +48,9 @@ function normalizar(texto: string): string {
     .toLowerCase();
 }
 
-export default function Dashboard({
-  tareas,
-  usuario,
-  onCerrarSesion,
-}: {
-  tareas: Tarea[];
-  usuario?: UsuarioSidebar;
-  onCerrarSesion?: () => void;
-}) {
+export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
+  const { cursosSeleccionados, setConteoPorCurso } = useFiltroCursos();
   const [tab, setTab] = useState<Tab>("pendientes");
-  const [cursosSeleccionados, setCursosSeleccionados] = useState<string[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [vistaLayout, setVistaLayout] = useState<VistaLayout>("grid");
 
@@ -66,16 +59,15 @@ export default function Dashboard({
     [tareas],
   );
 
-  const conteoPorCurso = useMemo(
+  const conteoPendientes = useMemo(
     () => contarPendientesPorCurso(tareas),
     [tareas]
   );
 
-  function toggleCurso(curso: string) {
-    setCursosSeleccionados((prev) =>
-      prev.includes(curso) ? prev.filter((c) => c !== curso) : [...prev, curso],
-    );
-  }
+  // Publica el conteo de pendientes por curso al Sidebar compartido.
+  useEffect(() => {
+    setConteoPorCurso(conteoPendientes);
+  }, [conteoPendientes, setConteoPorCurso]);
 
   const tareasFiltradasPorCurso = useMemo(
     () =>
@@ -133,246 +125,233 @@ export default function Dashboard({
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-800 font-[family-name:var(--font-poppins)]">
-      <Sidebar
-        cursos={nombresCursos}
-        conteoPorCurso={conteoPorCurso}
-        cursosSeleccionados={cursosSeleccionados}
-        onToggleCurso={toggleCurso}
-        onLimpiarCursos={() => setCursosSeleccionados([])}
-        seccion="tareas"
-        usuario={usuario}
-        onCerrarSesion={onCerrarSesion}
-      />
+    <main className="flex-1 p-8">
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-slate-900">
+          {cursosSeleccionados.length === 0
+            ? "Todas las tareas"
+            : cursosSeleccionados.length === 1
+              ? cursosSeleccionados[0]
+              : `${cursosSeleccionados.length} cursos seleccionados`}
+        </h1>
+        <p className="text-sm text-slate-500 capitalize">{hoy}</p>
+      </div>
 
-      <main className="flex-1 p-8">
-        <div className="mb-8">
-          <h1 className="text-xl font-semibold text-slate-900">
-            {cursosSeleccionados.length === 0
-              ? "Todas las tareas"
-              : cursosSeleccionados.length === 1
-                ? cursosSeleccionados[0]
-                : `${cursosSeleccionados.length} cursos seleccionados`}
-          </h1>
-          <p className="text-sm text-slate-500 capitalize">{hoy}</p>
-        </div>
+      {/* StatCards — métricas de resumen */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <StatCard
+          icono={<Clock size={18} className="text-indigo-600" />}
+          valor={pendientes.length}
+          etiqueta="Pendientes"
+          fondo="bg-white border-l-4 border-l-indigo-500"
+        />
+        <StatCard
+          icono={<AlertCircle size={18} className="text-red-600" />}
+          valor={vencidas.length}
+          etiqueta="Vencidas"
+          fondo="bg-white border-l-4 border-l-red-500"
+        />
+        <StatCard
+          icono={<Calendar size={18} className="text-amber-600" />}
+          valor={estaSemana.length}
+          etiqueta="Esta semana"
+          fondo="bg-white border-l-4 border-l-amber-500"
+        />
+        <StatCard
+          icono={<CheckCircle2 size={18} className="text-green-600" />}
+          valor={completadas.length}
+          etiqueta="Completadas"
+          fondo="bg-white border-l-4 border-l-green-500"
+        />
+      </div>
 
-        {/* StatCards — métricas de resumen */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <StatCard
-            icono={<Clock size={18} className="text-indigo-600" />}
-            valor={pendientes.length}
-            etiqueta="Pendientes"
-            fondo="bg-white border-l-4 border-l-indigo-500"
-          />
-          <StatCard
-            icono={<AlertCircle size={18} className="text-red-600" />}
-            valor={vencidas.length}
-            etiqueta="Vencidas"
-            fondo="bg-white border-l-4 border-l-red-500"
-          />
-          <StatCard
-            icono={<Calendar size={18} className="text-amber-600" />}
-            valor={estaSemana.length}
-            etiqueta="Esta semana"
-            fondo="bg-white border-l-4 border-l-amber-500"
-          />
-          <StatCard
-            icono={<CheckCircle2 size={18} className="text-green-600" />}
-            valor={completadas.length}
-            etiqueta="Completadas"
-            fondo="bg-white border-l-4 border-l-green-500"
-          />
-        </div>
-
-        {/* Barra de herramientas: Tabs + Buscador + Toggle de vista */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          {/* Tabs con badge de conteo */}
-          <div className="flex gap-2 flex-wrap">
-            {TABS_MAP.map(({ valor, etiqueta }) => (
-              <button
-                key={valor}
-                onClick={() => setTab(valor)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+      {/* Barra de herramientas: Tabs + Buscador + Toggle de vista */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        {/* Tabs con badge de conteo */}
+        <div className="flex gap-2 flex-wrap">
+          {TABS_MAP.map(({ valor, etiqueta }) => (
+            <button
+              key={valor}
+              onClick={() => setTab(valor)}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+                tab === valor
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {etiqueta}
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                   tab === valor
-                    ? "bg-indigo-600 text-white"
-                    : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-100"
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-100 text-slate-600"
                 }`}
               >
-                {etiqueta}
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                    tab === valor
-                      ? "bg-white/25 text-white"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {conteosPorTab[valor]}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Buscador */}
-          <div className="relative flex-1 min-w-48 max-w-sm">
-            <Search
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar entregas, temas o TPs…"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
-            />
-          </div>
-
-          {/* Toggle Grid / Lista */}
-          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0">
-            <button
-              onClick={() => setVistaLayout("grid")}
-              title="Vista Cuadrícula"
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                vistaLayout === "grid"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <LayoutGrid size={16} />
+                {conteosPorTab[valor]}
+              </span>
             </button>
-            <button
-              onClick={() => setVistaLayout("lista")}
-              title="Vista Lista Compacta"
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                vistaLayout === "lista"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <List size={16} />
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Contenido */}
-        {ordenadas.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-            <CheckCircle2 size={32} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">
-              {busqueda
-                ? `Sin resultados para "${busqueda}" en esta categoría.`
-                : "No hay tareas en esta categoría."}
-            </p>
-          </div>
-        ) : vistaLayout === "grid" ? (
-          // Vista cuadrícula (3 columnas)
-          <div className="grid grid-cols-3 gap-4">
-            {ordenadas.map((tarea, i) => {
-              const dias = diasHastaVencimiento(tarea.vencimiento);
-              const completada = estaCompletada(tarea);
-              return (
-                <a
-                  key={i}
-                  href={tarea.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block bg-white border border-slate-200 shadow-sm rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span
-                      className={`text-xs font-medium ${colorParaCurso(
-                        tarea.curso,
-                        nombresCursos,
-                      )}`}
-                    >
-                      {tarea.curso}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${colorEtiquetaVencimiento(
-                        dias,
-                        completada,
-                      )}`}
-                    >
-                      {completada ? "Entregada" : etiquetaVencimiento(dias)}
-                    </span>
-                  </div>
-                  <h3 className="font-medium mb-1 text-slate-900">{tarea.titulo}</h3>
-                  {tarea.descripcion && (
-                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">
-                      {tarea.descripcion}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>{formatearFecha(tarea.vencimiento)}</span>
-                    {tarea.puntos !== null && <span>{tarea.puntos} pts</span>}
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        ) : (
-          // Vista lista compacta
-          <div className="flex flex-col divide-y divide-slate-100 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-            {ordenadas.map((tarea, i) => {
-              const dias = diasHastaVencimiento(tarea.vencimiento);
-              const completada = estaCompletada(tarea);
-              return (
-                <a
-                  key={i}
-                  href={tarea.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer"
-                >
-                  {/* Indicador de estado */}
-                  <span
-                    className={`shrink-0 h-2.5 w-2.5 rounded-full ${
-                      completada
-                        ? "bg-green-500"
-                        : dias !== null && dias < 0
-                          ? "bg-red-500"
-                          : dias !== null && dias <= 1
-                            ? "bg-orange-400"
-                            : "bg-indigo-400"
-                    }`}
-                  />
+        {/* Buscador */}
+        <div className="relative flex-1 min-w-48 max-w-sm">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar entregas, temas o TPs…"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
+          />
+        </div>
 
-                  {/* Titulo */}
-                  <span className="flex-1 text-sm font-medium text-slate-900 truncate">
-                    {tarea.titulo}
-                  </span>
+        {/* Toggle Grid / Lista */}
+        <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0">
+          <button
+            onClick={() => setVistaLayout("grid")}
+            title="Vista Cuadrícula"
+            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+              vistaLayout === "grid"
+                ? "bg-slate-900 text-white"
+                : "text-slate-500 hover:text-slate-900"
+            }`}
+          >
+            <LayoutGrid size={16} />
+          </button>
+          <button
+            onClick={() => setVistaLayout("lista")}
+            title="Vista Lista Compacta"
+            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+              vistaLayout === "lista"
+                ? "bg-slate-900 text-white"
+                : "text-slate-500 hover:text-slate-900"
+            }`}
+          >
+            <List size={16} />
+          </button>
+        </div>
+      </div>
 
-                  {/* Curso */}
+      {/* Contenido */}
+      {ordenadas.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+          <CheckCircle2 size={32} className="text-slate-300" />
+          <p className="text-slate-500 text-sm">
+            {busqueda
+              ? `Sin resultados para "${busqueda}" en esta categoría.`
+              : "No hay tareas en esta categoría."}
+          </p>
+        </div>
+      ) : vistaLayout === "grid" ? (
+        // Vista cuadrícula (3 columnas)
+        <div className="grid grid-cols-3 gap-4">
+          {ordenadas.map((tarea, i) => {
+            const dias = diasHastaVencimiento(tarea.vencimiento);
+            const completada = estaCompletada(tarea);
+            return (
+              <a
+                key={i}
+                href={tarea.link}
+                target="_blank"
+                rel="noreferrer"
+                className="block bg-white border border-slate-200 shadow-sm rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-3">
                   <span
-                    className={`hidden sm:inline shrink-0 text-xs font-medium ${colorParaCurso(
+                    className={`text-xs font-medium ${colorParaCurso(
                       tarea.curso,
                       nombresCursos,
                     )}`}
                   >
                     {tarea.curso}
                   </span>
-
-                  {/* Badge estado */}
                   <span
-                    className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${colorEtiquetaVencimiento(
+                    className={`text-xs px-2 py-1 rounded-full ${colorEtiquetaVencimiento(
                       dias,
                       completada,
                     )}`}
                   >
                     {completada ? "Entregada" : etiquetaVencimiento(dias)}
                   </span>
+                </div>
+                <h3 className="font-medium mb-1 text-slate-900">{tarea.titulo}</h3>
+                {tarea.descripcion && (
+                  <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+                    {tarea.descripcion}
+                  </p>
+                )}
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span>{formatearFecha(tarea.vencimiento)}</span>
+                  {tarea.puntos !== null && <span>{tarea.puntos} pts</span>}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        // Vista lista compacta
+        <div className="flex flex-col divide-y divide-slate-100 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          {ordenadas.map((tarea, i) => {
+            const dias = diasHastaVencimiento(tarea.vencimiento);
+            const completada = estaCompletada(tarea);
+            return (
+              <a
+                key={i}
+                href={tarea.link}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                {/* Indicador de estado */}
+                <span
+                  className={`shrink-0 h-2.5 w-2.5 rounded-full ${
+                    completada
+                      ? "bg-green-500"
+                      : dias !== null && dias < 0
+                        ? "bg-red-500"
+                        : dias !== null && dias <= 1
+                          ? "bg-orange-400"
+                          : "bg-indigo-400"
+                  }`}
+                />
 
-                  {/* Fecha vencimiento */}
-                  <span className="shrink-0 text-xs text-slate-400 w-24 text-right">
-                    {formatearFecha(tarea.vencimiento)}
-                  </span>
-                </a>
-              );
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+                {/* Titulo */}
+                <span className="flex-1 text-sm font-medium text-slate-900 truncate">
+                  {tarea.titulo}
+                </span>
+
+                {/* Curso */}
+                <span
+                  className={`hidden sm:inline shrink-0 text-xs font-medium ${colorParaCurso(
+                    tarea.curso,
+                    nombresCursos,
+                  )}`}
+                >
+                  {tarea.curso}
+                </span>
+
+                {/* Badge estado */}
+                <span
+                  className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${colorEtiquetaVencimiento(
+                    dias,
+                    completada,
+                  )}`}
+                >
+                  {completada ? "Entregada" : etiquetaVencimiento(dias)}
+                </span>
+
+                {/* Fecha vencimiento */}
+                <span className="shrink-0 text-xs text-slate-400 w-24 text-right">
+                  {formatearFecha(tarea.vencimiento)}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </main>
   );
 }
 

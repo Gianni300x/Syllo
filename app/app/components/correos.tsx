@@ -9,7 +9,8 @@ import {
   Search,
   Star,
 } from "lucide-react";
-import Sidebar, { colorParaCurso, type UsuarioSidebar } from "./sidebar";
+import { colorParaCurso } from "./sidebar";
+import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import {
   formatearFechaCompleta,
   formatearFechaCorreo,
@@ -22,15 +23,11 @@ import {
 export default function Correos({
   cursos,
   paginaInicial,
-  usuario,
-  onCerrarSesion,
 }: {
   cursos: string[];
   paginaInicial: PaginaCorreos;
-  usuario?: UsuarioSidebar;
-  onCerrarSesion?: () => void;
 }) {
-  const [cursosSeleccionados, setCursosSeleccionados] = useState<string[]>([]);
+  const { cursosSeleccionados, setConteoPorCurso } = useFiltroCursos();
   const [origenFiltro, setOrigenFiltro] = useState<"Todos" | "Classroom" | "CVG">("Todos");
   const [busqueda, setBusqueda] = useState("");
   const [busquedaAplicada, setBusquedaAplicada] = useState("");
@@ -45,12 +42,6 @@ export default function Correos({
   const [error, setError] = useState<string | null>(null);
 
   const [seleccionado, setSeleccionado] = useState<string | null>(null);
-
-  function toggleCurso(curso: string) {
-    setCursosSeleccionados((prev) =>
-      prev.includes(curso) ? prev.filter((c) => c !== curso) : [...prev, curso],
-    );
-  }
 
   // Última URL consultada. Arranca en la que el servidor ya resolvió, así el
   // primer render no vuelve a pedir lo mismo.
@@ -138,6 +129,11 @@ export default function Correos({
     return conteo;
   }, [correos]);
 
+  // Publica el conteo de no leídos por curso al Sidebar compartido.
+  useEffect(() => {
+    setConteoPorCurso(conteoPorCurso);
+  }, [conteoPorCurso, setConteoPorCurso]);
+
   const hoy = new Date().toLocaleDateString("es-AR", {
     weekday: "long",
     day: "numeric",
@@ -145,161 +141,148 @@ export default function Correos({
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-800 font-[family-name:var(--font-poppins)]">
-      <Sidebar
-        cursos={cursos}
-        conteoPorCurso={conteoPorCurso}
-        cursosSeleccionados={cursosSeleccionados}
-        onToggleCurso={toggleCurso}
-        onLimpiarCursos={() => setCursosSeleccionados([])}
-        seccion="correos"
-        usuario={usuario}
-        onCerrarSesion={onCerrarSesion}
-      />
+    <main className="flex-1 p-8 min-w-0">
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-slate-900">
+          {cursosSeleccionados.length === 0
+            ? "Correos recibidos"
+            : cursosSeleccionados.length === 1
+              ? `Correos de ${cursosSeleccionados[0]}`
+              : `Correos — ${cursosSeleccionados.length} cursos`}
+        </h1>
+        <p className="text-sm text-slate-500 capitalize">{hoy}</p>
+      </div>
 
-      <main className="flex-1 p-8 min-w-0">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-slate-900">
-            {cursosSeleccionados.length === 0
-              ? "Correos recibidos"
-              : cursosSeleccionados.length === 1
-                ? `Correos de ${cursosSeleccionados[0]}`
-                : `Correos — ${cursosSeleccionados.length} cursos`}
-          </h1>
-          <p className="text-sm text-slate-500 capitalize">{hoy}</p>
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="relative flex-1 min-w-64">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar correos de Classroom o CVG…"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
+          />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="relative flex-1 min-w-64">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar correos de Classroom o CVG…"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
-            />
-          </div>
-
-          <div className="flex rounded-lg border border-slate-200 bg-white p-1">
-            <button
-              type="button"
-              onClick={() => setOrigenFiltro("Todos")}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                origenFiltro === "Todos"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              type="button"
-              onClick={() => setOrigenFiltro("Classroom")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                origenFiltro === "Classroom"
-                  ? "bg-emerald-600 text-white"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  origenFiltro === "Classroom" ? "bg-white" : "bg-emerald-500"
-                }`}
-              />
-              Classroom
-            </button>
-            <button
-              type="button"
-              onClick={() => setOrigenFiltro("CVG")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                origenFiltro === "CVG"
-                  ? "bg-sky-600 text-white"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  origenFiltro === "CVG" ? "bg-white" : "bg-sky-500"
-                }`}
-              />
-              CVG
-            </button>
-          </div>
-
+        <div className="flex rounded-lg border border-slate-200 bg-white p-1">
           <button
-            onClick={() => setSoloNoLeidos((valor) => !valor)}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              soloNoLeidos
-                ? "bg-indigo-600 text-white"
-                : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+            type="button"
+            onClick={() => setOrigenFiltro("Todos")}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              origenFiltro === "Todos"
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Mail size={16} />
-            Solo no leídos
+            Todos
           </button>
-
-          <span className="text-sm text-slate-500">
-            {noLeidos} sin leer de {correos.length}
-          </span>
-        </div>
-
-        {error && (
-          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-          <div className="lg:col-span-2 flex flex-col gap-2">
-            {cargando ? (
-              <Cargando texto="Buscando correos…" />
-            ) : correos.length === 0 ? (
-              <p className="text-sm text-slate-500">
-                No hay correos con estos filtros.
-              </p>
-            ) : (
-              <>
-                {correos
-                  .filter(
-                    (c) =>
-                      cursosSeleccionados.length === 0 ||
-                      (c.curso != null && cursosSeleccionados.includes(c.curso)),
-                  )
-                  .map((correo) => (
-                    <FilaCorreo
-                      key={correo.id}
-                      correo={correo}
-                      cursos={cursos}
-                      activo={seleccionado === correo.id}
-                      onSeleccionar={() => setSeleccionado(correo.id)}
-                    />
-                  ))}
-                {siguientePagina && (
-                  <button
-                    onClick={cargarMas}
-                    disabled={cargandoMas}
-                    className="mt-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60"
-                  >
-                    {cargandoMas ? "Cargando…" : "Cargar más"}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-
-          <div className="lg:col-span-3 lg:sticky lg:top-8">
-            <Lector
-              key={seleccionado ?? "vacio"}
-              id={seleccionado}
-              cursos={cursos}
+          <button
+            type="button"
+            onClick={() => setOrigenFiltro("Classroom")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              origenFiltro === "Classroom"
+                ? "bg-emerald-600 text-white"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                origenFiltro === "Classroom" ? "bg-white" : "bg-emerald-500"
+              }`}
             />
-          </div>
+            Classroom
+          </button>
+          <button
+            type="button"
+            onClick={() => setOrigenFiltro("CVG")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              origenFiltro === "CVG"
+                ? "bg-sky-600 text-white"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                origenFiltro === "CVG" ? "bg-white" : "bg-sky-500"
+              }`}
+            />
+            CVG
+          </button>
         </div>
-      </main>
-    </div>
+
+        <button
+          onClick={() => setSoloNoLeidos((valor) => !valor)}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            soloNoLeidos
+              ? "bg-indigo-600 text-white"
+              : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+          }`}
+        >
+          <Mail size={16} />
+          Solo no leídos
+        </button>
+
+        <span className="text-sm text-slate-500">
+          {noLeidos} sin leer de {correos.length}
+        </span>
+      </div>
+
+      {error && (
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+        <div className="lg:col-span-2 flex flex-col gap-2">
+          {cargando ? (
+            <Cargando texto="Buscando correos…" />
+          ) : correos.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No hay correos con estos filtros.
+            </p>
+          ) : (
+            <>
+              {correos
+                .filter(
+                  (c) =>
+                    cursosSeleccionados.length === 0 ||
+                    (c.curso != null && cursosSeleccionados.includes(c.curso)),
+                )
+                .map((correo) => (
+                  <FilaCorreo
+                    key={correo.id}
+                    correo={correo}
+                    cursos={cursos}
+                    activo={seleccionado === correo.id}
+                    onSeleccionar={() => setSeleccionado(correo.id)}
+                  />
+                ))}
+              {siguientePagina && (
+                <button
+                  onClick={cargarMas}
+                  disabled={cargandoMas}
+                  className="mt-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+                >
+                  {cargandoMas ? "Cargando…" : "Cargar más"}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="lg:col-span-3 lg:sticky lg:top-8">
+          <Lector
+            key={seleccionado ?? "vacio"}
+            id={seleccionado}
+            cursos={cursos}
+          />
+        </div>
+      </div>
+    </main>
   );
 }
 

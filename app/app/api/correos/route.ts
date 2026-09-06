@@ -4,7 +4,7 @@ import {
   fetchCorreosDeClassroom,
   MAX_CORREOS_POR_PAGINA,
 } from "@/app/lib/correos-server";
-import { fetchNombresCursos } from "@/app/lib/tareas-server";
+import { getNombresCursos } from "@/app/lib/tareas-server";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
   const pageToken = params.get("pageToken");
 
   try {
-    const cursos = await fetchNombresCursos(session.access_token);
+    const userId = session.user?.email ?? "anon";
+    const cursos = await getNombresCursos(session.access_token, userId);
     const pagina = await fetchCorreosDeClassroom(session.access_token, {
       cursos,
       curso,

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { fetchCorreoCompleto } from "@/app/lib/correos-server";
-import { fetchNombresCursos } from "@/app/lib/tareas-server";
+import { getNombresCursos } from "@/app/lib/tareas-server";
 
 export async function GET(
   _request: NextRequest,
@@ -16,7 +16,8 @@ export async function GET(
   const { id } = await ctx.params;
 
   try {
-    const cursos = await fetchNombresCursos(session.access_token);
+    const userId = session.user?.email ?? "anon";
+    const cursos = await getNombresCursos(session.access_token, userId);
     const correo = await fetchCorreoCompleto(session.access_token, id, cursos);
     return NextResponse.json(correo);
   } catch (error) {

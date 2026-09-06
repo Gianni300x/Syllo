@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, ListChecks, LogOut, Mail } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { BookOpen, ListChecks, LogOut, Mail, RefreshCw } from "lucide-react";
+import { useFiltroCursos } from "../(panel)/filtro-cursos";
 
 const COLORES_CURSO = [
   "text-sky-600",
@@ -41,29 +43,45 @@ export interface UsuarioSidebar {
 
 export default function Sidebar({
   cursos,
-  conteoPorCurso = {},
-  cursosSeleccionados,
-  onToggleCurso,
-  onLimpiarCursos,
-  seccion,
   usuario,
   onCerrarSesion,
+  onActualizar,
+  actualizando = false,
 }: {
   cursos: string[];
-  conteoPorCurso?: Record<string, number>;
-  cursosSeleccionados: string[];
-  onToggleCurso: (curso: string) => void;
-  onLimpiarCursos: () => void;
-  seccion: Seccion;
   usuario?: UsuarioSidebar;
   onCerrarSesion?: () => void;
+  onActualizar?: () => void;
+  actualizando?: boolean;
 }) {
+  const pathname = usePathname();
+  const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
+    ? "correos"
+    : "tareas";
+
+  const {
+    cursosSeleccionados,
+    toggleCurso,
+    limpiarCursos,
+    conteoPorCurso,
+  } = useFiltroCursos();
+
   const haySeleccion = cursosSeleccionados.length > 0;
 
   return (
     <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-6 flex flex-col h-screen sticky top-0">
-      <div className="flex items-center gap-3 text-indigo-600 mb-8">
+      <div className="flex items-center justify-between gap-3 text-indigo-600 mb-8">
         <span className="font-bold text-lg">Syllo</span>
+        {onActualizar && (
+          <button
+            onClick={onActualizar}
+            disabled={actualizando}
+            title="Actualizar datos"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer disabled:opacity-60"
+          >
+            <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
+          </button>
+        )}
       </div>
 
       <nav className="flex flex-col gap-1 mb-8">
@@ -89,7 +107,7 @@ export default function Sidebar({
           </p>
           {haySeleccion && (
             <button
-              onClick={onLimpiarCursos}
+              onClick={limpiarCursos}
               className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
             >
               Ver todos
@@ -109,7 +127,7 @@ export default function Sidebar({
         <nav className="flex flex-col gap-0.5 text-slate-900 overflow-y-auto">
           {/* Opción "Todos" */}
           <button
-            onClick={onLimpiarCursos}
+            onClick={limpiarCursos}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               !haySeleccion
                 ? "bg-indigo-50 text-slate-900"
@@ -126,7 +144,7 @@ export default function Sidebar({
             return (
               <button
                 key={nombre}
-                onClick={() => onToggleCurso(nombre)}
+                onClick={() => toggleCurso(nombre)}
                 className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                   seleccionado
                     ? "bg-indigo-50 text-slate-900"

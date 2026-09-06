@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { google, type classroom_v1 } from "googleapis";
 import type { Tarea } from "./classroom";
 
@@ -73,3 +75,30 @@ export async function fetchNombresCursos(
     .map((curso) => curso.name)
     .filter((nombre): nombre is string => Boolean(nombre));
 }
+
+/**
+ * Versiones cacheadas de las lecturas de Classroom.
+ *
+ * - `cache()` de React deduplica llamadas dentro de un mismo request.
+ * - `unstable_cache` persiste el resultado entre requests durante `revalidate`
+ *   segundos. La clave es únicamente `userId`: el `accessToken` de Google rota
+ *   ~cada hora y se pasa por closure (no va en `keyParts`) para que un refresh
+ *   de token no invalide el cache.
+ * - Los tags permiten forzar datos frescos con `revalidateTag` (botón "Actualizar").
+ */
+
+export const getNombresCursos = cache((accessToken: string, userId: string) =>
+  unstable_cache(
+    () => fetchNombresCursos(accessToken),
+    ["nombres-cursos", userId],
+    { revalidate: 180, tags: ["nombres-cursos", `u:${userId}`] },
+  )(),
+);
+
+export const getTareas = cache((accessToken: string, userId: string) =>
+  unstable_cache(
+    () => fetchTareasDesdeClassroom(accessToken),
+    ["tareas", userId],
+    { revalidate: 180, tags: ["tareas", `u:${userId}`] },
+  )(),
+);

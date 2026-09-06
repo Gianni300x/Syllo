@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { google, type gmail_v1 } from "googleapis";
 import {
   detectarCurso,
@@ -137,6 +139,21 @@ export async function fetchCorreosDeClassroom(
     siguientePagina: listado.data.nextPageToken ?? null,
   };
 }
+
+/**
+ * Primera página de la bandeja, sin filtros, cacheada entre requests.
+ * Clave por `userId`; el `accessToken` va por closure (ver nota en
+ * `tareas-server.ts`). Las búsquedas/paginación filtradas de `/api/correos`
+ * quedan sin cache porque son puntuales y muy variadas.
+ */
+export const getCorreosInicial = cache(
+  (accessToken: string, userId: string, cursos: string[]) =>
+    unstable_cache(
+      () => fetchCorreosDeClassroom(accessToken, { cursos }),
+      ["correos-inicial", userId],
+      { revalidate: 180, tags: ["correos", `u:${userId}`] },
+    )(),
+);
 
 /** Trae un correo con su cuerpo, para el panel de lectura. */
 export async function fetchCorreoCompleto(
