@@ -11,6 +11,22 @@ function normalizarVencimiento(
   return { year: fecha.year, month: fecha.month, day: fecha.day };
 }
 
+/** Recorre todas las páginas de un listado de Classroom y junta los ítems. */
+async function listarTodo<T>(
+  pedirPagina: (
+    pageToken?: string,
+  ) => Promise<{ items: T[]; nextPageToken?: string | null }>,
+): Promise<T[]> {
+  const items: T[] = [];
+  let pageToken: string | undefined;
+  do {
+    const pagina = await pedirPagina(pageToken);
+    items.push(...pagina.items);
+    pageToken = pagina.nextPageToken ?? undefined;
+  } while (pageToken);
+  return items;
+}
+
 export async function fetchTareasDesdeClassroom(
   accessToken: string,
 ): Promise<Tarea[]> {
@@ -26,32 +42,51 @@ export async function fetchTareasDesdeClassroom(
   const cursos = cursosRes.data.courses ?? [];
 
   const tareasPromises = cursos.map(async (curso) => {
-    const trabajosRes = await classroom.courses.courseWork.list({
-      courseId: curso.id!,
-    });
-    const trabajos = trabajosRes.data.courseWork ?? [];
-
-    return Promise.all(
-      trabajos.map(async (trabajo) => {
-        const entregasRes =
-          await classroom.courses.courseWork.studentSubmissions.list({
+    // Dos llamadas por curso, sin importar cuántos trabajos tenga:
+    // - todos los courseWork del curso
+    // - todas mis entregas del curso (`courseWorkId: "-"` = cualquiera)
+    const [trabajos, entregas] = await Promise.all([
+      listarTodo((pageToken) =>
+        classroom.courses.courseWork
+          .list({ courseId: curso.id!, pageToken })
+          .then((res) => ({
+            items: res.data.courseWork ?? [],
+            nextPageToken: res.data.nextPageToken,
+          })),
+      ),
+      listarTodo((pageToken) =>
+        classroom.courses.courseWork.studentSubmissions
+          .list({
             courseId: curso.id!,
-            courseWorkId: trabajo.id!,
+            courseWorkId: "-",
             userId: "me",
-          });
-        const entregas = entregasRes.data.studentSubmissions ?? [];
-        const estado = entregas[0]?.state ?? "CREATED";
+            pageToken,
+          })
+          .then((res) => ({
+            items: res.data.studentSubmissions ?? [],
+            nextPageToken: res.data.nextPageToken,
+          })),
+      ),
+    ]);
 
-        return {
+    const estadoPorTrabajo = new Map<string, string>();
+    for (const entrega of entregas) {
+      if (entrega.courseWorkId && entrega.state) {
+        estadoPorTrabajo.set(entrega.courseWorkId, entrega.state);
+      }
+    }
+
+    return trabajos.map(
+      (trabajo) =>
+        ({
           curso: curso.name ?? "Sin curso",
           titulo: trabajo.title ?? "(sin título)",
           descripcion: trabajo.description ?? "",
           puntos: trabajo.maxPoints ?? null,
           vencimiento: normalizarVencimiento(trabajo.dueDate),
-          estado,
+          estado: estadoPorTrabajo.get(trabajo.id ?? "") ?? "CREATED",
           link: trabajo.alternateLink ?? "",
-        } satisfies Tarea;
-      }),
+        }) satisfies Tarea,
     );
   });
 

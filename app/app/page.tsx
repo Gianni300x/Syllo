@@ -7,11 +7,8 @@ export default function Home() {
       <div className="w-full max-w-5xl grid gap-16 lg:grid-cols-[1.1fr_0.9fr] items-center">
         <div className="max-w-lg">
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 text-balance mb-4">
-            Inicia tu agenda 
+            Inicia tu agenda
             <span className="block text-indigo-600"> con Syllo</span>
-          </h1>
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 text-balance mb-4">
-            
           </h1>
 
           <p className="text-slate-600 leading-relaxed mb-3">
