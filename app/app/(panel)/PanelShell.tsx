@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar, { type UsuarioSidebar } from "../components/sidebar";
 import { FiltroCursosContext, type FiltroCursosValue } from "./filtro-cursos";
 import { actualizarDatos } from "./actions";
+import ThemeToggle from "./theme-toggle";
 
 export default function PanelShell({
   cursos,
@@ -50,7 +51,7 @@ export default function PanelShell({
 
   return (
     <FiltroCursosContext.Provider value={value}>
-      <div className="flex min-h-screen bg-slate-100 text-slate-800 font-[family-name:var(--font-poppins)]">
+      <div className="flex min-h-screen bg-slate-100 text-slate-800 font-[family-name:var(--font-poppins)] dark:bg-slate-900 dark:text-slate-200">
         <Sidebar
           cursos={cursos}
           usuario={usuario}
@@ -59,6 +60,7 @@ export default function PanelShell({
           actualizando={actualizando}
         />
         <div className="flex-1 min-w-0">{children}</div>
+        <ThemeToggle />
       </div>
     </FiltroCursosContext.Provider>
   );

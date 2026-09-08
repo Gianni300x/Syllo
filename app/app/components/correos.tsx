@@ -143,14 +143,14 @@ export default function Correos({
   return (
     <main className="flex-1 p-8 min-w-0">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
           {cursosSeleccionados.length === 0
             ? "Correos recibidos"
             : cursosSeleccionados.length === 1
               ? `Correos de ${cursosSeleccionados[0]}`
               : `Correos — ${cursosSeleccionados.length} cursos`}
         </h1>
-        <p className="text-sm text-slate-500 capitalize">{hoy}</p>
+        <p className="text-sm text-slate-500 capitalize dark:text-slate-400">{hoy}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -163,18 +163,18 @@ export default function Correos({
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             placeholder="Buscar correos de Classroom o CVG…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
-        <div className="flex rounded-lg border border-slate-200 bg-white p-1">
+        <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
           <button
             type="button"
             onClick={() => setOrigenFiltro("Todos")}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               origenFiltro === "Todos"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-slate-900 text-white dark:bg-slate-600"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             }`}
           >
             Todos
@@ -185,7 +185,7 @@ export default function Correos({
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               origenFiltro === "Classroom"
                 ? "bg-emerald-600 text-white"
-                : "text-slate-600 hover:text-slate-900"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             }`}
           >
             <span
@@ -201,7 +201,7 @@ export default function Correos({
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               origenFiltro === "CVG"
                 ? "bg-sky-600 text-white"
-                : "text-slate-600 hover:text-slate-900"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             }`}
           >
             <span
@@ -218,20 +218,20 @@ export default function Correos({
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
             soloNoLeidos
               ? "bg-indigo-600 text-white"
-              : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+              : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
           }`}
         >
           <Mail size={16} />
           Solo no leídos
         </button>
 
-        <span className="text-sm text-slate-500">
+        <span className="text-sm text-slate-500 dark:text-slate-400">
           {noLeidos} sin leer de {correos.length}
         </span>
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
           {error}
         </p>
       )}
@@ -241,7 +241,7 @@ export default function Correos({
           {cargando ? (
             <Cargando texto="Buscando correos…" />
           ) : correos.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               No hay correos con estos filtros.
             </p>
           ) : (
@@ -265,7 +265,7 @@ export default function Correos({
                 <button
                   onClick={cargarMas}
                   disabled={cargandoMas}
-                  className="mt-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+                  className="mt-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   {cargandoMas ? "Cargando…" : "Cargar más"}
                 </button>
@@ -289,13 +289,13 @@ export default function Correos({
 function EtiquetaOrigen({ origen }: { origen: OrigenCorreo }) {
   if (origen === "CVG") {
     return (
-      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200/70 shrink-0">
+      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200/70 shrink-0 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/30">
         CVG
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/70 shrink-0">
+    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/70 shrink-0 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30">
       Classroom
     </span>
   );
@@ -315,10 +315,10 @@ function FilaCorreo({
   return (
     <button
       onClick={onSeleccionar}
-      className={`w-full rounded-xl border bg-white p-4 text-left shadow-sm transition-all ${
+      className={`w-full rounded-xl border bg-white p-4 text-left shadow-sm transition-all dark:bg-slate-800 ${
         activo
-          ? "border-indigo-400 shadow-md"
-          : "border-slate-200 hover:border-indigo-300 hover:shadow-md"
+          ? "border-indigo-400 shadow-md dark:border-indigo-500"
+          : "border-slate-200 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:hover:border-indigo-500"
       }`}
     >
       <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -335,7 +335,7 @@ function FilaCorreo({
             </span>
           )}
         </div>
-        <span className="flex shrink-0 items-center gap-1.5 text-xs text-slate-400">
+        <span className="flex shrink-0 items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
           {correo.destacado && (
             <Star size={12} className="fill-amber-400 text-amber-400" />
           )}
@@ -344,7 +344,7 @@ function FilaCorreo({
       </div>
 
       <h3
-        className={`mb-1 flex items-center gap-2 text-sm text-slate-900 ${
+        className={`mb-1 flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100 ${
           correo.leido ? "font-normal" : "font-semibold"
         }`}
       >
@@ -354,7 +354,7 @@ function FilaCorreo({
         <span className="truncate">{correo.asunto}</span>
       </h3>
 
-      <p className="line-clamp-2 text-xs text-slate-500">{correo.resumen}</p>
+      <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{correo.resumen}</p>
     </button>
   );
 }
@@ -388,7 +388,7 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
 
   if (!id) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white/60 text-slate-400">
+      <div className="flex h-96 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white/60 text-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-500">
         <MailOpen size={28} />
         <p className="text-sm">Elegí un correo para leerlo acá.</p>
       </div>
@@ -397,7 +397,7 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
 
   if (cargando) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <Cargando texto="Abriendo correo…" />
       </div>
     );
@@ -405,35 +405,35 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
 
   if (error || !correo) {
     return (
-      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
         {error ?? "No pudimos abrir este correo."}
       </p>
     );
   }
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <header className="mb-4 border-b border-slate-100 pb-4">
+    <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <header className="mb-4 border-b border-slate-100 pb-4 dark:border-slate-700">
         <div className="mb-2 flex items-start justify-between gap-3">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
             {correo.asunto}
           </h2>
           <a
             href={correo.link}
             target="_blank"
             rel="noreferrer"
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             <ExternalLink size={13} />
             Abrir en Gmail
           </a>
         </div>
 
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
           {correo.remitente}{" "}
-          <span className="text-slate-400">&lt;{correo.remitenteEmail}&gt;</span>
+          <span className="text-slate-400 dark:text-slate-500">&lt;{correo.remitenteEmail}&gt;</span>
         </p>
-        <p className="text-xs capitalize text-slate-400">
+        <p className="text-xs capitalize text-slate-400 dark:text-slate-500">
           {formatearFechaCompleta(correo.fecha)}
         </p>
 
@@ -458,10 +458,10 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
           // sandbox vacío: el HTML del mail no ejecuta scripts ni accede a Syllo.
           sandbox=""
           srcDoc={documentoHtml(correo.html)}
-          className="h-[60vh] w-full rounded-lg border border-slate-200 bg-white"
+          className="h-[60vh] w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700"
         />
       ) : (
-        <pre className="whitespace-pre-wrap break-words font-[family-name:var(--font-geist-sans)] text-sm text-slate-700">
+        <pre className="whitespace-pre-wrap break-words font-[family-name:var(--font-geist-sans)] text-sm text-slate-700 dark:text-slate-300">
           {correo.texto ?? correo.resumen}
         </pre>
       )}
@@ -501,7 +501,7 @@ function documentoHtml(html: string): string {
 
 function Cargando({ texto }: { texto: string }) {
   return (
-    <p className="flex items-center gap-2 text-sm text-slate-500">
+    <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
       <Loader2 size={16} className="animate-spin" />
       {texto}
     </p>

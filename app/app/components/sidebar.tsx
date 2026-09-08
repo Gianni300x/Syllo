@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, ListChecks, LogOut, Mail, RefreshCw } from "lucide-react";
@@ -55,6 +56,7 @@ export default function Sidebar({
   actualizando?: boolean;
 }) {
   const pathname = usePathname();
+  const [fotoFallo, setFotoFallo] = useState(false);
   const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
     ? "correos"
     : "tareas";
@@ -69,15 +71,15 @@ export default function Sidebar({
   const haySeleccion = cursosSeleccionados.length > 0;
 
   return (
-    <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-6 flex flex-col h-screen sticky top-0">
-      <div className="flex items-center justify-between gap-3 text-indigo-600 mb-8">
+    <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-6 flex flex-col h-screen sticky top-0 dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex items-center justify-between gap-3 text-indigo-600 mb-8 dark:text-indigo-400">
         <span className="font-bold text-lg">Syllo</span>
         {onActualizar && (
           <button
             onClick={onActualizar}
             disabled={actualizando}
             title="Actualizar datos"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer disabled:opacity-60"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer disabled:opacity-60 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
           >
             <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
           </button>
@@ -102,13 +104,13 @@ export default function Sidebar({
       {/* Cursos: multi-selección, scrollea internamente */}
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium text-slate-900 tracking-wider">
+          <p className="text-xs font-medium text-slate-900 tracking-wider dark:text-slate-100">
             MIS CURSOS
           </p>
           {haySeleccion && (
             <button
               onClick={limpiarCursos}
-              className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+              className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Ver todos
             </button>
@@ -117,24 +119,24 @@ export default function Sidebar({
 
         {/* Indicador de cantidad seleccionada */}
         {haySeleccion && (
-          <p className="text-[11px] text-slate-400 mb-2">
+          <p className="text-[11px] text-slate-400 mb-2 dark:text-slate-500">
             {cursosSeleccionados.length === 1
               ? "1 curso seleccionado"
               : `${cursosSeleccionados.length} cursos seleccionados`}
           </p>
         )}
 
-        <nav className="flex flex-col gap-0.5 text-slate-900 overflow-y-auto">
+        <nav className="flex flex-col gap-0.5 text-slate-900 overflow-y-auto dark:text-slate-100">
           {/* Opción "Todos" */}
           <button
             onClick={limpiarCursos}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               !haySeleccion
-                ? "bg-indigo-50 text-slate-900"
-                : "text-slate-500 hover:bg-slate-100"
+                ? "bg-indigo-50 text-slate-900 dark:bg-indigo-500/15 dark:text-slate-100"
+                : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
             }`}
           >
-            <BookOpen size={16} className={!haySeleccion ? "text-indigo-600" : ""} />
+            <BookOpen size={16} className={!haySeleccion ? "text-indigo-600 dark:text-indigo-400" : ""} />
             Todos los cursos
           </button>
 
@@ -147,8 +149,8 @@ export default function Sidebar({
                 onClick={() => toggleCurso(nombre)}
                 className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                   seleccionado
-                    ? "bg-indigo-50 text-slate-900"
-                    : "text-slate-500 hover:bg-slate-100"
+                    ? "bg-indigo-50 text-slate-900 dark:bg-indigo-500/15 dark:text-slate-100"
+                    : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
                 }`}
               >
                 <span className="flex items-center gap-2 min-w-0">
@@ -157,7 +159,7 @@ export default function Sidebar({
                     className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${
                       seleccionado
                         ? `${bgParaCurso(nombre, cursos)} border-transparent`
-                        : "border-slate-300 bg-white"
+                        : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700"
                     }`}
                   >
                     {seleccionado && (
@@ -182,8 +184,8 @@ export default function Sidebar({
                   <span
                     className={`text-xs px-1.5 py-0.5 rounded-full shrink-0 ${
                       seleccionado
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
                     }`}
                   >
                     {conteoPorCurso[nombre]}
@@ -197,25 +199,27 @@ export default function Sidebar({
 
       {/* Pie: perfil de usuario y logout */}
       {usuario && (
-        <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+        <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-3 dark:border-slate-700">
           <div className="flex items-center gap-2.5 min-w-0">
-            {usuario.image ? (
+            {usuario.image && !fotoFallo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={usuario.image}
                 alt={usuario.name ?? "Avatar"}
-                className="w-8 h-8 rounded-full ring-1 ring-slate-200 shrink-0"
+                referrerPolicy="no-referrer"
+                onError={() => setFotoFallo(true)}
+                className="w-8 h-8 rounded-full ring-1 ring-slate-200 shrink-0 dark:ring-slate-600"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center text-xs shrink-0 select-none">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center text-xs shrink-0 select-none dark:bg-indigo-500/20 dark:text-indigo-300">
                 {usuario.name?.[0]?.toUpperCase() ?? "U"}
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 truncate">
+              <p className="text-xs font-semibold text-slate-900 truncate dark:text-slate-100">
                 {usuario.name ?? "Estudiante"}
               </p>
-              <p className="text-[11px] text-slate-500 truncate">
+              <p className="text-[11px] text-slate-500 truncate dark:text-slate-400">
                 {usuario.email ?? ""}
               </p>
             </div>
@@ -225,7 +229,7 @@ export default function Sidebar({
             <button
               onClick={onCerrarSesion}
               title="Cerrar sesión"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0 dark:hover:text-red-400 dark:hover:bg-red-500/10"
             >
               <LogOut size={16} />
             </button>
@@ -253,7 +257,7 @@ function EnlaceSeccion({
       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         activo
           ? "bg-indigo-600 text-white"
-          : "text-slate-600 hover:bg-slate-100"
+          : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
       }`}
     >
       {icono}

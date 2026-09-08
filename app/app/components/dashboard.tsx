@@ -37,7 +37,7 @@ function colorEtiquetaVencimiento(dias: number | null, completada: boolean): str
   if (dias === null) return "bg-slate-400 text-slate-100";
   if (dias < 0) return "bg-red-500 text-white";
   if (dias <= 3) return "bg-orange-400 text-white";
-  return "bg-slate-100 text-slate-600";
+  return "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300";
 }
 
 /** Normaliza un string para búsqueda insensible a mayúsculas y tildes. */
@@ -127,14 +127,14 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
   return (
     <main className="flex-1 p-8">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
           {cursosSeleccionados.length === 0
             ? "Todas las tareas"
             : cursosSeleccionados.length === 1
               ? cursosSeleccionados[0]
               : `${cursosSeleccionados.length} cursos seleccionados`}
         </h1>
-        <p className="text-sm text-slate-500 capitalize">{hoy}</p>
+        <p className="text-sm text-slate-500 capitalize dark:text-slate-400">{hoy}</p>
       </div>
 
       {/* StatCards — métricas de resumen */}
@@ -143,25 +143,25 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
           icono={<Clock size={18} className="text-indigo-600" />}
           valor={pendientes.length}
           etiqueta="Pendientes"
-          fondo="bg-white border-l-4 border-l-indigo-500"
+          fondo="bg-white border-l-4 border-l-indigo-500 dark:bg-slate-800"
         />
         <StatCard
           icono={<AlertCircle size={18} className="text-red-600" />}
           valor={vencidas.length}
           etiqueta="Vencidas"
-          fondo="bg-white border-l-4 border-l-red-500"
+          fondo="bg-white border-l-4 border-l-red-500 dark:bg-slate-800"
         />
         <StatCard
           icono={<Calendar size={18} className="text-amber-600" />}
           valor={estaSemana.length}
           etiqueta="Esta semana"
-          fondo="bg-white border-l-4 border-l-amber-500"
+          fondo="bg-white border-l-4 border-l-amber-500 dark:bg-slate-800"
         />
         <StatCard
           icono={<CheckCircle2 size={18} className="text-green-600" />}
           valor={completadas.length}
           etiqueta="Completadas"
-          fondo="bg-white border-l-4 border-l-green-500"
+          fondo="bg-white border-l-4 border-l-green-500 dark:bg-slate-800"
         />
       </div>
 
@@ -176,7 +176,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tab === valor
                   ? "bg-indigo-600 text-white"
-                  : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-100"
+                  : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-700"
               }`}
             >
               {etiqueta}
@@ -184,7 +184,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                   tab === valor
                     ? "bg-white/25 text-white"
-                    : "bg-slate-100 text-slate-600"
+                    : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
                 }`}
               >
                 {conteosPorTab[valor]}
@@ -203,19 +203,19 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             placeholder="Buscar entregas, temas o TPs…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
         {/* Toggle Grid / Lista */}
-        <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0">
+        <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0 dark:border-slate-700 dark:bg-slate-800">
           <button
             onClick={() => setVistaLayout("grid")}
             title="Vista Cuadrícula"
             className={`p-1.5 rounded-md transition-colors cursor-pointer ${
               vistaLayout === "grid"
-                ? "bg-slate-900 text-white"
-                : "text-slate-500 hover:text-slate-900"
+                ? "bg-slate-900 text-white dark:bg-slate-600"
+                : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
             }`}
           >
             <LayoutGrid size={16} />
@@ -225,8 +225,8 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             title="Vista Lista Compacta"
             className={`p-1.5 rounded-md transition-colors cursor-pointer ${
               vistaLayout === "lista"
-                ? "bg-slate-900 text-white"
-                : "text-slate-500 hover:text-slate-900"
+                ? "bg-slate-900 text-white dark:bg-slate-600"
+                : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
             }`}
           >
             <List size={16} />
@@ -237,8 +237,8 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
       {/* Contenido */}
       {ordenadas.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <CheckCircle2 size={32} className="text-slate-300" />
-          <p className="text-slate-500 text-sm">
+          <CheckCircle2 size={32} className="text-slate-300 dark:text-slate-600" />
+          <p className="text-slate-500 text-sm dark:text-slate-400">
             {busqueda
               ? `Sin resultados para "${busqueda}" en esta categoría.`
               : "No hay tareas en esta categoría."}
@@ -256,7 +256,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 href={tarea.link}
                 target="_blank"
                 rel="noreferrer"
-                className="block bg-white border border-slate-200 shadow-sm rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
+                className="block bg-white border border-slate-200 shadow-sm rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:hover:border-indigo-500"
               >
                 <div className="flex items-center justify-between mb-3">
                   <span
@@ -276,13 +276,13 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     {completada ? "Entregada" : etiquetaVencimiento(dias)}
                   </span>
                 </div>
-                <h3 className="font-medium mb-1 text-slate-900">{tarea.titulo}</h3>
+                <h3 className="font-medium mb-1 text-slate-900 dark:text-slate-100">{tarea.titulo}</h3>
                 {tarea.descripcion && (
-                  <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+                  <p className="text-sm text-slate-500 mb-4 line-clamp-2 dark:text-slate-400">
                     {tarea.descripcion}
                   </p>
                 )}
-                <div className="flex items-center justify-between text-xs text-slate-400">
+                <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
                   <span>{formatearFecha(tarea.vencimiento)}</span>
                   {tarea.puntos !== null && <span>{tarea.puntos} pts</span>}
                 </div>
@@ -292,7 +292,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
         </div>
       ) : (
         // Vista lista compacta
-        <div className="flex flex-col divide-y divide-slate-100 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="flex flex-col divide-y divide-slate-100 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden dark:divide-slate-700 dark:bg-slate-800 dark:border-slate-700">
           {ordenadas.map((tarea, i) => {
             const dias = diasHastaVencimiento(tarea.vencimiento);
             const completada = estaCompletada(tarea);
@@ -302,7 +302,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 href={tarea.link}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer dark:hover:bg-slate-700"
               >
                 {/* Indicador de estado */}
                 <span
@@ -318,7 +318,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 />
 
                 {/* Titulo */}
-                <span className="flex-1 text-sm font-medium text-slate-900 truncate">
+                <span className="flex-1 text-sm font-medium text-slate-900 truncate dark:text-slate-100">
                   {tarea.titulo}
                 </span>
 
@@ -343,7 +343,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 </span>
 
                 {/* Fecha vencimiento */}
-                <span className="shrink-0 text-xs text-slate-400 w-24 text-right">
+                <span className="shrink-0 text-xs text-slate-400 w-24 text-right dark:text-slate-500">
                   {formatearFecha(tarea.vencimiento)}
                 </span>
               </a>
@@ -368,14 +368,14 @@ function StatCard({
 }) {
   return (
     <div
-      className={`${fondo} border border-slate-200 shadow-sm rounded-xl p-4 flex items-center gap-3`}
+      className={`${fondo} border border-slate-200 shadow-sm rounded-xl p-4 flex items-center gap-3 dark:border-slate-700`}
     >
-      <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 shrink-0">
+      <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 shrink-0 dark:bg-slate-700 dark:border-slate-600">
         {icono}
       </div>
       <div>
-        <p className="text-xl font-semibold text-slate-900">{valor}</p>
-        <p className="text-xs text-slate-500">{etiqueta}</p>
+        <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">{valor}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{etiqueta}</p>
       </div>
     </div>
   );
