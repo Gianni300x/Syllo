@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { colorParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import { useTemaOscuro } from "../lib/tema";
 import {
   formatearFechaCompleta,
   formatearFechaCorreo,
@@ -365,6 +366,7 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
   // ya refleja la carga en curso y el efecto solo dispara el fetch.
   const [cargando, setCargando] = useState(Boolean(id));
   const [error, setError] = useState<string | null>(null);
+  const oscuro = useTemaOscuro();
 
   useEffect(() => {
     if (!id) return;
@@ -376,12 +378,15 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
         if (!respuesta.ok) throw new Error(String(respuesta.status));
         return (await respuesta.json()) as CorreoCompleto;
       })
-      .then(setCorreo)
+      .then((c) => {
+        setCorreo(c);
+        setCargando(false);
+      })
       .catch((e) => {
         if (e.name === "AbortError") return;
         setError("No pudimos abrir este correo.");
-      })
-      .finally(() => setCargando(false));
+        setCargando(false);
+      });
 
     return () => controlador.abort();
   }, [id]);
@@ -457,8 +462,8 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
           title={correo.asunto}
           // sandbox vacío: el HTML del mail no ejecuta scripts ni accede a Syllo.
           sandbox=""
-          srcDoc={documentoHtml(correo.html)}
-          className="h-[60vh] w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700"
+          srcDoc={documentoHtml(correo.html, oscuro)}
+          className="h-[60vh] w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
         />
       ) : (
         <pre className="whitespace-pre-wrap break-words font-[family-name:var(--font-geist-sans)] text-sm text-slate-700 dark:text-slate-300">
@@ -472,7 +477,7 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
 /**
  * Envuelve el HTML del mail con una CSP propia.
  */
-function documentoHtml(html: string): string {
+function documentoHtml(html: string, oscuro: boolean): string {
   return `<!doctype html>
 <html>
   <head>
@@ -481,18 +486,21 @@ function documentoHtml(html: string): string {
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; style-src 'unsafe-inline'; img-src https: data:; font-src 'none'; media-src 'none'; frame-src 'none'"
     />
+    <meta name="color-scheme" content="${oscuro ? "dark" : "light"}" />
     <base target="_blank" />
     <style>
+      :root { color-scheme: ${oscuro ? "dark" : "light"}; }
       body {
         margin: 0;
         padding: 4px;
         font-family: system-ui, sans-serif;
         font-size: 14px;
-        color: #334155;
+        color: ${oscuro ? "#e2e8f0" : "#334155"};
+        ${oscuro ? "background: #0f172a;" : ""}
         word-break: break-word;
       }
       img { max-width: 100%; height: auto; }
-      a { color: #4f46e5; }
+      a { color: ${oscuro ? "#818cf8" : "#4f46e5"}; }
     </style>
   </head>
   <body>${html}</body>

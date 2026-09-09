@@ -15,7 +15,7 @@ export default function Home() {
           <h1>Todo lo que necesitás para cursar, en un solo lugar.</h1>
 
           <p className="sub">
-            Los correos de Google Classroom y de tu universidad, y las tareas de
+            Los correos de Google Classroom y del CVG, y las tareas de
             todos tus cursos ordenadas por entrega, en un mismo lugar.
           </p>
 
@@ -25,7 +25,7 @@ export default function Home() {
                 <rect x="3" y="5" width="18" height="14" rx="2" />
                 <path d="m3 7 9 6 9-6" />
               </svg>
-              Correos de Classroom y de tu universidad
+              Correos de Classroom y del CVG
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

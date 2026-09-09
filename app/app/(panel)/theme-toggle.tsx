@@ -1,16 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 
-const EVENTO = "syllo-tema-cambio";
-
-function suscribir(cb: () => void) {
-  window.addEventListener(EVENTO, cb);
-  return () => window.removeEventListener(EVENTO, cb);
-}
-
-const esOscuro = () => document.documentElement.classList.contains("dark");
+import { EVENTO, esOscuro, useTemaOscuro } from "../lib/tema";
 
 /**
  * Botón redondo fijo abajo a la derecha del panel para alternar el modo oscuro.
@@ -19,7 +11,7 @@ const esOscuro = () => document.documentElement.classList.contains("dark");
  * root layout aplica la preferencia guardada antes del primer paint.
  */
 export default function ThemeToggle() {
-  const oscuro = useSyncExternalStore(suscribir, esOscuro, () => false);
+  const oscuro = useTemaOscuro();
 
   function alternar() {
     const proximo = !esOscuro();

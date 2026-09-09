@@ -181,7 +181,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             >
               {etiqueta}
               <span
-                className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                className={`inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full text-xs font-semibold leading-none tabular-nums ${
                   tab === valor
                     ? "bg-white/25 text-white"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
