@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ListChecks, LogOut, Mail, RefreshCw } from "lucide-react";
+import {
+  BookOpen,
+  ListChecks,
+  LogOut,
+  Mail,
+  NotebookPen,
+  RefreshCw,
+} from "lucide-react";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 
 const COLORES_CURSO = [
@@ -34,7 +41,7 @@ function bgParaCurso(nombre: string, listaCursos: string[]): string {
   return COLORES_CURSO_BG[indice % COLORES_CURSO_BG.length];
 }
 
-export type Seccion = "tareas" | "correos";
+export type Seccion = "tareas" | "correos" | "notas";
 
 export interface UsuarioSidebar {
   name?: string | null;
@@ -59,7 +66,9 @@ export default function Sidebar({
   const [fotoFallo, setFotoFallo] = useState(false);
   const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
     ? "correos"
-    : "tareas";
+    : pathname?.startsWith("/dashboard/notas")
+      ? "notas"
+      : "tareas";
 
   const {
     cursosSeleccionados,
@@ -98,6 +107,12 @@ export default function Sidebar({
           icono={<Mail size={16} />}
           etiqueta="Correos"
           activo={seccion === "correos"}
+        />
+        <EnlaceSeccion
+          href="/dashboard/notas"
+          icono={<NotebookPen size={16} />}
+          etiqueta="Notas"
+          activo={seccion === "notas"}
         />
       </nav>
 
