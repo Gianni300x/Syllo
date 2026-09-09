@@ -19,15 +19,15 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Syllo",
+  title: "Syllo — Todo tu estudio en un solo lugar",
   description:
-    "Agenda para estudiantes: reúne las tareas y los correos de todos tus cursos de Google Classroom y del CVG en un solo panel.",
+    "Syllo reúne los correos de Google Classroom y de tu universidad y las tareas de todos tus cursos en un solo panel. Próximamente: notas, recordatorios y calendario.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="es"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
