@@ -15,7 +15,8 @@ export const esOscuro = () => document.documentElement.classList.contains("dark"
 
 /**
  * Hook reactivo al modo oscuro: se re-renderiza cuando `ThemeToggle` emite
- * el evento `syllo-tema-cambio`. En SSR devuelve `false` (default claro).
+ * el evento `syllo-tema-cambio`. En SSR y en cada carga devuelve `false`: el
+ * tema no se persiste, siempre se arranca en claro.
  */
 export function useTemaOscuro(): boolean {
   return useSyncExternalStore(suscribir, esOscuro, () => false);

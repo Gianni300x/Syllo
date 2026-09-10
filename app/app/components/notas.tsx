@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type ReactNode,
   type RefObject,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -100,40 +101,104 @@ export default function Notas({
         </button>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_minmax(360px,420px)]">
-        {/* Lista */}
-        <div className="min-w-0">
-          {notas.length === 0 && abierta !== "nueva" ? (
-            <EstadoVacio onNueva={() => setAbierta("nueva")} />
-          ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {notas.map((nota) => (
-                <li key={nota.id}>
-                  <TarjetaNota
-                    nota={nota}
-                    activa={abierta === nota.id}
-                    onAbrir={() => setAbierta(nota.id)}
-                    eliminarNota={eliminarNota}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      {notas.length === 0 && abierta !== "nueva" ? (
+        <EstadoVacio onNueva={() => setAbierta("nueva")} />
+      ) : (
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {notas.map((nota) => (
+            <li key={nota.id}>
+              <TarjetaNota
+                nota={nota}
+                activa={abierta === nota.id}
+                onAbrir={() => setAbierta(nota.id)}
+                eliminarNota={eliminarNota}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
 
-        {/* Editor */}
-        {mostrarEditor && (
-          <div className="lg:sticky lg:top-8 lg:self-start">
-            <EditorNota
-              key={abierta}
-              nota={notaEnEdicion}
-              accion={notaEnEdicion ? editarNota : crearNota}
-              onCerrar={() => setAbierta(null)}
-            />
-          </div>
-        )}
-      </div>
+      <PanelLateral
+        open={mostrarEditor}
+        onCerrar={() => setAbierta(null)}
+        titulo={notaEnEdicion ? "Editar nota" : "Nueva nota"}
+      >
+        <EditorNota
+          key={abierta}
+          nota={notaEnEdicion}
+          accion={notaEnEdicion ? editarNota : crearNota}
+          onCerrar={() => setAbierta(null)}
+        />
+      </PanelLateral>
     </main>
+  );
+}
+
+/**
+ * Drawer que entra deslizándose desde la derecha, a toda la altura de la
+ * ventana, con fondo oscurecido. Siempre montado: abierto/cerrado se controla
+ * con las clases de transición. Se cierra con la X (dentro del contenido), la
+ * tecla Esc o un clic en el fondo.
+ */
+function PanelLateral({
+  open,
+  onCerrar,
+  titulo,
+  children,
+}: {
+  open: boolean;
+  onCerrar: () => void;
+  titulo: string;
+  children: ReactNode;
+}) {
+  const asideRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function alTecla(e: KeyboardEvent) {
+      if (e.key === "Escape") onCerrar();
+    }
+    document.addEventListener("keydown", alTecla);
+
+    const overflowPrevio = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const foco = setTimeout(() => {
+      asideRef.current
+        ?.querySelector<HTMLElement>('input[name="titulo"]')
+        ?.focus();
+    }, 60);
+
+    return () => {
+      document.removeEventListener("keydown", alTecla);
+      document.body.style.overflow = overflowPrevio;
+      clearTimeout(foco);
+    };
+  }, [open, onCerrar]);
+
+  return (
+    <>
+      <div
+        aria-hidden
+        onClick={onCerrar}
+        className={`fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+      <aside
+        ref={asideRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={titulo}
+        aria-hidden={!open}
+        className={`fixed inset-y-0 right-0 z-[70] flex w-full flex-col border-l border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-out sm:w-[540px] sm:max-w-[88vw] dark:border-slate-700 dark:bg-slate-800 ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {children}
+      </aside>
+    </>
   );
 }
 
@@ -275,21 +340,10 @@ function EditorNota({
     }
   }, [estado.ok, onCerrar, router]);
 
-  // Autoexpandir el textarea al contenido.
-  useEffect(() => {
-    const el = areaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 600)}px`;
-  }, [contenido]);
-
   return (
-    <form
-      action={enviar}
-      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+    <form action={enviar} className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
           {nota ? "Editar nota" : "Nueva nota"}
         </h2>
         <button
@@ -304,34 +358,35 @@ function EditorNota({
 
       {nota && <input type="hidden" name="id" value={nota.id} />}
 
-      <input
-        name="titulo"
-        defaultValue={nota?.titulo ?? ""}
-        placeholder="Título"
-        maxLength={MAX_TITULO}
-        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
-      />
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
+        <input
+          name="titulo"
+          defaultValue={nota?.titulo ?? ""}
+          placeholder="Título"
+          maxLength={MAX_TITULO}
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+        />
 
-      <BarraMarkdown areaRef={areaRef} onCambio={setContenido} />
+        <BarraMarkdown areaRef={areaRef} onCambio={setContenido} />
 
-      <textarea
-        ref={areaRef}
-        name="contenido"
-        value={contenido}
-        onChange={(e) => setContenido(e.target.value)}
-        placeholder="Escribí tu nota… podés usar markdown"
-        maxLength={MAX_CONTENIDO}
-        rows={8}
-        className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 font-[family-name:var(--font-geist-mono)] text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
-      />
+        <textarea
+          ref={areaRef}
+          name="contenido"
+          value={contenido}
+          onChange={(e) => setContenido(e.target.value)}
+          placeholder="Escriba su nota…"
+          maxLength={MAX_CONTENIDO}
+          className="min-h-[280px] w-full flex-1 resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 font-[family-name:var(--font-geist-mono)] text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+        />
 
-      {error && (
-        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+            {error}
+          </p>
+        )}
+      </div>
 
-      <div className="mt-3 flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
         <button
           type="button"
           onClick={onCerrar}

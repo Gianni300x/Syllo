@@ -6,9 +6,8 @@ import { EVENTO, esOscuro, useTemaOscuro } from "../lib/tema";
 
 /**
  * Botón redondo fijo abajo a la derecha del panel para alternar el modo oscuro.
- * El tema se aplica como clase `dark` en `<html>` y se recuerda en
- * `localStorage` ('syllo-tema'). El default es claro; un script inline en el
- * root layout aplica la preferencia guardada antes del primer paint.
+ * El tema se aplica como clase `dark` en `<html>` solo durante la sesión actual:
+ * no se persiste, así que cada vez que se entra a Syllo el panel arranca en claro.
  */
 export default function ThemeToggle() {
   const oscuro = useTemaOscuro();
@@ -16,11 +15,6 @@ export default function ThemeToggle() {
   function alternar() {
     const proximo = !esOscuro();
     document.documentElement.classList.toggle("dark", proximo);
-    try {
-      localStorage.setItem("syllo-tema", proximo ? "dark" : "light");
-    } catch {
-      /* localStorage no disponible: el tema igual cambia en esta sesión */
-    }
     window.dispatchEvent(new Event(EVENTO));
   }
 

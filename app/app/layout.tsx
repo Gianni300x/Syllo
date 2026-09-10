@@ -32,11 +32,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('syllo-tema')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`,
-          }}
-        />
         {children}
       </body>
     </html>

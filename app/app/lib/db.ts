@@ -22,6 +22,7 @@ export function getDb() {
 
     pool = new Pool({
       connectionString: url,
+      ssl: { rejectUnauthorized: true },
     });
 
     db = drizzle(pool);
