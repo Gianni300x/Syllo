@@ -5,19 +5,27 @@
  * quede inlineada en el build (requisito de Next 16 para env vars de servidor).
  * El cliente se crea una sola vez por proceso.
  */
-import { connection } from "next/server";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
-import * as schema from "./schema";
+// lib/db.ts
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let pool: Pool | undefined;
+let db: ReturnType<typeof drizzle> | undefined;
 
-export async function getDb() {
-  await connection();
-  if (!_db) {
+export function getDb() {
+  if (!db) {
     const url = process.env.DATABASE_URL;
-    if (!url) throw new Error("Falta la variable de entorno DATABASE_URL");
-    _db = drizzle(neon(url), { schema });
+
+    if (!url) {
+      throw new Error("Falta la variable de entorno DATABASE_URL");
+    }
+
+    pool = new Pool({
+      connectionString: url,
+    });
+
+    db = drizzle(pool);
   }
-  return _db;
+
+  return db;
 }

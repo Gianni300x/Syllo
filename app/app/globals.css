@@ -4,12 +4,42 @@
 
 :root {
   --background: #eef1f6;
-  --foreground: #1e293b;
+  --foreground: #393E46;
 }
 
 .dark {
-  --background: #0f172a; /* slate-900 */
-  --foreground: #e2e8f0; /* slate-200 */
+  /* Fondo base (canvas) */
+  --background: #262624;
+
+  /* Texto principal (crema, no blanco puro) */
+  --foreground: #FAF9F5;
+
+  /* Superficie elevada (panel/card) */
+  --color-slate-800: #30302E;
+
+  /* Fondo más profundo (código) */
+  --color-slate-900: #1F1E1D;
+
+  /* Borde / divisores */
+  --color-slate-700: #3E3E3A;
+  --color-slate-600: #4B4A45;
+
+  /* Texto principal */
+  --color-slate-100: #FAF9F5;
+  --color-slate-200: #FAF9F5;
+
+  /* Texto secundario */
+  --color-slate-400: #C2C0B6;
+  --color-slate-500: #9C9A90;
+  --color-slate-300: #D8D6CD;
+
+  /* Acento (naranja Claude) */
+  --color-indigo-600: #D97757;
+  --color-indigo-500: #E08A6D;
+  --color-indigo-400: #E5987D;
+  --color-indigo-300: #F0B8A3;
+  --color-indigo-700: #C46546;
+  --color-indigo-800: #A85034;
 }
 
 @theme inline {

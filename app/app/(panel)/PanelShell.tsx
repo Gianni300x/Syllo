@@ -51,7 +51,7 @@ export default function PanelShell({
 
   return (
     <FiltroCursosContext.Provider value={value}>
-      <div className="flex min-h-screen bg-slate-100 text-slate-800 font-[family-name:var(--font-poppins)] dark:bg-slate-900 dark:text-slate-200">
+      <div className="flex min-h-screen bg-background text-foreground font-[family-name:var(--font-poppins)]">
         <Sidebar
           cursos={cursos}
           usuario={usuario}

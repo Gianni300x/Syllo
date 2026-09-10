@@ -7,6 +7,7 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bold,
   Italic,
@@ -170,7 +171,14 @@ function TarjetaNota({
 }) {
   const [confirmando, setConfirmando] = useState(false);
   const [estado, accion, pendiente] = useActionState(eliminarNota, INICIAL);
+  const router = useRouter();
   const error = mensajeError(estado.error);
+
+  useEffect(() => {
+    if (estado.ok) {
+      router.refresh();
+    }
+  }, [estado.ok, router]);
 
   // Al perder el foco de la zona de confirmación, cancelá.
   return (
@@ -256,12 +264,16 @@ function EditorNota({
   const [estado, enviar, pendiente] = useActionState(accion, INICIAL);
   const [contenido, setContenido] = useState(nota?.contenido ?? "");
   const areaRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
   const error = mensajeError(estado.error);
 
   // Cerrar el editor cuando la acción termina bien.
   useEffect(() => {
-    if (estado.ok) onCerrar();
-  }, [estado.ok, onCerrar]);
+    if (estado.ok) {
+      onCerrar();
+      router.refresh();
+    }
+  }, [estado.ok, onCerrar, router]);
 
   // Autoexpandir el textarea al contenido.
   useEffect(() => {

@@ -495,12 +495,12 @@ function documentoHtml(html: string, oscuro: boolean): string {
         padding: 4px;
         font-family: system-ui, sans-serif;
         font-size: 14px;
-        color: ${oscuro ? "#e2e8f0" : "#334155"};
-        ${oscuro ? "background: #0f172a;" : ""}
+        color: ${oscuro ? "#FAF9F5" : "#334155"};
+        ${oscuro ? "background: #1F1E1D;" : ""}
         word-break: break-word;
       }
       img { max-width: 100%; height: auto; }
-      a { color: ${oscuro ? "#818cf8" : "#4f46e5"}; }
+      a { color: ${oscuro ? "#D97757" : "#4f46e5"}; }
     </style>
   </head>
   <body>${html}</body>

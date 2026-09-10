@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getDb } from "@/app/lib/db";
@@ -64,6 +64,7 @@ export async function crearNota(
     return err("error_db");
   }
 
+  revalidatePath("/dashboard/notas");
   revalidateTag("notas", "max");
   revalidateTag(`u:${email}`, "max");
   return { ok: true };
@@ -96,6 +97,7 @@ export async function editarNota(
     return err("error_db");
   }
 
+  revalidatePath("/dashboard/notas");
   revalidateTag("notas", "max");
   revalidateTag(`u:${email}`, "max");
   return { ok: true };
@@ -123,6 +125,7 @@ export async function eliminarNota(
     return err("error_db");
   }
 
+  revalidatePath("/dashboard/notas");
   revalidateTag("notas", "max");
   revalidateTag(`u:${email}`, "max");
   return { ok: true };

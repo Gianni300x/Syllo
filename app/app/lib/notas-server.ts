@@ -14,8 +14,9 @@ import { getDb } from "./db";
 import { notas } from "./schema";
 import type { Nota } from "./notas";
 
-async function fetchNotasDeUsuario(userId: string): Promise<Nota[]> {
-  const db = await getDb();
+export async function fetchNotasDesdeDb(userId: string): Promise<Nota[]> {
+  const db = getDb();
+
   const filas = await db
     .select()
     .from(notas)
@@ -26,15 +27,21 @@ async function fetchNotasDeUsuario(userId: string): Promise<Nota[]> {
     id: fila.id,
     titulo: fila.titulo,
     contenido: fila.contenido,
-    createdAt: fila.createdAt.toISOString(),
-    updatedAt: fila.updatedAt.toISOString(),
+    createdAt:
+      fila.createdAt instanceof Date
+        ? fila.createdAt.toISOString()
+        : new Date(fila.createdAt).toISOString(),
+    updatedAt:
+      fila.updatedAt instanceof Date
+        ? fila.updatedAt.toISOString()
+        : new Date(fila.updatedAt).toISOString(),
   }));
 }
 
 export const getNotas = cache((userId: string) =>
   unstable_cache(
-    () => fetchNotasDeUsuario(userId),
+    () => fetchNotasDesdeDb(userId),
     ["notas", userId],
-    { revalidate: 60, tags: ["notas", `u:${userId}`] },
+    { revalidate: 180, tags: ["notas", `u:${userId}`] },
   )(),
 );
