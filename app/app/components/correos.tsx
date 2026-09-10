@@ -28,7 +28,7 @@ export default function Correos({
   cursos: string[];
   paginaInicial: PaginaCorreos;
 }) {
-  const { cursosSeleccionados, setConteoPorCurso } = useFiltroCursos();
+  const { cursosSeleccionados, setConteoPorCurso, cursosArchivados } = useFiltroCursos();
   const [origenFiltro, setOrigenFiltro] = useState<"Todos" | "Classroom" | "CVG">("Todos");
   const [busqueda, setBusqueda] = useState("");
   const [busquedaAplicada, setBusquedaAplicada] = useState("");
@@ -117,20 +117,31 @@ export default function Correos({
     }
   }
 
+  // Los correos de cursos archivados se ocultan. La detección de curso sigue
+  // usando la lista completa, así el correo queda etiquetado y se filtra en vez
+  // de aparecer como "sin curso".
+  const correosVisibles = useMemo(
+    () =>
+      cursosArchivados.length === 0
+        ? correos
+        : correos.filter((c) => !c.curso || !cursosArchivados.includes(c.curso)),
+    [correos, cursosArchivados],
+  );
+
   const noLeidos = useMemo(
-    () => correos.filter((correo) => !correo.leido).length,
-    [correos],
+    () => correosVisibles.filter((correo) => !correo.leido).length,
+    [correosVisibles],
   );
 
   const conteoPorCurso = useMemo(() => {
     const conteo: Record<string, number> = {};
-    for (const correo of correos) {
+    for (const correo of correosVisibles) {
       if (correo.curso && !correo.leido) {
         conteo[correo.curso] = (conteo[correo.curso] ?? 0) + 1;
       }
     }
     return conteo;
-  }, [correos]);
+  }, [correosVisibles]);
 
   // Publica el conteo de no leídos por curso al Sidebar compartido.
   useEffect(() => {
@@ -229,7 +240,7 @@ export default function Correos({
         </button>
 
         <span className="text-sm text-slate-500 dark:text-slate-400">
-          {noLeidos} sin leer de {correos.length}
+          {noLeidos} sin leer de {correosVisibles.length}
         </span>
       </div>
 
@@ -243,13 +254,13 @@ export default function Correos({
         <div className="lg:col-span-2 flex flex-col gap-2">
           {cargando ? (
             <Cargando texto="Buscando correos…" />
-          ) : correos.length === 0 ? (
+          ) : correosVisibles.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               No hay correos con estos filtros.
             </p>
           ) : (
             <>
-              {correos
+              {correosVisibles
                 .filter(
                   (c) =>
                     cursosSeleccionados.length === 0 ||

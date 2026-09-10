@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { getNombresCursos } from "../lib/tareas-server";
+import { getCursosArchivados } from "../lib/archivados-server";
 import PanelShell from "./PanelShell";
 
 export default async function PanelLayout({
@@ -15,7 +16,13 @@ export default async function PanelLayout({
   }
 
   const userId = session.user?.email ?? "anon";
-  const cursos = await getNombresCursos(session.access_token, userId);
+  const [cursos, archivados] = await Promise.all([
+    getNombresCursos(session.access_token, userId),
+    getCursosArchivados(userId),
+  ]);
+  // Un archivado cuyo curso ya no existe en Classroom (renombrado o cerrado)
+  // no tiene nada que ocultar: se ignora.
+  const cursosArchivados = archivados.filter((a) => cursos.includes(a));
 
   const usuario = {
     name: session.user?.name,
@@ -26,6 +33,7 @@ export default async function PanelLayout({
   return (
     <PanelShell
       cursos={cursos}
+      cursosArchivados={cursosArchivados}
       usuario={usuario}
       onCerrarSesion={async () => {
         "use server";

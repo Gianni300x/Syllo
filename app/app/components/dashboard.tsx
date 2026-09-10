@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
+  Archive,
+  ArchiveRestore,
   Calendar,
   CheckCircle2,
   Clock,
@@ -10,7 +12,7 @@ import {
   List,
   Search,
 } from "lucide-react";
-import { colorParaCurso } from "./sidebar";
+import { bgParaCurso, colorParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import {
   Tarea,
@@ -19,9 +21,18 @@ import {
   formatearFecha,
   etiquetaVencimiento,
 } from "../lib/classroom";
-import { clasificarTareas, contarPendientesPorCurso } from "../lib/tareas-service";
+import {
+  clasificarTareas,
+  contarPendientesPorCurso,
+} from "../lib/tareas-service";
 
-type Tab = "pendientes" | "urgentes" | "vencidas" | "semana" | "completadas";
+type Tab =
+  | "pendientes"
+  | "urgentes"
+  | "vencidas"
+  | "semana"
+  | "completadas"
+  | "archivados";
 type VistaLayout = "grid" | "lista";
 
 const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
@@ -30,9 +41,14 @@ const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
   { valor: "vencidas", etiqueta: "Vencidas" },
   { valor: "semana", etiqueta: "Esta semana" },
   { valor: "completadas", etiqueta: "Completadas" },
+  // Solo se muestra cuando hay al menos un curso archivado.
+  { valor: "archivados", etiqueta: "Archivados" },
 ];
 
-function colorEtiquetaVencimiento(dias: number | null, completada: boolean): string {
+function colorEtiquetaVencimiento(
+  dias: number | null,
+  completada: boolean,
+): string {
   if (completada) return "bg-green-500 text-white";
   if (dias === null) return "bg-slate-400 text-slate-100";
   if (dias < 0) return "bg-red-500 text-white";
@@ -49,9 +65,18 @@ function normalizar(texto: string): string {
 }
 
 export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
-  const { cursosSeleccionados, setConteoPorCurso } = useFiltroCursos();
-  const [tab, setTab] = useState<Tab>("pendientes");
+  const {
+    cursosSeleccionados,
+    setConteoPorCurso,
+    cursosArchivados,
+    restaurarCursos,
+    archivando,
+  } = useFiltroCursos();
+  const [tabElegido, setTab] = useState<Tab>("pendientes");
   const [busqueda, setBusqueda] = useState("");
+  // La lupa abre el campo de búsqueda en su lugar; queda abierto mientras haya texto.
+  const [buscadorAbierto, setBuscadorAbierto] = useState(false);
+  const mostrarBuscador = buscadorAbierto || busqueda.length > 0;
   const [vistaLayout, setVistaLayout] = useState<VistaLayout>("grid");
 
   const nombresCursos = useMemo(
@@ -59,9 +84,33 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     [tareas],
   );
 
+  // Las tareas de cursos archivados salen de todas las vistas y solo viven en
+  // la pestaña "Archivados".
+  const { tareasActivas, tareasArchivadas } = useMemo(() => {
+    const activas: Tarea[] = [];
+    const archivadas: Tarea[] = [];
+    for (const t of tareas) {
+      (cursosArchivados.includes(t.curso) ? archivadas : activas).push(t);
+    }
+    return { tareasActivas: activas, tareasArchivadas: archivadas };
+  }, [tareas, cursosArchivados]);
+
+  const hayArchivados = cursosArchivados.length > 0;
+
+  const tareasPorCursoArchivado = useMemo(() => {
+    const conteo: Record<string, number> = {};
+    for (const t of tareasArchivadas)
+      conteo[t.curso] = (conteo[t.curso] ?? 0) + 1;
+    return conteo;
+  }, [tareasArchivadas]);
+
+  // Si se restauró todo mientras estaba abierta la pestaña, cae a Pendientes.
+  const tab: Tab =
+    tabElegido === "archivados" && !hayArchivados ? "pendientes" : tabElegido;
+
   const conteoPendientes = useMemo(
-    () => contarPendientesPorCurso(tareas),
-    [tareas]
+    () => contarPendientesPorCurso(tareasActivas),
+    [tareasActivas],
   );
 
   // Publica el conteo de pendientes por curso al Sidebar compartido.
@@ -72,13 +121,22 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
   const tareasFiltradasPorCurso = useMemo(
     () =>
       cursosSeleccionados.length === 0
-        ? tareas
-        : tareas.filter((t) => cursosSeleccionados.includes(t.curso)),
-    [tareas, cursosSeleccionados],
+        ? tareasActivas
+        : tareasActivas.filter((t) => cursosSeleccionados.includes(t.curso)),
+    [tareasActivas, cursosSeleccionados],
   );
 
-  const { pendientes, vencidas, vencidasRecientes, urgentes, estaSemana, completadas } =
-    useMemo(() => clasificarTareas(tareasFiltradasPorCurso), [tareasFiltradasPorCurso]);
+  const {
+    pendientes,
+    vencidas,
+    vencidasRecientes,
+    urgentes,
+    estaSemana,
+    completadas,
+  } = useMemo(
+    () => clasificarTareas(tareasFiltradasPorCurso),
+    [tareasFiltradasPorCurso],
+  );
 
   /** Conteos para los badges en tabs y statcards. */
   const conteosPorTab: Record<Tab, number> = {
@@ -87,6 +145,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     vencidas: vencidasRecientes.length,
     semana: estaSemana.length,
     completadas: completadas.length,
+    archivados: tareasArchivadas.length,
   };
 
   const tareasDelTab =
@@ -98,7 +157,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
           ? vencidasRecientes
           : tab === "semana"
             ? estaSemana
-            : completadas;
+            : tab === "completadas"
+              ? completadas
+              : tareasArchivadas;
 
   /** Aplica búsqueda sobre el tab activo, sin ir al servidor. */
   const tareasFiltradas = useMemo(() => {
@@ -126,15 +187,56 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
 
   return (
     <main className="flex-1 p-8">
-      <div className="mb-8">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-          {cursosSeleccionados.length === 0
-            ? "Todas las tareas"
-            : cursosSeleccionados.length === 1
-              ? cursosSeleccionados[0]
-              : `${cursosSeleccionados.length} cursos seleccionados`}
-        </h1>
-        <p className="text-sm text-slate-500 capitalize dark:text-slate-400">{hoy}</p>
+      {/* Cabecera: título y fecha a la izquierda, buscador y toggle de vista a la derecha */}
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            {cursosSeleccionados.length === 0
+              ? "Todas las tareas"
+              : cursosSeleccionados.length === 1
+                ? cursosSeleccionados[0]
+                : `${cursosSeleccionados.length} cursos seleccionados`}
+          </h1>
+          <p className="text-sm text-slate-500 capitalize dark:text-slate-400">
+            {hoy}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Buscador: lupa que se expande en su lugar */}
+          {mostrarBuscador ? (
+            <div className="relative w-64">
+              <Search
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                autoFocus
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                onBlur={() => {
+                  if (!busqueda) setBuscadorAbierto(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setBusqueda("");
+                    setBuscadorAbierto(false);
+                  }
+                }}
+                placeholder="Buscar entregas, temas o TPs…"
+                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setBuscadorAbierto(true)}
+              title="Buscar entregas, temas o TPs"
+              className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:hover:text-slate-100 dark:hover:border-slate-600"
+            >
+              <Search size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* StatCards — métricas de resumen */}
@@ -165,11 +267,12 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
         />
       </div>
 
-      {/* Barra de herramientas: Tabs + Buscador + Toggle de vista */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        {/* Tabs con badge de conteo */}
+      {/* Pestañas a la izquierda, modo de vista a la derecha */}
+      <div className="flex items-center gap-3 mb-6">
         <div className="flex gap-2 flex-wrap">
-          {TABS_MAP.map(({ valor, etiqueta }) => (
+          {TABS_MAP.filter(
+            ({ valor }) => valor !== "archivados" || hayArchivados,
+          ).map(({ valor, etiqueta }) => (
             <button
               key={valor}
               onClick={() => setTab(valor)}
@@ -193,55 +296,111 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
           ))}
         </div>
 
-        {/* Buscador */}
-        <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar entregas, temas o TPs…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
-          />
-        </div>
-
-        {/* Toggle Grid / Lista */}
-        <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0 dark:border-slate-700 dark:bg-slate-800">
-          <button
-            onClick={() => setVistaLayout("grid")}
-            title="Vista Cuadrícula"
-            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-              vistaLayout === "grid"
-                ? "bg-slate-900 text-white dark:bg-slate-600"
-                : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
-            }`}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            onClick={() => setVistaLayout("lista")}
-            title="Vista Lista Compacta"
-            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-              vistaLayout === "lista"
-                ? "bg-slate-900 text-white dark:bg-slate-600"
-                : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
-            }`}
-          >
-            <List size={16} />
-          </button>
+        <div className="ml-auto shrink-0">
+          {/* Toggle Grid / Lista */}
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 shrink-0 dark:border-slate-700 dark:bg-slate-800">
+            <button
+              onClick={() => setVistaLayout("grid")}
+              title="Vista Cuadrícula"
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                vistaLayout === "grid"
+                  ? "bg-slate-900 text-white dark:bg-slate-600"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+              }`}
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setVistaLayout("lista")}
+              title="Vista Lista Compacta"
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                vistaLayout === "lista"
+                  ? "bg-slate-900 text-white dark:bg-slate-600"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+              }`}
+            >
+              <List size={16} />
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Cursos archivados: tarjeta con una fila por curso, solo en su pestaña */}
+      {tab === "archivados" && hayArchivados && (
+        <>
+          <div className="mb-8 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
+            <div className="flex items-center justify-between gap-4 px-5 py-3 border-b border-slate-100 dark:border-slate-700">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                <Archive size={16} className="text-slate-400" />
+                Cursos archivados
+                <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full text-xs font-semibold leading-none tabular-nums bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                  {cursosArchivados.length}
+                </span>
+              </div>
+              {cursosArchivados.length > 1 && (
+                <button
+                  onClick={() => restaurarCursos(cursosArchivados)}
+                  disabled={archivando}
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
+                  Restaurar todos
+                </button>
+              )}
+            </div>
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
+              {cursosArchivados.map((nombre) => {
+                const cantidad = tareasPorCursoArchivado[nombre] ?? 0;
+                return (
+                  <div
+                    key={nombre}
+                    className="flex items-center gap-4 px-5 py-3"
+                  >
+                    <span
+                      className={`shrink-0 h-2.5 w-2.5 rounded-full ${bgParaCurso(nombre, nombresCursos)}`}
+                    />
+                    <span
+                      className={`flex-1 min-w-0 truncate text-sm font-medium ${colorParaCurso(nombre, nombresCursos)}`}
+                    >
+                      {nombre}
+                    </span>
+                    <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                      {cantidad === 1 ? "1 tarea" : `${cantidad} tareas`}
+                    </span>
+                    <button
+                      onClick={() => restaurarCursos([nombre])}
+                      disabled={archivando}
+                      title="Volver a mostrar este curso"
+                      className="inline-flex items-center gap-1.5 shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:border-slate-600 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
+                    >
+                      <ArchiveRestore size={13} />
+                      Restaurar
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {ordenadas.length > 0 && (
+            <p className="text-xs font-medium tracking-wider text-slate-500 mb-3 dark:text-slate-400">
+              TAREAS DE CURSOS ARCHIVADOS
+            </p>
+          )}
+        </>
+      )}
 
       {/* Contenido */}
       {ordenadas.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <CheckCircle2 size={32} className="text-slate-300 dark:text-slate-600" />
+          <CheckCircle2
+            size={32}
+            className="text-slate-300 dark:text-slate-600"
+          />
           <p className="text-slate-500 text-sm dark:text-slate-400">
             {busqueda
               ? `Sin resultados para "${busqueda}" en esta categoría.`
-              : "No hay tareas en esta categoría."}
+              : tab === "archivados"
+                ? "No hay tareas en los cursos archivados."
+                : "No hay tareas en esta categoría."}
           </p>
         </div>
       ) : vistaLayout === "grid" ? (
@@ -276,7 +435,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     {completada ? "Entregada" : etiquetaVencimiento(dias)}
                   </span>
                 </div>
-                <h3 className="font-medium mb-1 text-slate-900 dark:text-slate-100">{tarea.titulo}</h3>
+                <h3 className="font-medium mb-1 text-slate-900 dark:text-slate-100">
+                  {tarea.titulo}
+                </h3>
                 {tarea.descripcion && (
                   <p className="text-sm text-slate-500 mb-4 line-clamp-2 dark:text-slate-400">
                     {tarea.descripcion}
@@ -374,7 +535,9 @@ function StatCard({
         {icono}
       </div>
       <div>
-        <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">{valor}</p>
+        <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+          {valor}
+        </p>
         <p className="text-xs text-slate-500 dark:text-slate-400">{etiqueta}</p>
       </div>
     </div>

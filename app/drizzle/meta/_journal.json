@@ -8,6 +8,13 @@
       "when": 1788994719208,
       "tag": "0000_faulty_slayback",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789068470199,
+      "tag": "0001_conscious_puppet_master",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Archive,
   BookOpen,
   ListChecks,
   LogOut,
@@ -36,7 +37,7 @@ export function colorParaCurso(nombre: string, listaCursos: string[]): string {
   return COLORES_CURSO[indice % COLORES_CURSO.length];
 }
 
-function bgParaCurso(nombre: string, listaCursos: string[]): string {
+export function bgParaCurso(nombre: string, listaCursos: string[]): string {
   const indice = listaCursos.indexOf(nombre);
   return COLORES_CURSO_BG[indice % COLORES_CURSO_BG.length];
 }
@@ -75,9 +76,15 @@ export default function Sidebar({
     toggleCurso,
     limpiarCursos,
     conteoPorCurso,
+    cursosArchivados,
+    archivarCursos,
+    archivando,
   } = useFiltroCursos();
 
   const haySeleccion = cursosSeleccionados.length > 0;
+  // Los archivados no se listan, pero `cursos` completo se sigue usando para
+  // los colores: dependen del índice en la lista original.
+  const cursosVisibles = cursos.filter((c) => !cursosArchivados.includes(c));
 
   return (
     <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-6 flex flex-col h-screen sticky top-0 dark:border-slate-700 dark:bg-slate-800">
@@ -123,12 +130,23 @@ export default function Sidebar({
             MIS CURSOS
           </p>
           {haySeleccion && (
-            <button
-              onClick={limpiarCursos}
-              className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer dark:text-indigo-400 dark:hover:text-indigo-300"
-            >
-              Ver todos
-            </button>
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => archivarCursos(cursosSeleccionados)}
+                disabled={archivando}
+                title="Ocultar los cursos seleccionados. Se pueden restaurar desde la pestaña Archivados."
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:text-slate-400 dark:hover:text-slate-100"
+              >
+                <Archive size={12} />
+                Archivar
+              </button>
+              <button
+                onClick={limpiarCursos}
+                className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                Ver todos
+              </button>
+            </div>
           )}
         </div>
 
@@ -156,7 +174,7 @@ export default function Sidebar({
           </button>
 
           {/* Lista de cursos con checkboxes visuales */}
-          {cursos.map((nombre) => {
+          {cursosVisibles.map((nombre) => {
             const seleccionado = cursosSeleccionados.includes(nombre);
             return (
               <button
