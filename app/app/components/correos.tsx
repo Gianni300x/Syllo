@@ -513,7 +513,7 @@ function documentoHtml(html: string, oscuro: boolean): string {
         word-break: break-word;
       }
       img { max-width: 100%; height: auto; }
-      a { color: ${oscuro ? "#D97757" : "#4f46e5"}; }
+      a { color: ${oscuro ? "#A5B4FC" : "#4f46e5"}; }
     </style>
   </head>
   <body>${html}</body>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Archive,
   BookOpen,
+  CalendarDays,
   ListChecks,
   LogOut,
   Mail,
@@ -42,7 +43,7 @@ export function bgParaCurso(nombre: string, listaCursos: string[]): string {
   return COLORES_CURSO_BG[indice % COLORES_CURSO_BG.length];
 }
 
-export type Seccion = "tareas" | "correos" | "notas";
+export type Seccion = "tareas" | "correos" | "notas" | "calendario";
 
 export interface UsuarioSidebar {
   name?: string | null;
@@ -69,7 +70,9 @@ export default function Sidebar({
     ? "correos"
     : pathname?.startsWith("/dashboard/notas")
       ? "notas"
-      : "tareas";
+      : pathname?.startsWith("/dashboard/calendario")
+        ? "calendario"
+        : "tareas";
 
   const {
     cursosSeleccionados,
@@ -120,6 +123,12 @@ export default function Sidebar({
           icono={<NotebookPen size={16} />}
           etiqueta="Notas"
           activo={seccion === "notas"}
+        />
+        <EnlaceSeccion
+          href="/dashboard/calendario"
+          icono={<CalendarDays size={16} />}
+          etiqueta="Calendario"
+          activo={seccion === "calendario"}
         />
       </nav>
 

@@ -10,9 +10,15 @@ export interface Tarea {
 
 const ESTADOS_COMPLETADOS = ["TURNED_IN", "RETURNED"];
 
-export function diasHastaVencimiento(vencimiento: Tarea["vencimiento"]): number | null {
+/** La fecha de vencimiento como `Date` local (medianoche), o `null` si no tiene. */
+export function fechaVencimiento(vencimiento: Tarea["vencimiento"]): Date | null {
   if (!vencimiento) return null;
-  const fecha = new Date(vencimiento.year, vencimiento.month - 1, vencimiento.day);
+  return new Date(vencimiento.year, vencimiento.month - 1, vencimiento.day);
+}
+
+export function diasHastaVencimiento(vencimiento: Tarea["vencimiento"]): number | null {
+  const fecha = fechaVencimiento(vencimiento);
+  if (!fecha) return null;
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   const diffMs = fecha.getTime() - hoy.getTime();

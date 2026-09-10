@@ -33,13 +33,15 @@
   --color-slate-500: #9C9A90;
   --color-slate-300: #D8D6CD;
 
-  /* Acento (naranja Claude) */
-  --color-indigo-600: #D97757;
-  --color-indigo-500: #E08A6D;
-  --color-indigo-400: #E5987D;
-  --color-indigo-300: #F0B8A3;
-  --color-indigo-700: #C46546;
-  --color-indigo-800: #A85034;
+  /* Acento (índigo, el mismo tono del modo claro para que la marca no cambie;
+     el "600" mantiene contraste AA con texto blanco en la píldora de "hoy",
+     y las tintas 500/400/300 —más luminosas— se usan para texto sobre oscuro) */
+  --color-indigo-300: #C7D2FE;
+  --color-indigo-400: #A5B4FC;
+  --color-indigo-500: #818CF8;
+  --color-indigo-600: #5B57E8;
+  --color-indigo-700: #4F46E5;
+  --color-indigo-800: #4338CA;
 }
 
 @theme inline {
