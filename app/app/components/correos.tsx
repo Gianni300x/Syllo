@@ -91,7 +91,9 @@ export default function Correos({
         setError(
           e.message === "401"
             ? "Tu sesión con Google expiró. Volvé a iniciar sesión."
-            : "No pudimos consultar tus correos.",
+            : e.message === "429"
+              ? "Gmail está limitando las consultas. Esperá un minuto y probá de nuevo."
+              : "No pudimos consultar tus correos.",
         );
       })
       .finally(() => setCargando(false));

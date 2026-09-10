@@ -31,13 +31,52 @@ export interface OpcionesCorreos {
   maxResults?: number;
 }
 
+/** Cuántos `messages.get` mandamos en paralelo. Ráfagas más grandes disparan el
+ *  rate limit por usuario de Gmail ('Total Query Cost' / Units per minute). */
+const CONCURRENCIA_DETALLE = 5;
+
 function clienteGmail(accessToken: string): gmail_v1.Gmail {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
   );
   oauth2Client.setCredentials({ access_token: accessToken });
-  return google.gmail({ version: "v1", auth: oauth2Client });
+  return google.gmail({
+    version: "v1",
+    auth: oauth2Client,
+    // gaxios reintenta con backoff exponencial ante 429 (cuota) y 5xx.
+    retryConfig: {
+      retry: 4,
+      retryDelay: 1000,
+      httpMethodsToRetry: ["GET"],
+      statusCodesToRetry: [
+        [429, 429],
+        [500, 599],
+      ],
+    },
+  });
+}
+
+/** `Promise.all` pero con un tope de tareas simultáneas. */
+async function mapearConLimite<T, R>(
+  items: T[],
+  limite: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const resultados = new Array<R>(items.length);
+  let siguiente = 0;
+
+  async function worker() {
+    while (siguiente < items.length) {
+      const i = siguiente++;
+      resultados[i] = await fn(items[i]);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(limite, items.length) }, worker),
+  );
+  return resultados;
 }
 
 /** Arma la query de búsqueda de Gmail a partir de los filtros de la UI. */
@@ -122,8 +161,10 @@ export async function fetchCorreosDeClassroom(
   const referencias = listado.data.messages ?? [];
 
   // `metadata` trae encabezados, etiquetas y snippet sin bajar el cuerpo entero.
-  const correos = await Promise.all(
-    referencias.map(async (referencia) => {
+  const correos = await mapearConLimite(
+    referencias,
+    CONCURRENCIA_DETALLE,
+    async (referencia) => {
       const detalle = await gmail.users.messages.get({
         userId: "me",
         id: referencia.id!,
@@ -131,7 +172,7 @@ export async function fetchCorreosDeClassroom(
         metadataHeaders: ["From", "Subject", "Date"],
       });
       return aCorreo(detalle.data, cursos);
-    }),
+    },
   );
 
   return {
@@ -149,9 +190,9 @@ export async function fetchCorreosDeClassroom(
 export const getCorreosInicial = cache(
   (accessToken: string, userId: string, cursos: string[]) =>
     unstable_cache(
-      () => fetchCorreosDeClassroom(accessToken, { cursos }),
+      () => fetchCorreosDeClassroom(accessToken, { cursos, maxResults: 15 }),
       ["correos-inicial", userId],
-      { revalidate: 180, tags: ["correos", `u:${userId}`] },
+      { revalidate: 300, tags: ["correos", `u:${userId}`] },
     )(),
 );
 

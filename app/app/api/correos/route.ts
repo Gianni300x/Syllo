@@ -38,6 +38,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(pagina);
   } catch (error) {
     console.error("Error al consultar Gmail:", error);
+    const e = error as { code?: number; status?: number; message?: string };
+    if (e?.code === 429 || e?.status === 429 || /quota|rate limit/i.test(e?.message ?? "")) {
+      return NextResponse.json({ error: "cuota_gmail" }, { status: 429 });
+    }
     return NextResponse.json({ error: "error_gmail" }, { status: 502 });
   }
 }
