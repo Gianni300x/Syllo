@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Download, X } from "lucide-react";
 import { bgParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
@@ -158,6 +158,15 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="/api/tareas/ics"
+            download="syllo.ics"
+            title="Exportar vencimientos a Google/Apple Calendar"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:border-slate-600"
+          >
+            <Download size={15} />
+            Exportar
+          </a>
           <button
             onClick={irAHoy}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:border-slate-600"
