@@ -96,7 +96,7 @@ export default function Sidebar({
 
   return (
     <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-6 flex flex-col h-screen sticky top-0 dark:border-slate-700 dark:bg-slate-800">
-      <div className="flex items-center justify-between gap-3 text-indigo-600 mb-8 dark:text-indigo-400">
+      <div className="flex items-center justify-between gap-3 text-[#4F46E5] mb-8">
         <span className="font-bold text-lg">Syllo</span>
         {onActualizar && (
           <button

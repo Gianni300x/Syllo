@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { getTareas, getNombresCursos } from "../../lib/tareas-server";
 import { getCorreosInicial } from "../../lib/correos-server";
 import { getNotas } from "../../lib/notas-server";
+import { eventoComoTarea, getEventosCached } from "../../lib/eventos-service";
 import HomeView from "../../components/home-view";
 
 export default async function DashboardHomePage() {
@@ -13,14 +14,17 @@ export default async function DashboardHomePage() {
   }
 
   const userId = session.user?.email ?? "anon";
-  
+
   const cursos = await getNombresCursos(session.access_token, userId);
 
-  const [tareas, correosPagina, notas] = await Promise.all([
+  const [tareas, correosPagina, notas, eventosRaw] = await Promise.all([
     getTareas(session.access_token, userId),
     getCorreosInicial(session.access_token, userId, cursos),
     getNotas(userId),
+    getEventosCached(userId),
   ]);
 
-  return <HomeView tareas={tareas} correos={correosPagina.correos} notas={notas} usuario={session.user} />;
+  const eventos = eventosRaw.map(eventoComoTarea);
+
+  return <HomeView tareas={tareas} eventos={eventos} correos={correosPagina.correos} notas={notas} usuario={session.user} />;
 }

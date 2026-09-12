@@ -63,9 +63,9 @@ export function CursoItem({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (!editando && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            if (!editando) toggleCurso(nombre);
+            toggleCurso(nombre);
           }
         }}
         onClick={() => {

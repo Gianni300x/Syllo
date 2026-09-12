@@ -12,16 +12,18 @@ import {
 } from "lucide-react";
 import { Tarea } from "../lib/classroom";
 import { Correo } from "../lib/correos";
-import { Nota } from "../lib/notas";
+import { Nota, fechaRelativa } from "../lib/notas";
 import { MiniCalendar } from "./mini-calendar";
 
 export default function HomeView({
   tareas,
+  eventos,
   correos,
   notas,
   usuario
 }: {
   tareas: Tarea[];
+  eventos: Tarea[];
   correos: Correo[];
   notas: Nota[];
   usuario: { name?: string | null; email?: string | null; image?: string | null } | undefined;
@@ -89,7 +91,7 @@ export default function HomeView({
 
         {/* Mini Calendar Preview */}
         <motion.div variants={item}>
-          <MiniCalendar tareas={tareas} />
+          <MiniCalendar tareas={[...tareas, ...eventos]} />
         </motion.div>
 
         {/* Stats Grid */}
@@ -196,7 +198,7 @@ export default function HomeView({
                 ultimasNotas.map((nota, i) => (
                   <Link href={`/dashboard/notas?id=${nota.id}`} key={i} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
                     <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{nota.titulo || "(Sin título)"}</p>
-                    <p className="text-xs text-slate-500 truncate">{new Date(nota.updatedAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-slate-500 truncate">{fechaRelativa(nota.updatedAt)}</p>
                   </Link>
                 ))
               )}

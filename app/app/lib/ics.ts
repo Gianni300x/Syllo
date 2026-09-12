@@ -84,7 +84,7 @@ export function generarIcs(tareas: Tarea[]): string {
     if (tarea.descripcion) {
       lineas.push(`DESCRIPTION:${escaparTexto(tarea.descripcion)}`);
     }
-    if (tarea.link) {
+    if (tarea.link && tarea.link !== "#") {
       lineas.push(`URL:${escaparTexto(tarea.link)}`);
     }
 

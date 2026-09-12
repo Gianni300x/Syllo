@@ -6,6 +6,8 @@ export interface Tarea {
   vencimiento: { year: number; month: number; day: number } | null;
   estado: string;
   link: string;
+  /** Presente solo si es un evento personal (tabla `eventos`), no una tarea de Classroom. */
+  eventoId?: string;
 }
 
 const ESTADOS_COMPLETADOS = ["TURNED_IN", "RETURNED"];

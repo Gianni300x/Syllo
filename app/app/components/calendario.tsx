@@ -8,9 +8,15 @@ import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-// Alto aproximado de una pill (incluye el gap vertical). Se usa para decidir
-// cuántas entran en una celda antes de resumir el resto en "+N más".
-const ALTO_PILL = 22;
+// Medidas reales del layout de una celda del mes (ver PillTarea y la celda en
+// el grid), usadas para decidir cuántas pills entran antes de resumir el
+// resto en "+N más". Un cálculo mal ajustado corta la última pill visible
+// con el overflow-hidden de la celda en vez de resumirla.
+const CELL_PADDING = 12; // p-1.5: 6px arriba + 6px abajo
+const BADGE_ALTO = 26; // h-6.5 del número del día
+const GAP = 4; // gap-1: badge→primera pill, y entre pills
+const PILL_ALTO = 18; // alto de una pill (medido: 17.75px)
+const ROW_GAP = 6; // gap-1.5 de la grilla, también entre filas
 
 /** Clave local `YYYY-MM-DD` de una fecha (sin corrimiento por zona horaria). */
 function claveDia(fecha: Date): string {
@@ -40,6 +46,7 @@ function etiquetaDiaLargo(fecha: Date): string {
 }
 
 import AgregarEventoModal from "./agregar-evento-modal";
+import DetalleEventoModal from "./detalle-evento-modal";
 
 export default function Calendario({ tareas }: { tareas: Tarea[] }) {
   const { cursosSeleccionados, cursosArchivados } = useFiltroCursos();
@@ -110,7 +117,9 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
 
   // Día abierto en el panel de detalle (para celdas con más tareas de las que entran).
   const [diaAbierto, setDiaAbierto] = useState<string | null>(null);
-  useEffect(() => setDiaAbierto(null), [mesVisible]);
+
+  // Evento personal abierto en el modal de ver/editar/eliminar.
+  const [eventoAbierto, setEventoAbierto] = useState<Tarea | null>(null);
 
   // Cuántas pills entran por celda según el alto real de la grilla.
   const grillaRef = useRef<HTMLDivElement>(null);
@@ -119,10 +128,11 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
     const el = grillaRef.current;
     if (!el) return;
     const medir = () => {
-      const altoCelda = el.clientHeight / filas;
-      // ~26px se van en el número del día y el padding de la celda.
-      const disponible = altoCelda - 26;
-      setPillsPorCelda(Math.max(1, Math.floor(disponible / ALTO_PILL)));
+      const altoCelda = (el.clientHeight - (filas - 1) * ROW_GAP) / filas;
+      const disponible = altoCelda - CELL_PADDING - BADGE_ALTO - GAP;
+      // N pills ocupan N*PILL_ALTO + (N-1)*GAP de alto.
+      const maxPills = Math.floor((disponible + GAP) / (PILL_ALTO + GAP));
+      setPillsPorCelda(Math.max(1, maxPills));
     };
     medir();
     const obs = new ResizeObserver(medir);
@@ -132,10 +142,12 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
 
   function irAMes(delta: number) {
     setMesVisible((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
+    setDiaAbierto(null);
   }
 
   function irAHoy() {
     setMesVisible(inicioDeMes(new Date()));
+    setDiaAbierto(null);
   }
 
   // Días del mes con tareas, para la vista agenda (mobile).
@@ -252,6 +264,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
                         key={`${clave}-${i}`}
                         tarea={tarea}
                         nombresCursos={nombresCursos}
+                        onAbrirEvento={setEventoAbierto}
                       />
                     ))}
 
@@ -291,6 +304,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
                         key={`${clave}-${i}`}
                         tarea={tarea}
                         nombresCursos={nombresCursos}
+                        onAbrirEvento={setEventoAbierto}
                       />
                     ))}
                   </div>
@@ -306,8 +320,11 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
           tareas={tareasPorDia.get(diaAbierto!) ?? []}
           nombresCursos={nombresCursos}
           onCerrar={() => setDiaAbierto(null)}
+          onAbrirEvento={setEventoAbierto}
         />
       )}
+
+      <DetalleEventoModal evento={eventoAbierto} onCerrar={() => setEventoAbierto(null)} />
     </main>
   );
 }
@@ -318,11 +335,13 @@ function DetalleDia({
   tareas,
   nombresCursos,
   onCerrar,
+  onAbrirEvento,
 }: {
   fecha: Date;
   tareas: Tarea[];
   nombresCursos: string[];
   onCerrar: () => void;
+  onAbrirEvento: (tarea: Tarea) => void;
 }) {
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
@@ -353,7 +372,12 @@ function DetalleDia({
         </div>
         <div className="flex flex-col gap-1">
           {tareas.map((tarea, i) => (
-            <PillTarea key={i} tarea={tarea} nombresCursos={nombresCursos} />
+            <PillTarea
+              key={i}
+              tarea={tarea}
+              nombresCursos={nombresCursos}
+              onAbrirEvento={onAbrirEvento}
+            />
           ))}
         </div>
       </div>
@@ -364,29 +388,50 @@ function DetalleDia({
 function PillTarea({
   tarea,
   nombresCursos,
+  onAbrirEvento,
 }: {
   tarea: Tarea;
   nombresCursos: string[];
+  onAbrirEvento?: (tarea: Tarea) => void;
 }) {
   const completada = estaCompletada(tarea);
+  const className = `flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11px] leading-tight transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 ${
+    completada
+      ? "text-slate-400 line-through dark:text-slate-500"
+      : "text-slate-700 dark:text-slate-200"
+  }`;
+  const punto = (
+    <span
+      className={`shrink-0 h-2 w-2 rounded-full ${bgParaCurso(
+        tarea.curso,
+        nombresCursos,
+      )} ${completada ? "opacity-50" : ""}`}
+    />
+  );
+
+  if (tarea.eventoId) {
+    return (
+      <button
+        type="button"
+        onClick={() => onAbrirEvento?.(tarea)}
+        title={`${tarea.curso} · ${tarea.titulo}`}
+        className={`${className} text-left cursor-pointer`}
+      >
+        {punto}
+        <span className="truncate">{tarea.titulo}</span>
+      </button>
+    );
+  }
+
   return (
     <a
       href={tarea.link}
       target="_blank"
       rel="noreferrer"
       title={`${tarea.curso} · ${tarea.titulo}`}
-      className={`flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11px] leading-tight transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 ${
-        completada
-          ? "text-slate-400 line-through dark:text-slate-500"
-          : "text-slate-700 dark:text-slate-200"
-      }`}
+      className={className}
     >
-      <span
-        className={`shrink-0 h-2 w-2 rounded-full ${bgParaCurso(
-          tarea.curso,
-          nombresCursos,
-        )} ${completada ? "opacity-50" : ""}`}
-      />
+      {punto}
       <span className="truncate">{tarea.titulo}</span>
     </a>
   );
