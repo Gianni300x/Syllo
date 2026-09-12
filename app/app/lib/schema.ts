@@ -56,3 +56,43 @@ export const cursosArchivados = pgTable(
     ),
   ],
 );
+
+/**
+ * Nombres personalizados para los cursos.
+ * Mapea el nombre original del curso a un nombre más corto o descriptivo
+ * elegido por el usuario.
+ */
+export const cursosRenombrados = pgTable(
+  "cursos_renombrados",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerEmail: text("owner_email").notNull(),
+    cursoOriginal: text("curso_original").notNull(),
+    cursoRenombrado: text("curso_renombrado").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (tabla) => [
+    uniqueIndex("cursos_renombrados_owner_original_idx").on(
+      tabla.ownerEmail,
+      tabla.cursoOriginal,
+    ),
+  ],
+);
+
+export const eventos = pgTable(
+  "eventos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerEmail: text("owner_email").notNull(),
+    titulo: text("titulo").notNull(),
+    curso: text("curso").notNull().default("Personal"),
+    descripcion: text("descripcion").notNull().default(""),
+    vencimientoDia: timestamp("vencimiento_dia", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (tabla) => [index("eventos_owner_email_idx").on(tabla.ownerEmail)],
+);

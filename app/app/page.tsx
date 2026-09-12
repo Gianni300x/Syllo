@@ -1,5 +1,14 @@
 import { signIn } from "@/auth";
 import ThemeToggle from "./(panel)/theme-toggle";
+import {
+  MotionProvider,
+  HeroFadeIn,
+  HeroFadeInLi,
+  HeroFadeInSection,
+  ScrollFadeIn,
+  ScrollFadeInLi,
+  ScrollFadeInFooter,
+} from "./landing-animations";
 
 export default function Home() {
   return (
@@ -7,54 +16,59 @@ export default function Home() {
       <style>{CSS}</style>
       <ThemeToggle />
 
-      <div className="page">
+      <MotionProvider>
+        <div className="page">
         {/* ============ Hero ============ */}
         <div className="wrap">
           <section className="copy">
-            <div className="brand">
+            <HeroFadeIn delay={0.05} y={12} className="brand">
               <span className="mark">S</span>
               Syllo
-            </div>
+            </HeroFadeIn>
 
-            <h1>Todo lo que necesitás para cursar, en un solo lugar.</h1>
+            <HeroFadeIn delay={0.15} y={16}>
+              <h1>Todo lo que necesitás para cursar, en un solo lugar.</h1>
+            </HeroFadeIn>
 
-            <p className="sub">
-              Los correos de Google Classroom y del CVG, y las tareas de
-              todos tus cursos ordenadas por entrega, en un mismo lugar.
-            </p>
+            <HeroFadeIn delay={0.25} y={16}>
+              <p className="sub">
+                Los correos de Google Classroom y del CVG, y las tareas de
+                todos tus cursos ordenadas por entrega, en un mismo lugar.
+              </p>
+            </HeroFadeIn>
 
             <ul className="scope">
-              <li>
+              <HeroFadeInLi delay={0.35} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                   <path d="m3 7 9 6 9-6" />
                 </svg>
                 Correos de Classroom y del CVG
-              </li>
-              <li>
+              </HeroFadeInLi>
+              <HeroFadeInLi delay={0.42} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M9 6h11M9 12h11M9 18h11" />
                   <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeLinecap="round" />
                 </svg>
                 Tareas y vencimientos ordenados
-              </li>
-              <li>
+              </HeroFadeInLi>
+              <HeroFadeInLi delay={0.49} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M4 4h16v12l-4 4H4z" />
                   <path d="M16 20v-4h4" />
                 </svg>
                 Notas
-              </li>
-              <li>
+              </HeroFadeInLi>
+              <HeroFadeInLi delay={0.56} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <rect x="3" y="5" width="18" height="16" rx="2" />
                   <path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
                 </svg>
                 Calendario
-              </li>
+              </HeroFadeInLi>
             </ul>
 
-            <div className="actions">
+            <HeroFadeIn delay={0.65} y={16} className="actions">
               <form
                 action={async () => {
                   "use server";
@@ -79,10 +93,16 @@ export default function Home() {
                 Syllo solo lee tus cursos, tareas y correos. Nunca modifica ni
                 envía nada por vos.
               </p>
-            </div>
+            </HeroFadeIn>
           </section>
 
-          <section className="app" aria-label="Vista previa de Syllo">
+          <HeroFadeInSection
+            className="app"
+            aria-label="Vista previa de Syllo"
+            delay={0.25}
+            y={24}
+            duration={0.65}
+          >
             <div className="app__bar">
               <span className="mark">S</span>
               <b>Syllo</b>
@@ -159,46 +179,50 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </section>
+          </HeroFadeInSection>
         </div>
 
         {/* ============ Cómo funciona ============ */}
         <section className="section">
-          <h2>Cómo funciona</h2>
-          <p className="lead">
-            Syllo no reemplaza Classroom ni tu correo: los lee y te los ordena.
-          </p>
+          <ScrollFadeIn y={16}>
+            <h2>Cómo funciona</h2>
+            <p className="lead">
+              Syllo no reemplaza Classroom ni tu correo: los lee y te los ordena.
+            </p>
+          </ScrollFadeIn>
           <ul className="steps">
-            <li>
+            <ScrollFadeInLi delay={0.05} y={20}>
               <h3>Una sola cuenta</h3>
               <p>
                 Entrás con la de Google que ya usás en Classroom. No hay
                 registro, contraseña ni nada que configurar.
               </p>
-            </li>
-            <li>
+            </ScrollFadeInLi>
+            <ScrollFadeInLi delay={0.15} y={20}>
               <h3>Se actualiza solo</h3>
               <p>
                 Cada vez que abrís Syllo trae lo nuevo de Classroom y del
                 correo de la UTN FRRo. Si querés, lo refrescás a mano.
               </p>
-            </li>
-            <li>
+            </ScrollFadeInLi>
+            <ScrollFadeInLi delay={0.25} y={20}>
               <h3>Vos decidís qué ver</h3>
               <p>
                 Filtrás por materia, archivás los cursos que terminaste y lo
                 que no te sirve desaparece de la vista.
               </p>
-            </li>
+            </ScrollFadeInLi>
           </ul>
         </section>
 
         {/* ============ Lo que ves adentro ============ */}
         <section className="section">
-          <h2>Lo que ves adentro</h2>
-          <p className="lead">Cuatro secciones, ordenadas como cursás.</p>
+          <ScrollFadeIn y={16}>
+            <h2>Lo que ves adentro</h2>
+            <p className="lead">Cuatro secciones, ordenadas como cursás.</p>
+          </ScrollFadeIn>
           <ul className="features">
-            <li>
+            <ScrollFadeInLi delay={0.05} y={20}>
               <div>
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
@@ -214,9 +238,9 @@ export default function Home() {
                 <div className="row"><span className="from">Classroom</span><span className="t">Nuevo material — Práctica 4</span><span className="pill">Álgebra II</span></div>
                 <div className="row"><span className="from">Classroom</span><span className="t">Cambio de aula para el parcial</span><span className="pill">Física</span></div>
               </div>
-            </li>
+            </ScrollFadeInLi>
 
-            <li>
+            <ScrollFadeInLi delay={0.05} y={20}>
               <div>
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeLinecap="round" /></svg>
@@ -234,9 +258,9 @@ export default function Home() {
                 <div className="row"><span className="check"></span><span className="t">Entrega 2 — Álgebra II</span><span className="r">en 2 días</span></div>
                 <div className="row"><span className="check done"></span><span className="t muted">Práctica 3 — Redes</span><span className="r ok">entregada</span></div>
               </div>
-            </li>
+            </ScrollFadeInLi>
 
-            <li>
+            <ScrollFadeInLi delay={0.05} y={20}>
               <div>
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4h16v12l-4 4H4z" /><path d="M16 20v-4h4" /></svg>
@@ -256,9 +280,9 @@ export default function Home() {
                 </p>
                 <div className="stamp">Editada hace 2 horas</div>
               </div>
-            </li>
+            </ScrollFadeInLi>
 
-            <li>
+            <ScrollFadeInLi delay={0.05} y={20}>
               <div>
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" /></svg>
@@ -282,36 +306,41 @@ export default function Home() {
                 </div>
                 <div className="foot"><span>↓ Exportar .ics</span></div>
               </div>
-            </li>
+            </ScrollFadeInLi>
           </ul>
         </section>
 
         {/* ============ Hecho por estudiantes ============ */}
         <section className="section about">
-          <h2>Hecho por estudiantes</h2>
-          <div>
-            <p>
-              Syllo lo hacemos dos estudiantes de la UTN Regional Rosario que
-              nos cansamos de tener Classroom, el
-              campus y un calendario abiertos al mismo tiempo para no
-              perdernos una entrega.
-            </p>
-            <p>
-              Lo usamos todos los días para nuestra propia cursada, y lo
-              compartimos con compañeros. Si algo no anda o te falta,
-              avisanos: la lista de cosas por hacer la escribimos entre todos.
-            </p>
-          </div>
+          <ScrollFadeIn y={16}>
+            <h2>Hecho por estudiantes</h2>
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={0.1} y={16}>
+            <div>
+              <p>
+                Syllo lo hacemos dos estudiantes de la UTN Regional Rosario que
+                nos cansamos de tener Classroom, el
+                campus y un calendario abiertos al mismo tiempo para no
+                perdernos una entrega.
+              </p>
+              <p>
+                Lo usamos todos los días para nuestra propia cursada, y lo
+                compartimos con compañeros. Si algo no anda o te falta,
+                avisanos: la lista de cosas por hacer la escribimos entre todos.
+              </p>
+            </div>
+          </ScrollFadeIn>
         </section>
 
-        <footer>
+        <ScrollFadeInFooter>
           <div className="brand">
             <span className="mark">S</span>
             Syllo
           </div>
           <span>Hecho por estudiantes, para estudiantes.</span>
-        </footer>
+        </ScrollFadeInFooter>
       </div>
+    </MotionProvider>
     </main>
   );
 }
@@ -387,15 +416,6 @@ const CSS = `
     gap: clamp(2rem, 5vw, 4.5rem);
     align-items: center;
     padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(3rem, 7vw, 5.5rem);
-    animation: syllo-enter 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  @keyframes syllo-enter {
-    from { opacity: 0; transform: translateY(10px); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .syllo-landing .wrap { animation: none; }
   }
 
   .syllo-landing .brand {

@@ -21,6 +21,9 @@ export interface FiltroCursosValue {
   archivarCursos: (cursos: string[]) => void;
   restaurarCursos: (cursos: string[]) => void;
   archivando: boolean;
+  renombres: Record<string, string>;
+  renombrarCurso: (original: string, nuevo: string) => void;
+  renombrando: boolean;
 }
 
 export const FiltroCursosContext = createContext<FiltroCursosValue | null>(null);

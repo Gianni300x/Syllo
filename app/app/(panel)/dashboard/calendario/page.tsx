@@ -1,7 +1,17 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
 import { getTareas } from "../../../lib/tareas-server";
+import { getEventos } from "../../../lib/eventos-service";
 import Calendario from "../../../components/calendario";
+import type { Tarea } from "../../../lib/classroom";
+
+const getEventosCached = (userId: string) => 
+  unstable_cache(
+    async () => getEventos(userId),
+    ["eventos", userId],
+    { revalidate: 3600, tags: [`eventos:${userId}`] }
+  )();
 
 export default async function CalendarioPage() {
   const session = await auth();
@@ -11,7 +21,26 @@ export default async function CalendarioPage() {
   }
 
   const userId = session.user?.email ?? "anon";
-  const tareas = await getTareas(session.access_token, userId);
+  const [tareas, eventosRaw] = await Promise.all([
+    getTareas(session.access_token, userId),
+    getEventosCached(userId)
+  ]);
 
-  return <Calendario tareas={tareas} />;
+  const eventosComoTareas: Tarea[] = eventosRaw.map(e => ({
+    curso: e.curso,
+    titulo: e.titulo,
+    descripcion: e.descripcion,
+    puntos: null,
+    vencimiento: {
+      year: e.vencimientoDia.getFullYear(),
+      month: e.vencimientoDia.getMonth() + 1,
+      day: e.vencimientoDia.getDate()
+    },
+    estado: "CREATED",
+    link: "#"
+  }));
+
+  const tareasYEventos = [...tareas, ...eventosComoTareas];
+
+  return <Calendario tareas={tareasYEventos} />;
 }

@@ -37,9 +37,9 @@ type VistaLayout = "grid" | "lista";
 
 const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
   { valor: "pendientes", etiqueta: "Pendientes" },
+  { valor: "semana", etiqueta: "Esta semana" },
   { valor: "urgentes", etiqueta: "Urgentes" },
   { valor: "vencidas", etiqueta: "Vencidas" },
-  { valor: "semana", etiqueta: "Esta semana" },
   { valor: "completadas", etiqueta: "Completadas" },
   // Solo se muestra cuando hay al menos un curso archivado.
   { valor: "archivados", etiqueta: "Archivados" },
@@ -71,6 +71,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     cursosArchivados,
     restaurarCursos,
     archivando,
+    renombres,
   } = useFiltroCursos();
   const [tabElegido, setTab] = useState<Tab>("pendientes");
   const [busqueda, setBusqueda] = useState("");
@@ -169,9 +170,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
       (t) =>
         normalizar(t.titulo).includes(q) ||
         normalizar(t.descripcion ?? "").includes(q) ||
-        normalizar(t.curso).includes(q),
+        normalizar(renombres[t.curso] || t.curso).includes(q),
     );
-  }, [tareasDelTab, busqueda]);
+  }, [tareasDelTab, busqueda, renombres]);
 
   const ordenadas = [...tareasFiltradas].sort((a, b) => {
     const diasA = diasHastaVencimiento(a.vencimiento) ?? Infinity;
@@ -194,7 +195,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             {cursosSeleccionados.length === 0
               ? "Todas las tareas"
               : cursosSeleccionados.length === 1
-                ? cursosSeleccionados[0]
+                ? renombres[cursosSeleccionados[0]] || cursosSeleccionados[0]
                 : `${cursosSeleccionados.length} cursos seleccionados`}
           </h1>
           <p className="text-sm text-slate-500 capitalize dark:text-slate-400">
@@ -343,7 +344,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                   disabled={archivando}
                   className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
-                  Restaurar todos
+                  Desarchivar todos
                 </button>
               )}
             </div>
@@ -373,7 +374,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                       className="inline-flex items-center gap-1.5 shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:border-slate-600 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
                     >
                       <ArchiveRestore size={13} />
-                      Restaurar
+                      Desarchivar
                     </button>
                   </div>
                 );
@@ -423,8 +424,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                       tarea.curso,
                       nombresCursos,
                     )}`}
+                    title={renombres[tarea.curso] || tarea.curso}
                   >
-                    {tarea.curso}
+                    {renombres[tarea.curso] || tarea.curso}
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${colorEtiquetaVencimiento(
@@ -489,8 +491,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     tarea.curso,
                     nombresCursos,
                   )}`}
+                  title={renombres[tarea.curso] || tarea.curso}
                 >
-                  {tarea.curso}
+                  {renombres[tarea.curso] || tarea.curso}
                 </span>
 
                 {/* Badge estado */}

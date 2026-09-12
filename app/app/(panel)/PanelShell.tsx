@@ -9,26 +9,36 @@ import {
   archivarCursos as archivarCursosAction,
   restaurarCursos as restaurarCursosAction,
 } from "./archivados-actions";
+import { renombrarCursoAction } from "./renombrados-actions";
 import ThemeToggle from "./theme-toggle";
 
 export default function PanelShell({
   cursos,
   cursosArchivados,
+  renombres,
   usuario,
   onCerrarSesion,
   children,
 }: {
   cursos: string[];
   cursosArchivados: string[];
+  renombres: Record<string, string>;
   usuario?: UsuarioSidebar;
   onCerrarSesion?: () => void;
   children: React.ReactNode;
 }) {
   const [cursosSeleccionados, setCursosSeleccionados] = useState<string[]>([]);
   const [conteoPorCurso, setConteoPorCurso] = useState<Record<string, number>>({});
+  const [renombresOptimistas, setRenombresOptimistas] = useState<Record<string, string>>({});
   const [actualizando, startActualizar] = useTransition();
   const [archivando, startArchivar] = useTransition();
+  const [renombrando, startRenombrar] = useTransition();
   const router = useRouter();
+
+  const renombresEfectivos = useMemo(() => ({
+    ...renombres,
+    ...renombresOptimistas,
+  }), [renombres, renombresOptimistas]);
 
   const toggleCurso = useCallback((curso: string) => {
     setCursosSeleccionados((prev) =>
@@ -41,7 +51,6 @@ export default function PanelShell({
   const archivarCursos = useCallback(
     (lista: string[]) => {
       if (lista.length === 0) return;
-      // Un curso archivado ya no está en el sidebar: sacarlo del filtro.
       setCursosSeleccionados((prev) => prev.filter((c) => !lista.includes(c)));
       startArchivar(async () => {
         const resultado = await archivarCursosAction(lista);
@@ -64,6 +73,18 @@ export default function PanelShell({
     [router],
   );
 
+  const renombrarCurso = useCallback(
+    (original: string, nuevo: string) => {
+      setRenombresOptimistas((prev) => ({ ...prev, [original]: nuevo }));
+      startRenombrar(async () => {
+        const result = await renombrarCursoAction(original, nuevo);
+        if (result.error) console.error("Error renombrando:", result.error);
+        router.refresh();
+      });
+    },
+    [router],
+  );
+
   const value = useMemo<FiltroCursosValue>(
     () => ({
       cursosSeleccionados,
@@ -75,6 +96,9 @@ export default function PanelShell({
       archivarCursos,
       restaurarCursos,
       archivando,
+      renombres: renombresEfectivos,
+      renombrarCurso,
+      renombrando,
     }),
     [
       cursosSeleccionados,
@@ -85,6 +109,9 @@ export default function PanelShell({
       archivarCursos,
       restaurarCursos,
       archivando,
+      renombresEfectivos,
+      renombrarCurso,
+      renombrando,
     ],
   );
 

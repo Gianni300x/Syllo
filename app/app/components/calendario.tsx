@@ -39,6 +39,8 @@ function etiquetaDiaLargo(fecha: Date): string {
   );
 }
 
+import AgregarEventoModal from "./agregar-evento-modal";
+
 export default function Calendario({ tareas }: { tareas: Tarea[] }) {
   const { cursosSeleccionados, cursosArchivados } = useFiltroCursos();
   const [mesVisible, setMesVisible] = useState<Date>(() => inicioDeMes(new Date()));
@@ -158,6 +160,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <AgregarEventoModal />
           <a
             href="/api/tareas/ics"
             download="syllo.ics"
@@ -192,16 +195,8 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
         </div>
       </div>
 
-      {totalEnMes === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <CalendarDays size={32} className="text-slate-300 dark:text-slate-600" />
-          <p className="text-slate-500 text-sm dark:text-slate-400">
-            No hay entregas con fecha en {etiquetaMes.toLowerCase()}.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Grilla mensual — escritorio: ocupa el alto disponible sin scroll de página */}
+      <>
+        {/* Grilla mensual — escritorio: ocupa el alto disponible sin scroll de página */}
           <div className="hidden md:flex md:flex-1 md:min-h-0 md:flex-col">
             <div className="grid grid-cols-7 gap-1.5 mb-1.5 shrink-0">
               {DIAS_SEMANA.map((dia) => (
@@ -241,7 +236,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
                     }`}
                   >
                     <span
-                      className={`self-start text-xs font-medium h-5 min-w-5 px-1 inline-flex items-center justify-center rounded-full shrink-0 ${
+                      className={`self-start text-xs font-medium h-6.5 min-w-5 px-2 inline-flex items-center justify-center rounded-full shrink-0 ${
                         esHoy
                           ? "bg-indigo-600 text-white"
                           : delMes
@@ -304,7 +299,6 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
             })}
           </div>
         </>
-      )}
 
       {fechaAbierta && (
         <DetalleDia
