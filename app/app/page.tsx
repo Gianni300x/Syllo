@@ -127,7 +127,7 @@ export default function Home() {
                 </span>
                 <span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 3 2 8l10 5 10-5-10-5Z" /><path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5" /></svg>
-                  Universidad
+                  CVG
                 </span>
                 <span className="nav__group">Cursada</span>
                 <span className="is-active">
@@ -163,7 +163,7 @@ export default function Home() {
                 <div className="task">
                   <span className="check"></span>
                   <span className="title">Lectura Unidad 3 — Redes</span>
-                  <span className="src">Universidad</span>
+                  <span className="src">CVG</span>
                   <span className="due">vie</span>
                 </div>
                 <div className="task">
@@ -176,7 +176,7 @@ export default function Home() {
                 <div className="divider"></div>
 
                 <div className="mail">
-                  <span className="from">Universidad</span>
+                  <span className="from">CVG</span>
                   Mesa de finales: inscripción abierta hasta el 20/9
                 </div>
                 <div className="mail">
@@ -240,7 +240,7 @@ export default function Home() {
                 </p>  
               </div>
               <div className="mini" aria-hidden="true">
-                <div className="row"><span className="from">Universidad</span><span className="t">Mesa de finales: inscripción abierta</span><span className="r">hoy</span></div>
+                <div className="row"><span className="from">CVG</span><span className="t">Mesa de finales: inscripción abierta</span><span className="r">hoy</span></div>
                 <div className="row"><span className="from">Classroom</span><span className="t">Nuevo material — Práctica 4</span><span className="pill">Álgebra II</span></div>
                 <div className="row"><span className="from">Classroom</span><span className="t">Cambio de aula para el parcial</span><span className="pill">Física</span></div>
               </div>
