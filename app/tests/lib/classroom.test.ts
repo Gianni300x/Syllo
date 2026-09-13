@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import {
   claveTarea,
+  cuentaRegresivaEvento,
   diasHastaVencimiento,
   estaCompletada,
   etiquetaVencimiento,
@@ -139,3 +140,63 @@ describe("claveTarea", () => {
     expect(claveTarea({ ...base, courseWorkId: "w1" })).toBeNull();
   });
 });
+
+describe("cuentaRegresivaEvento", () => {
+  // HOY = 12 de septiembre de 2026
+  test("si está completada, devuelve Completado", () => {
+    const res = cuentaRegresivaEvento({ year: 2026, month: 9, day: 15 }, true);
+    expect(res).toEqual({
+      texto: "Completado",
+      dias: 0,
+      tipo: "completado",
+    });
+  });
+
+  test("evento de hoy", () => {
+    const res = cuentaRegresivaEvento({ year: 2026, month: 9, day: 12 });
+    expect(res).toEqual({
+      texto: "Hoy (0 días)",
+      dias: 0,
+      tipo: "hoy",
+    });
+  });
+
+  test("evento de mañana", () => {
+    const res = cuentaRegresivaEvento({ year: 2026, month: 9, day: 13 });
+    expect(res).toEqual({
+      texto: "Falta 1 día",
+      dias: 1,
+      tipo: "manana",
+    });
+  });
+
+  test("evento en varios días", () => {
+    const res = cuentaRegresivaEvento({ year: 2026, month: 9, day: 17 });
+    expect(res).toEqual({
+      texto: "Faltan 5 días",
+      dias: 5,
+      tipo: "proximo",
+    });
+  });
+
+  test("evento pasado (ayer y hace varios días)", () => {
+    const ayer = cuentaRegresivaEvento({ year: 2026, month: 9, day: 11 });
+    expect(ayer).toEqual({
+      texto: "Pasó ayer",
+      dias: -1,
+      tipo: "pasado",
+    });
+
+    const pasado = cuentaRegresivaEvento({ year: 2026, month: 9, day: 8 });
+    expect(pasado).toEqual({
+      texto: "Pasó hace 4 días",
+      dias: -4,
+      tipo: "pasado",
+    });
+  });
+
+  test("sin vencimiento devuelve null", () => {
+    expect(cuentaRegresivaEvento(null)).toBeNull();
+  });
+});
+

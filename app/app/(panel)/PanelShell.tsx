@@ -227,7 +227,7 @@ export default function PanelShell({
           abierto={menuAbierto}
           onCerrarMenu={cerrarMenu}
         />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
           {/* Barra superior de mobile: es el único acceso al menú cuando el
               sidebar está fuera de pantalla. */}
           <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-slate-700 dark:bg-slate-800">

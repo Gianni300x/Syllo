@@ -2,7 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "../lib/classroom";
+import { CheckCircle2, Clock } from "lucide-react";
+import {
+  Tarea,
+  estaCompletada,
+  fechaVencimiento,
+  claveTarea,
+  cuentaRegresivaEvento,
+  diasHastaVencimiento,
+} from "../lib/classroom";
 import NuevoEventoModal from "./nuevo-evento-modal";
 
 export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
@@ -18,7 +26,7 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
     const ultimoDia = new Date(year, month + 1, 0);
     
     // Rellenar días anteriores para que el calendario empiece en lunes (1) o domingo (0)
-    // En Argentina es común empezar en Domingo o Lunes. Vamos a usar Lunes.
+    
     const primerDiaSemana = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
     
     const dias = [];
@@ -60,6 +68,19 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
     });
   }, [tareas, hoy]);
 
+  const proximoEvento = useMemo(() => {
+    return tareasDelMesLista.find((t) => {
+      if (estaCompletada(t)) return false;
+      const d = diasHastaVencimiento(t.vencimiento);
+      return d !== null && d >= 0;
+    });
+  }, [tareasDelMesLista]);
+
+  const cuentaProximo = useMemo(() => {
+    if (!proximoEvento) return null;
+    return cuentaRegresivaEvento(proximoEvento.vencimiento, false);
+  }, [proximoEvento]);
+
   const nombreMes = useMemo(() => {
     const mes = hoy.toLocaleDateString("es-AR", { month: "long" });
     return mes.charAt(0).toUpperCase() + mes.slice(1);
@@ -70,11 +91,19 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
       
       {/* Lado Izquierdo: Resumen de Eventos/Tareas */}
       <div className="flex-1 flex flex-col w-full h-full md:pr-8 md:border-r border-slate-100 dark:border-slate-700/50">
-        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xl mb-1">
-          Eventos de {nombreMes}
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xl">
+            Eventos de {nombreMes}
+          </h3>      
+        </div>
         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-          Próximas entregas y actividades del mes.
+          {cuentaProximo
+            ? cuentaProximo.dias === 0
+              ? `Hoy es tu próximo evento: ${proximoEvento?.titulo || "actividad"}.`
+              : cuentaProximo.dias === 1
+                ? `Falta 1 día para tu próximo evento: ${proximoEvento?.titulo || "actividad"}.`
+                : `Faltan ${cuentaProximo.dias} días para tu próximo evento (${proximoEvento?.titulo || "actividad"}).`
+            : "Próximas entregas y actividades del mes."}
         </p>
 
         <div className="flex flex-col gap-3 flex-1 justify-center">
@@ -84,20 +113,45 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
                 const fecha = fechaVencimiento(t.vencimiento);
                 const dia = fecha ? fecha.getDate() : "?";
                 const isCompletada = estaCompletada(t);
+                const cuenta = cuentaRegresivaEvento(t.vencimiento, isCompletada);
                 
                 return (
-                  <li key={claveTarea(t) ?? t.eventoId ?? idx} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                  <li key={claveTarea(t) ?? t.eventoId ?? idx} className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shrink-0 ${isCompletada ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'}`}>
                       {dia}
                     </div>
-                    <div className="flex flex-col overflow-hidden">
+                    <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                       <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {t.titulo}
                       </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
                         {t.curso}
                       </span>
                     </div>
+                    {cuenta && (
+                      <div className="shrink-0 text-right">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${
+                            cuenta.tipo === "completado"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                              : cuenta.tipo === "hoy"
+                                ? "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 font-semibold"
+                                : cuenta.tipo === "manana"
+                                  ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 font-semibold"
+                                  : cuenta.tipo === "pasado"
+                                    ? "text-slate-400 dark:text-slate-500"
+                                    : "bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-300"
+                          }`}
+                        >
+                          {cuenta.tipo === "completado" ? (
+                            <CheckCircle2 size={11} className="shrink-0" />
+                          ) : (
+                            <Clock size={11} className="shrink-0 opacity-70" />
+                          )}
+                          <span>{cuenta.texto}</span>
+                        </span>
+                      </div>
+                    )}
                   </li>
                 );
               })}

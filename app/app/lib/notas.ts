@@ -2,7 +2,7 @@
  * Capa pura de Notas: tipos y helpers sin I/O.
  * No importa `db` ni nada de servidor: lo usan tanto el server como el cliente.
  */
-import { quitarMarcas, renderMarkdown } from "./markdown";
+import { htmlAMarkdown, quitarMarcas, renderMarkdown } from "./markdown";
 import { normalizar } from "./texto";
 
 export interface Nota {
@@ -145,3 +145,49 @@ export function contarNotasPorCurso(notas: Nota[]): Record<string, number> {
   }
   return conteo;
 }
+
+/**
+ * Convierte una nota completa a formato Markdown para descarga o compartir.
+ * Incluye el título como encabezado de nivel 1 si no está vacío ni duplicado.
+ */
+export function notaAMarkdown(
+  nota: Pick<Nota, "titulo" | "contenido">,
+): string {
+  const titulo = nota.titulo.trim();
+  const cuerpoMd = htmlAMarkdown(nota.contenido);
+
+  if (!titulo) return cuerpoMd;
+
+  if (
+    cuerpoMd.startsWith(`# ${titulo}\n`) ||
+    cuerpoMd === `# ${titulo}` ||
+    cuerpoMd.startsWith(`## ${titulo}\n`) ||
+    cuerpoMd === `## ${titulo}`
+  ) {
+    return cuerpoMd;
+  }
+
+  if (!cuerpoMd) {
+    return `# ${titulo}`;
+  }
+
+  return `# ${titulo}\n\n${cuerpoMd}`;
+}
+
+/**
+ * Sanitiza un título para usarlo como nombre de archivo .md válido.
+ */
+export function nombreArchivoMd(titulo: string): string {
+  const limpio = titulo
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9-_ ]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 60);
+
+  return limpio || "nota";
+}
+

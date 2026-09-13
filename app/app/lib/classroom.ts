@@ -77,3 +77,67 @@ export function etiquetaVencimiento(dias: number | null): string {
   if (dias === 1) return "Vence mañana";
   return `${dias} días restantes`;
 }
+
+export interface CuentaRegresiva {
+  texto: string;
+  dias: number;
+  tipo: "hoy" | "manana" | "proximo" | "pasado" | "completado";
+}
+
+/**
+ * Devuelve información de cuenta regresiva explícita y discreta para un evento/entrega.
+ * Ejemplo: "Faltan 3 días", "Falta 1 día", "Hoy (0 días)", "Pasó hace 2 días", "Completado".
+ */
+export function cuentaRegresivaEvento(
+  vencimiento: Tarea["vencimiento"],
+  completada = false,
+): CuentaRegresiva | null {
+  if (completada) {
+    return {
+      texto: "Completado",
+      dias: 0,
+      tipo: "completado",
+    };
+  }
+
+  const dias = diasHastaVencimiento(vencimiento);
+  if (dias === null) return null;
+
+  if (dias === 0) {
+    return {
+      texto: "Hoy (0 días)",
+      dias: 0,
+      tipo: "hoy",
+    };
+  }
+
+  if (dias === 1) {
+    return {
+      texto: "Falta 1 día",
+      dias: 1,
+      tipo: "manana",
+    };
+  }
+
+  if (dias > 1) {
+    return {
+      texto: `Faltan ${dias} días`,
+      dias,
+      tipo: "proximo",
+    };
+  }
+
+  if (dias === -1) {
+    return {
+      texto: "Pasó ayer",
+      dias: -1,
+      tipo: "pasado",
+    };
+  }
+
+  return {
+    texto: `Pasó hace ${Math.abs(dias)} días`,
+    dias,
+    tipo: "pasado",
+  };
+}

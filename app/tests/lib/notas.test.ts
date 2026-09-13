@@ -6,6 +6,8 @@ import {
   estaVacio,
   fechaRelativa,
   filtrarNotas,
+  nombreArchivoMd,
+  notaAMarkdown,
   resumen,
   textoPlano,
   tituloMostrado,
@@ -216,3 +218,51 @@ describe("contarNotasPorCurso", () => {
     expect(conteo).toEqual({ Análisis: 2, Física: 1 });
   });
 });
+
+describe("notaAMarkdown", () => {
+  test("combina título y contenido HTML en Markdown", () => {
+    const res = notaAMarkdown({
+      titulo: "Fórmulas de Física",
+      contenido: "<p>Velocidad: <em>v = d / t</em></p>",
+    });
+    expect(res).toBe("# Fórmulas de Física\n\nVelocidad: *v = d / t*");
+  });
+
+  test("no duplica el título si el contenido ya comienza con el encabezado", () => {
+    const res = notaAMarkdown({
+      titulo: "Resumen",
+      contenido: "<h2>Resumen</h2><p>Texto</p>",
+    });
+    expect(res).toBe("## Resumen\n\nTexto");
+  });
+
+  test("si no tiene título, devuelve solo el contenido", () => {
+    const res = notaAMarkdown({
+      titulo: "",
+      contenido: "<p>Nota sin título</p>",
+    });
+    expect(res).toBe("Nota sin título");
+  });
+
+  test("si no tiene contenido, devuelve el título", () => {
+    const res = notaAMarkdown({
+      titulo: "Solo Título",
+      contenido: "",
+    });
+    expect(res).toBe("# Solo Título");
+  });
+});
+
+describe("nombreArchivoMd", () => {
+  test("convierte espacios a guiones y remueve caracteres prohibidos", () => {
+    expect(nombreArchivoMd("Mi Nota / 2026: Álgebra")).toBe(
+      "mi-nota-2026-algebra",
+    );
+  });
+
+  test("devuelve fallback si queda vacío", () => {
+    expect(nombreArchivoMd("   ")).toBe("nota");
+    expect(nombreArchivoMd("???")).toBe("nota");
+  });
+});
+
