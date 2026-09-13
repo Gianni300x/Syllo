@@ -2,6 +2,7 @@
  * Tipos y helpers puros de la bandeja de correos de Classroom.
  * Este archivo no importa `googleapis`: lo usan tanto el servidor como el cliente.
  */
+import { MESES_CORTOS } from "./fechas";
 
 export type OrigenCorreo = "Classroom" | "CVG";
 
@@ -90,11 +91,6 @@ function normalizar(texto: string): string {
     .trim();
 }
 
-const MESES = [
-  "ene", "feb", "mar", "abr", "may", "jun",
-  "jul", "ago", "sept", "oct", "nov", "dic",
-];
-
 /** Hoy muestra la hora; el resto del año, día y mes. */
 export function formatearFechaCorreo(iso: string): string {
   const fecha = new Date(iso);
@@ -113,7 +109,7 @@ export function formatearFechaCorreo(iso: string): string {
     });
   }
 
-  const base = `${fecha.getDate()} ${MESES[fecha.getMonth()]}`;
+  const base = `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}`;
   return fecha.getFullYear() === hoy.getFullYear()
     ? base
     : `${base} ${fecha.getFullYear()}`;

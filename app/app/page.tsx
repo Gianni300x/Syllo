@@ -1,4 +1,5 @@
 import { signIn } from "@/auth";
+import Link from "next/link";
 import ThemeToggle from "./(panel)/theme-toggle";
 import {
   MotionProvider,
@@ -113,29 +114,29 @@ export default function Home() {
             </div>
 
             <div className="app__body">
-              <nav className="nav">
+              <nav className="nav" aria-hidden="true">
                 <span className="nav__group">Bandeja</span>
-                <a href="#">
+                <span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
                   Classroom
-                </a>
-                <a href="#">
+                </span>
+                <span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 3 2 8l10 5 10-5-10-5Z" /><path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5" /></svg>
                   Universidad
-                </a>
+                </span>
                 <span className="nav__group">Cursada</span>
-                <a href="#" className="is-active">
+                <span className="is-active">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeLinecap="round" /></svg>
                   Tareas
-                </a>
-                <a href="#">
+                </span>
+                <span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4h16v12l-4 4H4z" /><path d="M16 20v-4h4" /></svg>
                   Notas
-                </a>
-                <a href="#">
+                </span>
+                <span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" /></svg>
                   Calendario
-                </a>
+                </span>
               </nav>
 
               <div className="main">
@@ -338,6 +339,9 @@ export default function Home() {
             Syllo
           </div>
           <span>Hecho por estudiantes, para estudiantes.</span>
+          <Link href="/privacidad" className="footer__link">
+            Política de privacidad
+          </Link>
         </ScrollFadeInFooter>
       </div>
     </MotionProvider>
@@ -594,7 +598,7 @@ const CSS = `
     padding: 0.5rem 0.5rem 0.3rem;
   }
 
-  .syllo-landing .nav a {
+  .syllo-landing .nav span:not(.nav__group) {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -604,9 +608,9 @@ const CSS = `
     text-decoration: none;
   }
 
-  .syllo-landing .nav a svg { width: 14px; height: 14px; flex: none; }
+  .syllo-landing .nav span svg { width: 14px; height: 14px; flex: none; }
 
-  .syllo-landing .nav a.is-active {
+  .syllo-landing .nav span.is-active {
     background: var(--surface-2);
     color: var(--text);
     font-weight: 500;
@@ -887,6 +891,19 @@ const CSS = `
 
   .syllo-landing footer .brand { margin: 0; font-size: 0.9rem; color: var(--text); }
 
+  .syllo-landing footer .footer__link {
+    margin-left: auto;
+    color: var(--text-3);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .syllo-landing footer .footer__link:hover,
+  .syllo-landing footer .footer__link:focus-visible {
+    color: var(--text);
+    border-bottom-color: currentColor;
+  }
+
   @media (max-width: 900px) {
     .syllo-landing .wrap {
       grid-template-columns: 1fr;
@@ -908,7 +925,7 @@ const CSS = `
       border-bottom: 1px solid var(--border);
     }
     .syllo-landing .nav__group { display: none; }
-    .syllo-landing .nav a { padding: 0.3rem 0.45rem; }
+    .syllo-landing .nav span:not(.nav__group) { padding: 0.3rem 0.45rem; }
     .syllo-landing .task .src { display: none; }
   }
 `;

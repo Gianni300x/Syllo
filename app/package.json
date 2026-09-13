@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "drizzle-orm": "^0.45.2",
     "googleapis": "^178.0.0",
     "lucide-react": "^1.38.0",

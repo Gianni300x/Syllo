@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { motion, Variants } from "motion/react";
 import Link from "next/link";
 import { 
@@ -10,9 +11,11 @@ import {
   ArrowRight,
   Sun
 } from "lucide-react";
-import { Tarea } from "../lib/classroom";
+import { Tarea, estaCompletada } from "../lib/classroom";
 import { Correo } from "../lib/correos";
 import { Nota, fechaRelativa } from "../lib/notas";
+import { contarPendientesPorCurso } from "../lib/tareas-service";
+import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { MiniCalendar } from "./mini-calendar";
 
 export default function HomeView({
@@ -28,14 +31,47 @@ export default function HomeView({
   notas: Nota[];
   usuario: { name?: string | null; email?: string | null; image?: string | null } | undefined;
 }) {
+  const { cursosArchivados, cursosSeleccionados, setConteoPorCurso } =
+    useFiltroCursos();
   const nombreFila = usuario?.name?.split(" ")[0] || "Estudiante";
 
-  const tareasPendientes = tareas.filter(t => !["TURNED_IN", "RETURNED"].includes(t.estado));
+  /**
+   * Mismo criterio que Tareas y Calendario: primero salen los cursos
+   * archivados, después se aplica la selección del sidebar. Sin esto el
+   * resumen de Inicio seguía mostrando materias que el usuario ya archivó.
+   */
+  const visibles = useMemo(() => {
+    const filtrar = (lista: Tarea[]) => {
+      const activas = lista.filter((t) => !cursosArchivados.includes(t.curso));
+      return cursosSeleccionados.length === 0
+        ? activas
+        : activas.filter((t) => cursosSeleccionados.includes(t.curso));
+    };
+    return { tareas: filtrar(tareas), eventos: filtrar(eventos) };
+  }, [tareas, eventos, cursosArchivados, cursosSeleccionados]);
+
+  const correosVisibles = useMemo(
+    () =>
+      correos.filter((c) => !c.curso || !cursosArchivados.includes(c.curso)),
+    [correos, cursosArchivados],
+  );
+
+  // Publica el conteo de pendientes por curso al Sidebar compartido, igual que
+  // hacen Tareas y Correos en sus propias secciones.
+  const conteoPendientes = useMemo(
+    () => contarPendientesPorCurso(visibles.tareas),
+    [visibles.tareas],
+  );
+  useEffect(() => {
+    setConteoPorCurso(conteoPendientes);
+  }, [conteoPendientes, setConteoPorCurso]);
+
+  const tareasPendientes = visibles.tareas.filter((t) => !estaCompletada(t));
   const ultimasTareas = tareasPendientes.slice(0, 4);
-  
-  const correosNoLeidos = correos.filter(c => !c.leido);
+
+  const correosNoLeidos = correosVisibles.filter((c) => !c.leido);
   const ultimosCorreos = correosNoLeidos.slice(0, 4);
-  
+
   const ultimasNotas = notas.slice(0, 4);
 
   const stats = [
@@ -47,7 +83,7 @@ export default function HomeView({
       link: "/dashboard/tareas"
     },
     {
-      titulo: "Correos No Leídos",
+      titulo: "Sin leer (recientes)",
       valor: correosNoLeidos.length,
       icono: <Mail size={20} className="text-amber-600 dark:text-amber-400" />,
       bg: "bg-amber-50 dark:bg-amber-500/20",
@@ -91,7 +127,7 @@ export default function HomeView({
 
         {/* Mini Calendar Preview */}
         <motion.div variants={item}>
-          <MiniCalendar tareas={[...tareas, ...eventos]} />
+          <MiniCalendar tareas={[...visibles.tareas, ...visibles.eventos]} />
         </motion.div>
 
         {/* Stats Grid */}
@@ -198,7 +234,7 @@ export default function HomeView({
                 ultimasNotas.map((nota, i) => (
                   <Link href={`/dashboard/notas?id=${nota.id}`} key={i} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
                     <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{nota.titulo || "(Sin título)"}</p>
-                    <p className="text-xs text-slate-500 truncate">{fechaRelativa(nota.updatedAt)}</p>
+                    <p suppressHydrationWarning className="text-xs text-slate-500 truncate">{fechaRelativa(nota.updatedAt)}</p>
                   </Link>
                 ))
               )}

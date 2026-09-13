@@ -24,12 +24,15 @@ export default function DetalleEventoModal({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false);
+  // Ver la nota en `nuevo-evento-modal.tsx`: el error va dentro del modal.
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!evento?.eventoId) return;
     setIsLoading(true);
+    setError(null);
     const form = new FormData(e.currentTarget);
     try {
       await editarEventoAction(evento.eventoId, form);
@@ -37,7 +40,7 @@ export default function DetalleEventoModal({
       onCerrar();
     } catch (err) {
       console.error(err);
-      alert("Error al guardar el evento");
+      setError("No pudimos guardar los cambios. Probá de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -46,13 +49,14 @@ export default function DetalleEventoModal({
   async function onEliminar() {
     if (!evento?.eventoId) return;
     setIsLoading(true);
+    setError(null);
     try {
       await eliminarEventoAction(evento.eventoId);
       router.refresh();
       onCerrar();
     } catch (err) {
       console.error(err);
-      alert("Error al eliminar el evento");
+      setError("No pudimos eliminar el evento. Probá de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +64,7 @@ export default function DetalleEventoModal({
 
   function cerrar() {
     setConfirmandoEliminar(false);
+    setError(null);
     onCerrar();
   }
 
@@ -113,7 +118,7 @@ export default function DetalleEventoModal({
                   />
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-5 sm:flex-row sm:gap-4">
                   <div className="flex flex-col gap-1.5 flex-1">
                     <label htmlFor="fecha" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Fecha
@@ -155,6 +160,12 @@ export default function DetalleEventoModal({
                     className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                   />
                 </div>
+
+                {error && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                    {error}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between gap-2 border-t border-slate-200 px-6 py-4 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 mt-auto">

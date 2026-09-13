@@ -2,6 +2,7 @@
  * Capa pura de Notas: tipos y helpers sin I/O.
  * No importa `db` ni nada de servidor: lo usan tanto el server como el cliente.
  */
+import { quitarMarcas, renderMarkdown } from "./markdown";
 
 export interface Nota {
   id: string;
@@ -14,11 +15,53 @@ export interface Nota {
 
 /** Límites de validación, compartidos entre el editor y las server actions. */
 export const MAX_TITULO = 200;
+/** Tope sobre el texto plano: es el largo que el usuario efectivamente escribió. */
 export const MAX_CONTENIDO = 20_000;
+/** Tope sobre el HTML crudo. Más alto porque las etiquetas también ocupan. */
+export const MAX_CONTENIDO_HTML = 80_000;
 
-/** Primera línea no vacía del contenido, recortada. */
+/**
+ * Las notas se guardan como HTML desde que el editor es Tiptap. Las que se
+ * escribieron antes quedaron en markdown, así que hay que distinguirlas: se
+ * convierten al vuelo al abrirlas y recién al guardar pasan a HTML. No hay
+ * migración destructiva en la base.
+ */
+export function esHtml(contenido: string): boolean {
+  return /^\s*<[a-z]/i.test(contenido);
+}
+
+/** Contenido listo para cargar en el editor. El markdown viejo se convierte. */
+export function contenidoComoHtml(contenido: string): string {
+  if (!contenido.trim()) return "";
+  return esHtml(contenido) ? contenido : renderMarkdown(contenido);
+}
+
+/**
+ * Texto plano del contenido, sea HTML o markdown viejo. Sin DOM, porque
+ * también corre en el servidor (validación de las server actions).
+ */
+export function textoPlano(contenido: string): string {
+  if (!esHtml(contenido)) return quitarMarcas(contenido);
+  return contenido
+    .replace(/<\/(p|div|h[1-6]|li|blockquote|pre|tr)>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+/** Una nota sin texto: un documento vacío de Tiptap igual serializa "<p></p>". */
+export function estaVacio(contenido: string): boolean {
+  return textoPlano(contenido).trim().length === 0;
+}
+
+/** Primera línea no vacía del contenido, en texto plano, recortada. */
 function primeraLinea(contenido: string): string {
-  const linea = contenido
+  const linea = textoPlano(contenido)
     .split("\n")
     .map((l) => l.trim())
     .find((l) => l.length > 0);
@@ -34,9 +77,9 @@ export function tituloMostrado(nota: Pick<Nota, "titulo" | "contenido">): string
   return "Sin título";
 }
 
-/** Resumen del contenido para el preview de la tarjeta. */
+/** Resumen del contenido para el preview de la tarjeta, en texto plano. */
 export function resumen(contenido: string, largo = 140): string {
-  const texto = contenido.replace(/\s+/g, " ").trim();
+  const texto = textoPlano(contenido).replace(/\s+/g, " ").trim();
   if (texto.length <= largo) return texto;
   return `${texto.slice(0, largo)}…`;
 }

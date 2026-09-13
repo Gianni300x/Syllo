@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Download, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
 import { bgParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
+import { capitalizar } from "../lib/fechas";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -29,10 +30,6 @@ function claveDia(fecha: Date): string {
 /** Primer día del mes que contiene a `fecha`. */
 function inicioDeMes(fecha: Date): Date {
   return new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-}
-
-function capitalizar(texto: string): string {
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 function etiquetaDiaLargo(fecha: Date): string {
@@ -111,10 +108,6 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
     mesVisible.toLocaleDateString("es-AR", { month: "long", year: "numeric" }),
   );
 
-  const totalEnMes = celdas.filter(
-    (f) => f.getMonth() === mesActual && tareasPorDia.has(claveDia(f)),
-  ).length;
-
   // Día abierto en el panel de detalle (para celdas con más tareas de las que entran).
   const [diaAbierto, setDiaAbierto] = useState<string | null>(null);
 
@@ -160,8 +153,10 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
     : null;
 
   return (
-    <main className="flex-1 p-6 md:h-screen md:flex md:flex-col md:overflow-hidden">
-      <div className="mb-6 flex items-center justify-between gap-4 shrink-0">
+    <main className="flex-1 p-4 sm:p-6 md:h-screen md:flex md:flex-col md:overflow-hidden">
+      {/* En mobile el título y los controles van en filas separadas: en línea
+          se amontonaban y "Septiembre de 2026" partía en dos. */}
+      <div className="mb-6 flex flex-col gap-3 shrink-0 md:flex-row md:items-center md:justify-between md:gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             {etiquetaMes}
@@ -171,7 +166,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <AgregarEventoModal />
           <a
             href="/api/tareas/ics"
@@ -276,6 +271,89 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
                         +{ocultas} más
                       </button>
                     )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Grilla mensual — mobile. La de escritorio es `hidden md:flex`, así
+              que abajo de `md` no había ningún calendario: solo la agenda. Acá
+              las celdas resumen el día con puntitos por curso y al tocarlas se
+              abre el mismo `DetalleDia` que usa el "+N más" de escritorio. */}
+          <div className="md:hidden mb-8">
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {DIAS_SEMANA.map((dia) => (
+                <div
+                  key={dia}
+                  className="text-center text-[11px] font-medium text-slate-500 dark:text-slate-400"
+                >
+                  {dia}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">
+              {celdas.map((fecha) => {
+                const clave = claveDia(fecha);
+                const delMes = fecha.getMonth() === mesActual;
+                const esHoy = clave === claveHoy;
+                const tareasDia = tareasPorDia.get(clave) ?? [];
+
+                const contenido = (
+                  <>
+                    <span
+                      className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full text-xs font-medium ${
+                        esHoy
+                          ? "bg-indigo-600 text-white"
+                          : delMes
+                            ? "text-slate-600 dark:text-slate-300"
+                            : "text-slate-400 dark:text-slate-600"
+                      }`}
+                    >
+                      {fecha.getDate()}
+                    </span>
+
+                    <span className="flex h-1.5 items-center gap-0.5">
+                      {tareasDia.slice(0, 3).map((tarea, i) => (
+                        <span
+                          key={i}
+                          className={`h-1.5 w-1.5 rounded-full ${bgParaCurso(
+                            tarea.curso,
+                            nombresCursos,
+                          )} ${estaCompletada(tarea) ? "opacity-40" : ""}`}
+                        />
+                      ))}
+                      {tareasDia.length > 3 && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      )}
+                    </span>
+                  </>
+                );
+
+                const clases = `flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border ${
+                  delMes
+                    ? "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
+                    : "border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40"
+                }`;
+
+                // Los días sin tareas no son interactivos: si fueran botones
+                // sumarían hasta 42 paradas muertas al tabular.
+                return tareasDia.length > 0 ? (
+                  <button
+                    key={clave}
+                    type="button"
+                    onClick={() => setDiaAbierto(clave)}
+                    aria-label={`${etiquetaDiaLargo(fecha)}, ${tareasDia.length} ${
+                      tareasDia.length === 1 ? "vencimiento" : "vencimientos"
+                    }`}
+                    className={`${clases} cursor-pointer transition-colors hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:border-indigo-500`}
+                  >
+                    {contenido}
+                  </button>
+                ) : (
+                  <div key={clave} className={clases}>
+                    {contenido}
                   </div>
                 );
               })}

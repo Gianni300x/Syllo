@@ -1,33 +1,18 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-  type RefObject,
-} from "react";
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, NotebookPen, Plus, Trash2, X } from "lucide-react";
 import {
-  Bold,
-  Italic,
-  List,
-  Heading,
-  Loader2,
-  NotebookPen,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  MAX_CONTENIDO,
   MAX_TITULO,
+  contenidoComoHtml,
   fechaRelativa,
   resumen,
   tituloMostrado,
   type Nota,
 } from "../lib/notas";
+import { capitalizar } from "../lib/fechas";
+import EditorRico from "./editor-rico";
 import type { ResultadoNota } from "../(panel)/dashboard/notas/actions";
 
 type AccionNota = (
@@ -66,11 +51,13 @@ export default function Notas({
   // `null` = nada abierto · `"nueva"` = creando · id = editando esa nota
   const [abierta, setAbierta] = useState<string | null>(null);
 
-  const hoy = new Date().toLocaleDateString("es-AR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const hoy = capitalizar(
+    new Date().toLocaleDateString("es-AR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }),
+  );
 
   const notaEnEdicion =
     abierta && abierta !== "nueva"
@@ -82,13 +69,13 @@ export default function Notas({
   const mostrarEditor = abierta === "nueva" || notaEnEdicion !== null;
 
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             Notas
           </h1>
-          <p className="text-sm capitalize text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {hoy}
           </p>
         </div>
@@ -156,8 +143,30 @@ function PanelLateral({
   useEffect(() => {
     if (!open) return;
 
+    /** Mientras el drawer está abierto el Tab no puede escaparse al fondo. */
     function alTecla(e: KeyboardEvent) {
-      if (e.key === "Escape") onCerrar();
+      if (e.key === "Escape") {
+        onCerrar();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const enfocables = asideRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!enfocables || enfocables.length === 0) return;
+
+      const primero = enfocables[0];
+      const ultimo = enfocables[enfocables.length - 1];
+      const activo = document.activeElement;
+
+      if (e.shiftKey && activo === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && activo === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
     }
     document.addEventListener("keydown", alTecla);
 
@@ -191,7 +200,7 @@ function PanelLateral({
         role="dialog"
         aria-modal="true"
         aria-label={titulo}
-        aria-hidden={!open}
+        inert={!open}
         className={`fixed inset-y-0 right-0 z-[70] flex w-full flex-col border-l border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-out sm:w-[540px] sm:max-w-[88vw] dark:border-slate-700 dark:bg-slate-800 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
@@ -267,7 +276,11 @@ function TarjetaNota({
       </button>
 
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-2 dark:border-slate-700">
-        <span className="text-xs text-slate-400 dark:text-slate-500">
+        {/* El valor cambia entre el render del servidor y el del cliente. */}
+        <span
+          suppressHydrationWarning
+          className="text-xs text-slate-400 dark:text-slate-500"
+        >
           {fechaRelativa(nota.updatedAt)}
         </span>
 
@@ -327,8 +340,11 @@ function EditorNota({
   onCerrar: () => void;
 }) {
   const [estado, enviar, pendiente] = useActionState(accion, INICIAL);
-  const [contenido, setContenido] = useState(nota?.contenido ?? "");
-  const areaRef = useRef<HTMLTextAreaElement>(null);
+  // HTML del editor. Las notas viejas están en markdown: `contenidoComoHtml`
+  // las convierte al abrirlas y recién al guardar quedan como HTML.
+  const [contenido, setContenido] = useState(() =>
+    contenidoComoHtml(nota?.contenido ?? ""),
+  );
   const router = useRouter();
   const error = mensajeError(estado.error);
 
@@ -367,16 +383,12 @@ function EditorNota({
           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
 
-        <BarraMarkdown areaRef={areaRef} onCambio={setContenido} />
+        {/* El valor viaja al form acá: Tiptap vive fuera del ciclo de formularios. */}
+        <input type="hidden" name="contenido" value={contenido} />
 
-        <textarea
-          ref={areaRef}
-          name="contenido"
-          value={contenido}
-          onChange={(e) => setContenido(e.target.value)}
-          placeholder="Escriba su nota…"
-          maxLength={MAX_CONTENIDO}
-          className="min-h-[280px] w-full flex-1 resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 font-[family-name:var(--font-geist-mono)] text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+        <EditorRico
+          contenidoInicial={contenido}
+          onCambio={setContenido}
         />
 
         {error && (
@@ -397,89 +409,12 @@ function EditorNota({
         <button
           type="submit"
           disabled={pendiente}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-60 cursor-pointer disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           {pendiente && <Loader2 size={15} className="animate-spin" />}
           Guardar
         </button>
       </div>
     </form>
-  );
-}
-
-/** Mini-barra que inserta sintaxis markdown en la selección del textarea. */
-function BarraMarkdown({
-  areaRef,
-  onCambio,
-}: {
-  areaRef: RefObject<HTMLTextAreaElement | null>;
-  onCambio: (valor: string) => void;
-}) {
-  function envolver(prefijo: string, sufijo = prefijo) {
-    const el = areaRef.current;
-    if (!el) return;
-    const { selectionStart: ini, selectionEnd: fin, value } = el;
-    const seleccion = value.slice(ini, fin);
-    const nuevo =
-      value.slice(0, ini) + prefijo + seleccion + sufijo + value.slice(fin);
-    onCambio(nuevo);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(ini + prefijo.length, fin + prefijo.length);
-    });
-  }
-
-  function prefijoLinea(marca: string) {
-    const el = areaRef.current;
-    if (!el) return;
-    const { selectionStart: ini, value } = el;
-    const inicioLinea = value.lastIndexOf("\n", ini - 1) + 1;
-    const nuevo =
-      value.slice(0, inicioLinea) + marca + value.slice(inicioLinea);
-    onCambio(nuevo);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(ini + marca.length, ini + marca.length);
-    });
-  }
-
-  const boton =
-    "rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400";
-
-  return (
-    <div className="my-2 flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 px-1 py-1 dark:border-slate-700 dark:bg-slate-900/50">
-      <button
-        type="button"
-        title="Negrita"
-        onClick={() => envolver("**")}
-        className={boton}
-      >
-        <Bold size={15} />
-      </button>
-      <button
-        type="button"
-        title="Itálica"
-        onClick={() => envolver("_")}
-        className={boton}
-      >
-        <Italic size={15} />
-      </button>
-      <button
-        type="button"
-        title="Título"
-        onClick={() => prefijoLinea("## ")}
-        className={boton}
-      >
-        <Heading size={15} />
-      </button>
-      <button
-        type="button"
-        title="Lista"
-        onClick={() => prefijoLinea("- ")}
-        className={boton}
-      >
-        <List size={15} />
-      </button>
-    </div>
   );
 }

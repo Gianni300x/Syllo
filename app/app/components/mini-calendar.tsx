@@ -1,11 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Tarea, fechaVencimiento } from "../lib/classroom";
+import Link from "next/link";
+import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
 import NuevoEventoModal from "./nuevo-evento-modal";
 
 export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
-  const hoy = new Date();
+  // Estable entre renders: un `new Date()` suelto cambia la identidad de las
+  // dependencias y los `useMemo` de abajo se recalculan siempre.
+  const hoy = useMemo(() => new Date(), []);
   const [modalAbierto, setModalAbierto] = useState(false);
   
   const diasMes = useMemo(() => {
@@ -40,8 +43,8 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
         diaSemana: diaSemana,
         nombreDiaCorto: diasCortos[diaSemana],
         esHoy: d === hoy.getDate(),
-        tareasPendientes: tareasDelDia.filter(t => !["TURNED_IN", "RETURNED"].includes(t.estado)).length,
-        tareasCompletadas: tareasDelDia.filter(t => ["TURNED_IN", "RETURNED"].includes(t.estado)).length,
+        tareasPendientes: tareasDelDia.filter((t) => !estaCompletada(t)).length,
+        tareasCompletadas: tareasDelDia.filter(estaCompletada).length,
       });
     }
     return dias;
@@ -57,7 +60,10 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
     });
   }, [tareas, hoy]);
 
-  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const nombreMes = useMemo(() => {
+    const mes = hoy.toLocaleDateString("es-AR", { month: "long" });
+    return mes.charAt(0).toUpperCase() + mes.slice(1);
+  }, [hoy]);
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:p-8 dark:bg-slate-800 dark:border-slate-700 mb-10 w-full flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch justify-between">
@@ -65,7 +71,7 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
       {/* Lado Izquierdo: Resumen de Eventos/Tareas */}
       <div className="flex-1 flex flex-col w-full h-full md:pr-8 md:border-r border-slate-100 dark:border-slate-700/50">
         <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xl mb-1">
-          Eventos de {meses[hoy.getMonth()]}
+          Eventos de {nombreMes}
         </h3>
         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
           Próximas entregas y actividades del mes.
@@ -77,7 +83,7 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
               {tareasDelMesLista.slice(0, 4).map((t, idx) => {
                 const fecha = fechaVencimiento(t.vencimiento);
                 const dia = fecha ? fecha.getDate() : "?";
-                const isCompletada = ["TURNED_IN", "RETURNED"].includes(t.estado);
+                const isCompletada = estaCompletada(t);
                 
                 return (
                   <li key={idx} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
@@ -97,9 +103,12 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
               })}
               {tareasDelMesLista.length > 4 && (
                 <div className="text-center mt-2">
-                  <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline">
-                    Ver {tareasDelMesLista.length - 4} eventos más...
-                  </span>
+                  <Link
+                    href="/dashboard/calendario"
+                    className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  >
+                    Ver {tareasDelMesLista.length - 4} eventos más…
+                  </Link>
                 </div>
               )}
             </ul>
@@ -122,7 +131,7 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
       <div className="w-full max-w-[340px] shrink-0">
         <div className="flex items-center justify-between mb-4 px-2">
           <span className="text-base font-bold text-slate-900 dark:text-slate-100">
-            {meses[hoy.getMonth()]} {hoy.getFullYear()}
+            {nombreMes} {hoy.getFullYear()}
           </span>
           <div className="flex items-center gap-2 text-[10px] text-slate-500">
              <span className="w-2 h-2 rounded-full bg-indigo-500"></span> Pend.

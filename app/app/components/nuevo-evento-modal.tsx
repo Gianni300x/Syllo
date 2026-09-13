@@ -14,11 +14,15 @@ export default function NuevoEventoModal({
   onCerrar: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  // El error se muestra dentro del modal, como en el editor de Notas. Un
+  // `alert()` rompe el estilo del panel y bloquea el hilo.
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     const form = new FormData(e.currentTarget);
     try {
       await crearEventoAction(form);
@@ -26,7 +30,7 @@ export default function NuevoEventoModal({
       onCerrar();
     } catch (err) {
       console.error(err);
-      alert("Error al agregar evento");
+      setError("No pudimos guardar el evento. Probá de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +86,7 @@ export default function NuevoEventoModal({
                   />
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-5 sm:flex-row sm:gap-4">
                   <div className="flex flex-col gap-1.5 flex-1">
                     <label htmlFor="fecha" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Fecha
@@ -122,6 +126,12 @@ export default function NuevoEventoModal({
                     placeholder="Detalles adicionales sobre el evento..."
                   />
                 </div>
+
+                {error && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                    {error}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 mt-auto">

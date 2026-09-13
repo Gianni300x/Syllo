@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
   ExternalLink,
   Loader2,
   Mail,
@@ -12,6 +13,7 @@ import {
 import { colorParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { useTemaOscuro } from "../lib/tema";
+import { capitalizar } from "../lib/fechas";
 import {
   formatearFechaCompleta,
   formatearFechaCorreo,
@@ -48,17 +50,24 @@ export default function Correos({
   // primer render no vuelve a pedir lo mismo.
   const urlCargada = useRef("/api/correos?");
 
+  // Con un solo curso seleccionado el filtro viaja a Gmail (la API ya acepta
+  // `curso`), así la paginación trae correos de esa materia en vez de traer 25
+  // cualesquiera y descartarlos acá. Con varios cursos no hay query equivalente,
+  // así que se filtra en el cliente sobre lo que ya se cargó.
+  const cursoServidor =
+    cursosSeleccionados.length === 1 ? cursosSeleccionados[0] : null;
+
   const construirUrl = useCallback(
     (pageToken?: string | null) => {
       const params = new URLSearchParams();
-      // El filtrado por curso se hace client-side para soportar multi-selección
+      if (cursoServidor) params.set("curso", cursoServidor);
       if (origenFiltro !== "Todos") params.set("origen", origenFiltro);
       if (busquedaAplicada) params.set("busqueda", busquedaAplicada);
       if (soloNoLeidos) params.set("noLeidos", "1");
       if (pageToken) params.set("pageToken", pageToken);
       return `/api/correos?${params.toString()}`;
     },
-    [origenFiltro, busquedaAplicada, soloNoLeidos],
+    [cursoServidor, origenFiltro, busquedaAplicada, soloNoLeidos],
   );
 
   // Debounce del buscador: no consultamos Gmail en cada tecla.
@@ -128,9 +137,22 @@ export default function Correos({
     [correos, cursosArchivados],
   );
 
+  // Lista que realmente se muestra: `correosVisibles` sin los cursos que el
+  // sidebar dejó fuera. Es la única fuente para la lista, el estado vacío y el
+  // contador — antes cada uno usaba un array distinto y se contradecían.
+  const correosFiltrados = useMemo(
+    () =>
+      cursosSeleccionados.length === 0
+        ? correosVisibles
+        : correosVisibles.filter(
+            (c) => c.curso != null && cursosSeleccionados.includes(c.curso),
+          ),
+    [correosVisibles, cursosSeleccionados],
+  );
+
   const noLeidos = useMemo(
-    () => correosVisibles.filter((correo) => !correo.leido).length,
-    [correosVisibles],
+    () => correosFiltrados.filter((correo) => !correo.leido).length,
+    [correosFiltrados],
   );
 
   const conteoPorCurso = useMemo(() => {
@@ -148,14 +170,16 @@ export default function Correos({
     setConteoPorCurso(conteoPorCurso);
   }, [conteoPorCurso, setConteoPorCurso]);
 
-  const hoy = new Date().toLocaleDateString("es-AR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const hoy = capitalizar(
+    new Date().toLocaleDateString("es-AR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }),
+  );
 
   return (
-    <main className="flex-1 p-8 min-w-0">
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
           {cursosSeleccionados.length === 0
@@ -164,7 +188,7 @@ export default function Correos({
               ? `Correos de ${cursosSeleccionados[0]}`
               : `Correos — ${cursosSeleccionados.length} cursos`}
         </h1>
-        <p className="text-sm text-slate-500 capitalize dark:text-slate-400">{hoy}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{hoy}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -177,7 +201,7 @@ export default function Correos({
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             placeholder="Buscar correos de Classroom o CVG…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
@@ -240,7 +264,7 @@ export default function Correos({
         </button>
 
         <span className="text-sm text-slate-500 dark:text-slate-400">
-          {noLeidos} sin leer de {correosVisibles.length}
+          {noLeidos} sin leer de {correosFiltrados.length}
         </span>
       </div>
 
@@ -250,31 +274,31 @@ export default function Correos({
         </p>
       )}
 
+      {/* En mobile la lista y el lector se turnan: antes el lector se
+          renderizaba debajo de los 25 correos y había que scrollear todo. */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-        <div className="lg:col-span-2 flex flex-col gap-2">
+        <div
+          className={`lg:col-span-2 flex-col gap-2 lg:flex ${
+            seleccionado ? "hidden" : "flex"
+          }`}
+        >
           {cargando ? (
             <Cargando texto="Buscando correos…" />
-          ) : correosVisibles.length === 0 ? (
+          ) : correosFiltrados.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               No hay correos con estos filtros.
             </p>
           ) : (
             <>
-              {correosVisibles
-                .filter(
-                  (c) =>
-                    cursosSeleccionados.length === 0 ||
-                    (c.curso != null && cursosSeleccionados.includes(c.curso)),
-                )
-                .map((correo) => (
-                  <FilaCorreo
-                    key={correo.id}
-                    correo={correo}
-                    cursos={cursos}
-                    activo={seleccionado === correo.id}
-                    onSeleccionar={() => setSeleccionado(correo.id)}
-                  />
-                ))}
+              {correosFiltrados.map((correo) => (
+                <FilaCorreo
+                  key={correo.id}
+                  correo={correo}
+                  cursos={cursos}
+                  activo={seleccionado === correo.id}
+                  onSeleccionar={() => setSeleccionado(correo.id)}
+                />
+              ))}
               {siguientePagina && (
                 <button
                   onClick={cargarMas}
@@ -288,7 +312,20 @@ export default function Correos({
           )}
         </div>
 
-        <div className="lg:col-span-3 lg:sticky lg:top-8">
+        <div
+          className={`lg:col-span-3 lg:sticky lg:top-8 lg:block ${
+            seleccionado ? "block" : "hidden"
+          }`}
+        >
+          {seleccionado && (
+            <button
+              onClick={() => setSeleccionado(null)}
+              className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 lg:hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              <ArrowLeft size={15} />
+              Volver a la bandeja
+            </button>
+          )}
           <Lector
             key={seleccionado ?? "vacio"}
             id={seleccionado}
@@ -451,8 +488,8 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
           {correo.remitente}{" "}
           <span className="text-slate-400 dark:text-slate-500">&lt;{correo.remitenteEmail}&gt;</span>
         </p>
-        <p className="text-xs capitalize text-slate-400 dark:text-slate-500">
-          {formatearFechaCompleta(correo.fecha)}
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          {capitalizar(formatearFechaCompleta(correo.fecha))}
         </p>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-2">

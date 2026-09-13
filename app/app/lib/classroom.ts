@@ -1,3 +1,5 @@
+import { MESES_CORTOS } from "./fechas";
+
 export interface Tarea {
   curso: string;
   titulo: string;
@@ -33,11 +35,7 @@ export function estaCompletada(tarea: Tarea): boolean {
 
 export function formatearFecha(vencimiento: Tarea["vencimiento"]): string {
   if (!vencimiento) return "Sin fecha";
-  const meses = [
-    "ene", "feb", "mar", "abr", "may", "jun",
-    "jul", "ago", "sept", "oct", "nov", "dic",
-  ];
-  return `${vencimiento.day} ${meses[vencimiento.month - 1]}`;
+  return `${vencimiento.day} ${MESES_CORTOS[vencimiento.month - 1]}`;
 }
 
 export function etiquetaVencimiento(dias: number | null): string {

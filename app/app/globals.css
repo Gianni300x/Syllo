@@ -56,3 +56,82 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/**
+ * Contenido con formato de las Notas (editor Tiptap).
+ *
+ * Tailwind resetea h2/ul/ol/strong en su preflight, así que acá se les
+ * devuelve la apariencia, acotado a `.nota-rica` para no tocar el resto de la
+ * app. Va sin `@layer` a propósito: el CSS sin capa le gana al preflight.
+ */
+.nota-rica:focus { outline: none; }
+
+.nota-rica p { margin: 0 0 0.5rem; }
+.nota-rica > :last-child { margin-bottom: 0; }
+
+.nota-rica h2 { font-size: 1.0625rem; font-weight: 600; margin: 1rem 0 0.375rem; }
+.nota-rica h3 { font-size: 0.9375rem; font-weight: 600; margin: 0.875rem 0 0.25rem; }
+.nota-rica h2:first-child,
+.nota-rica h3:first-child { margin-top: 0; }
+
+.nota-rica ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
+.nota-rica ol { list-style: decimal; padding-left: 1.25rem; margin: 0.5rem 0; }
+.nota-rica li { margin: 0.125rem 0; }
+.nota-rica li p { margin: 0; }
+
+.nota-rica strong { font-weight: 600; }
+.nota-rica em { font-style: italic; }
+.nota-rica s { text-decoration: line-through; }
+
+.nota-rica a {
+  color: #4f46e5;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dark .nota-rica a { color: #a5b4fc; }
+
+.nota-rica blockquote {
+  border-left: 2px solid #e2e8f0;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: #64748b;
+}
+.dark .nota-rica blockquote { border-left-color: #3e3e3a; color: #9c9a90; }
+
+.nota-rica code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  background: #f1f5f9;
+  border-radius: 0.25rem;
+  padding: 0.0625rem 0.25rem;
+}
+.dark .nota-rica code { background: #1f1e1d; }
+
+.nota-rica pre {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+.dark .nota-rica pre { background: #1f1e1d; }
+.nota-rica pre code { background: none; padding: 0; }
+
+.nota-rica hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 0.875rem 0;
+}
+.dark .nota-rica hr { border-top-color: #3e3e3a; }
+
+/* Placeholder: lo pinta la extensión con `data-placeholder`. */
+.nota-rica p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: #94a3b8;
+}
+.dark .nota-rica p.is-editor-empty:first-child::before { color: #9c9a90; }
