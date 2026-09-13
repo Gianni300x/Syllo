@@ -15,23 +15,38 @@ function escaparTexto(texto: string): string {
     .replace(/\r?\n/g, "\\n");
 }
 
-/** El spec exige "folding" de líneas de más de 75 octetos, continuando con un espacio. */
+/**
+ * El spec exige "folding" de líneas de más de 75 octetos, continuando con un
+ * espacio.
+ *
+ * El corte se calcula acumulando **bytes** carácter por carácter. La versión
+ * anterior mezclaba unidades: comparaba bytes contra un índice de caracteres y
+ * usaba `slice()` con ese índice, así que cualquier línea con acentos —o sea,
+ * casi todas— terminaba excediendo el límite. Recorrer con `for...of` entrega
+ * code points enteros, de modo que nunca se parte un carácter ni un par
+ * suplente (emojis incluidos).
+ */
 function foldLinea(linea: string): string {
-  const bytes = Buffer.byteLength(linea, "utf8");
-  if (bytes <= 75) return linea;
+  if (Buffer.byteLength(linea, "utf8") <= 75) return linea;
 
   const partes: string[] = [];
-  let resto = linea;
+  let actual = "";
+  let bytes = 0;
   let limite = 75;
-  while (Buffer.byteLength(resto, "utf8") > limite) {
-    let corte = limite;
-    // No cortar en medio de un carácter multibyte.
-    while (corte > 0 && (resto.codePointAt(corte)! & 0xc0) === 0x80) corte--;
-    partes.push(resto.slice(0, corte));
-    resto = resto.slice(corte);
-    limite = 74; // las líneas de continuación arrancan con un espacio
+
+  for (const caracter of linea) {
+    const bytesCaracter = Buffer.byteLength(caracter, "utf8");
+    if (bytes + bytesCaracter > limite) {
+      partes.push(actual);
+      actual = "";
+      bytes = 0;
+      limite = 74; // las líneas de continuación arrancan con un espacio
+    }
+    actual += caracter;
+    bytes += bytesCaracter;
   }
-  partes.push(resto);
+
+  partes.push(actual);
   return partes.join("\r\n ");
 }
 
