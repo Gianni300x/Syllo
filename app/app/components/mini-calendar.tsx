@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
+import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "../lib/classroom";
 import NuevoEventoModal from "./nuevo-evento-modal";
 
 export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
@@ -86,7 +86,7 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
                 const isCompletada = estaCompletada(t);
                 
                 return (
-                  <li key={idx} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                  <li key={claveTarea(t) ?? t.eventoId ?? idx} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shrink-0 ${isCompletada ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'}`}>
                       {dia}
                     </div>

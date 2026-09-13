@@ -36,6 +36,18 @@ function desdoblar(ics: string): string[] {
 const contar = (ics: string, prefijo: string) =>
   desdoblar(ics).filter((l) => l.startsWith(prefijo)).length;
 
+/** Las líneas del VEVENT, sin las del VALARM que lleva adentro. */
+function lineasDelEvento(ics: string): string[] {
+  const fuera: string[] = [];
+  let dentroDeAlarma = false;
+  for (const linea of desdoblar(ics)) {
+    if (linea === "BEGIN:VALARM") dentroDeAlarma = true;
+    else if (linea === "END:VALARM") dentroDeAlarma = false;
+    else if (!dentroDeAlarma) fuera.push(linea);
+  }
+  return fuera;
+}
+
 describe("generarIcs", () => {
   test("arma un calendario válido con un evento", () => {
     const lineas = desdoblar(generarIcs([tarea()]));
@@ -81,8 +93,14 @@ describe("generarIcs", () => {
   });
 
   test("omite DESCRIPTION cuando la tarea no tiene descripción", () => {
-    expect(contar(generarIcs([tarea()]), "DESCRIPTION:")).toBe(0);
-    expect(contar(generarIcs([tarea({ descripcion: "Leer" })]), "DESCRIPTION:")).toBe(1);
+    // Se miran solo las líneas del VEVENT: el VALARM siempre trae la suya.
+    const descripcionesDel = (t: Tarea) =>
+      lineasDelEvento(generarIcs([t])).filter((l) =>
+        l.startsWith("DESCRIPTION:"),
+      ).length;
+
+    expect(descripcionesDel(tarea())).toBe(0);
+    expect(descripcionesDel(tarea({ descripcion: "Leer" }))).toBe(1);
   });
 
   test("escapa comas, puntos y coma y saltos de línea", () => {
@@ -123,5 +141,90 @@ describe("generarIcs", () => {
     ).filter((l) => l.startsWith("UID:"));
     expect(lineas).toHaveLength(2);
     expect(lineas[0]).not.toBe(lineas[1]);
+  });
+});
+
+describe("generarIcs > UID estable", () => {
+  const conIds = (parcial: Partial<Tarea> = {}) =>
+    tarea({ courseId: "c1", courseWorkId: "w1", ...parcial });
+
+  const uidDe = (t: Tarea) =>
+    desdoblar(generarIcs([t])).find((l) => l.startsWith("UID:"));
+
+  test("usa los ids de Classroom", () => {
+    expect(uidDe(conIds())).toBe("UID:c1-w1@syllo.app");
+  });
+
+  test("no cambia si el usuario renombra el curso", () => {
+    // Es el bug que tenía el UID viejo (hash de curso+título+fecha): el
+    // calendario borraba el evento y creaba otro en su lugar.
+    expect(uidDe(conIds({ curso: "Análisis Matemático II" }))).toBe(
+      uidDe(conIds()),
+    );
+  });
+
+  test("no cambia si se mueve la fecha de entrega", () => {
+    expect(uidDe(conIds({ vencimiento: { year: 2026, month: 10, day: 1 } }))).toBe(
+      uidDe(conIds()),
+    );
+  });
+
+  test("distingue dos tareas del mismo curso", () => {
+    expect(uidDe(conIds({ courseWorkId: "w2" }))).not.toBe(uidDe(conIds()));
+  });
+
+  test("usa el id del evento personal cuando no hay ids de Classroom", () => {
+    expect(uidDe(tarea({ eventoId: "abc-123", link: "#" }))).toBe(
+      "UID:evento-abc-123@syllo.app",
+    );
+  });
+});
+
+describe("generarIcs > recordatorio", () => {
+  test("cada evento lleva una alarma el día anterior a las 9", () => {
+    const lineas = desdoblar(generarIcs([tarea()]));
+
+    expect(lineas).toContain("BEGIN:VALARM");
+    expect(lineas).toContain("ACTION:DISPLAY");
+    // DTSTART es la medianoche del día de entrega: 15 horas antes son las 9
+    // de la mañana del día anterior.
+    expect(lineas).toContain("TRIGGER;RELATED=START:-PT15H");
+    expect(lineas).toContain("END:VALARM");
+  });
+
+  test("la alarma va adentro del VEVENT", () => {
+    const lineas = desdoblar(generarIcs([tarea()]));
+    const inicioEvento = lineas.indexOf("BEGIN:VEVENT");
+    const finEvento = lineas.indexOf("END:VEVENT");
+    const alarma = lineas.indexOf("BEGIN:VALARM");
+
+    expect(alarma).toBeGreaterThan(inicioEvento);
+    expect(alarma).toBeLessThan(finEvento);
+  });
+});
+
+describe("generarIcs > opciones", () => {
+  test("aplica los renombres de curso al SUMMARY", () => {
+    const lineas = desdoblar(
+      generarIcs([tarea()], { renombres: { Análisis: "AM2" } }),
+    );
+
+    expect(lineas).toContain("SUMMARY:AM2: TP 1");
+  });
+
+  test("solo el feed lleva las cabeceras de refresco", () => {
+    expect(desdoblar(generarIcs([tarea()]))).not.toContain(
+      "X-PUBLISHED-TTL:PT6H",
+    );
+
+    const feed = desdoblar(generarIcs([tarea()], { comoFeed: true }));
+    expect(feed).toContain("REFRESH-INTERVAL;VALUE=DURATION:PT6H");
+    expect(feed).toContain("X-PUBLISHED-TTL:PT6H");
+  });
+
+  test("el nombre del calendario es configurable", () => {
+    expect(desdoblar(generarIcs([], { nombre: "Cursada" }))).toContain(
+      "X-WR-CALNAME:Cursada",
+    );
   });
 });

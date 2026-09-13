@@ -1,9 +1,13 @@
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getTareas, getNombresCursos } from "../../lib/tareas-server";
 import { getCorreosInicial } from "../../lib/correos-server";
 import { getNotas } from "../../lib/notas-server";
 import { eventoComoTarea, getEventosCached } from "../../lib/eventos-service";
+import { getEstadosTareas } from "../../lib/estados-tareas-server";
+import { aplicarEstados } from "../../lib/tareas-service";
+import { refrescarSnapshotDelFeed } from "../../lib/feed-server";
 import HomeView from "../../components/home-view";
 
 export default async function DashboardHomePage() {
@@ -17,14 +21,20 @@ export default async function DashboardHomePage() {
 
   const cursos = await getNombresCursos(session.access_token, userId);
 
-  const [tareas, correosPagina, notas, eventosRaw] = await Promise.all([
-    getTareas(session.access_token, userId),
-    getCorreosInicial(session.access_token, userId, cursos),
-    getNotas(userId),
-    getEventosCached(userId),
-  ]);
+  const [tareasDeGoogle, correosPagina, notas, eventosRaw, estados] =
+    await Promise.all([
+      getTareas(session.access_token, userId),
+      getCorreosInicial(session.access_token, userId, cursos),
+      getNotas(userId),
+      getEventosCached(userId),
+      getEstadosTareas(userId),
+    ]);
 
+  const tareas = aplicarEstados(tareasDeGoogle, estados);
   const eventos = eventosRaw.map(eventoComoTarea);
+
+  // Ídem Tareas: mantener fresca la foto que consulta el feed de calendario.
+  after(() => refrescarSnapshotDelFeed(session.user?.email, tareasDeGoogle));
 
   return <HomeView tareas={tareas} eventos={eventos} correos={correosPagina.correos} notas={notas} usuario={session.user} />;
 }

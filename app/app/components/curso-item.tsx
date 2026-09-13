@@ -191,7 +191,12 @@ export function CursoItem({
               aria-expanded={menuAbierto}
               aria-label={`Opciones de ${nombreMostrar}`}
               className={`p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200 cursor-pointer transition-colors focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-slate-600 dark:hover:text-slate-200 ${
-                menuAbierto ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                // En mobile no hay hover: sin el prefijo `sm:` el menú era
+                // inalcanzable y archivar o renombrar un curso no existía desde
+                // el celular. Mismo patrón que `controles-tarea.tsx`.
+                menuAbierto
+                  ? "opacity-100"
+                  : "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
               }`}
             >
               <MoreVertical size={14} />

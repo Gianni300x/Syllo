@@ -11,12 +11,16 @@ import {
   ArrowRight,
   Sun
 } from "lucide-react";
-import { Tarea, estaCompletada } from "../lib/classroom";
+import { Tarea, claveTarea, estaCompletada } from "../lib/classroom";
 import { Correo } from "../lib/correos";
 import { Nota, fechaRelativa } from "../lib/notas";
-import { contarPendientesPorCurso } from "../lib/tareas-service";
+import {
+  contarPendientesPorCurso,
+  ordenarPorPrioridad,
+} from "../lib/tareas-service";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { MiniCalendar } from "./mini-calendar";
+import ControlesTarea from "./controles-tarea";
 
 export default function HomeView({
   tareas,
@@ -67,7 +71,8 @@ export default function HomeView({
   }, [conteoPendientes, setConteoPorCurso]);
 
   const tareasPendientes = visibles.tareas.filter((t) => !estaCompletada(t));
-  const ultimasTareas = tareasPendientes.slice(0, 4);
+  // Lo que el alumno fijó encabeza el resumen del día; después, por entrega.
+  const ultimasTareas = ordenarPorPrioridad(tareasPendientes).slice(0, 4);
 
   const correosNoLeidos = correosVisibles.filter((c) => !c.leido);
   const ultimosCorreos = correosNoLeidos.slice(0, 4);
@@ -177,10 +182,31 @@ export default function HomeView({
                 </div>
               ) : (
                 ultimasTareas.map((tarea, i) => (
-                  <Link href={tarea.link} target="_blank" key={i} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
-                    <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{tarea.titulo}</p>
-                    <p className="text-xs text-slate-500 truncate">{tarea.curso}</p>
-                  </Link>
+                  // Link estirado para que los controles de estado sean
+                  // hermanos del link y no vayan anidados adentro.
+                  <div
+                    key={claveTarea(tarea) ?? i}
+                    className={`group relative flex items-center gap-2 p-4 bg-white border rounded-xl transition-colors hover:border-indigo-300 dark:bg-slate-800 ${
+                      tarea.fijada
+                        ? "border-amber-300 dark:border-amber-500/60"
+                        : "border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">
+                        <Link
+                          href={tarea.link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-indigo-500"
+                        >
+                          {tarea.titulo}
+                        </Link>
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">{tarea.curso}</p>
+                    </div>
+                    <ControlesTarea tarea={tarea} />
+                  </div>
                 ))
               )}
             </div>
@@ -204,8 +230,8 @@ export default function HomeView({
                   <span className="text-sm">Sin correos nuevos</span>
                 </div>
               ) : (
-                ultimosCorreos.map((correo, i) => (
-                  <Link href={`/dashboard/correos?id=${correo.id}`} key={i} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-amber-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
+                ultimosCorreos.map((correo) => (
+                  <Link href={`/dashboard/correos?id=${correo.id}`} key={correo.id} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-amber-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
                     <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{correo.asunto || "(Sin asunto)"}</p>
                     <p className="text-xs text-slate-500 truncate">{correo.remitente}</p>
                   </Link>
@@ -231,8 +257,8 @@ export default function HomeView({
                   <span className="text-sm">Aún no has creado notas</span>
                 </div>
               ) : (
-                ultimasNotas.map((nota, i) => (
-                  <Link href={`/dashboard/notas?id=${nota.id}`} key={i} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
+                ultimasNotas.map((nota) => (
+                  <Link href={`/dashboard/notas?id=${nota.id}`} key={nota.id} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
                     <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{nota.titulo || "(Sin título)"}</p>
                     <p suppressHydrationWarning className="text-xs text-slate-500 truncate">{fechaRelativa(nota.updatedAt)}</p>
                   </Link>

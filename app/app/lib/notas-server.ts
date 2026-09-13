@@ -27,6 +27,7 @@ export async function fetchNotasDesdeDb(userId: string): Promise<Nota[]> {
     id: fila.id,
     titulo: fila.titulo,
     contenido: fila.contenido,
+    curso: fila.curso,
     createdAt:
       fila.createdAt instanceof Date
         ? fila.createdAt.toISOString()

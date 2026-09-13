@@ -24,6 +24,7 @@ type CodigoError =
   | "nota_vacia"
   | "titulo_muy_largo"
   | "contenido_muy_largo"
+  | "curso_invalido"
   | "falta_id"
   | "nota_no_encontrada"
   | "error_db";
@@ -44,10 +45,18 @@ function leerCampos(formData: FormData) {
   // Normaliza el documento vacío de Tiptap a cadena vacía, para que las notas
   // que son solo título no queden con marcado fantasma en la base.
   const contenido = estaVacio(crudo) ? "" : crudo;
-  return { titulo, contenido };
+  // El `<select>` manda "" para "Sin curso": en la base eso es `null`.
+  const curso = String(formData.get("curso") ?? "").trim() || null;
+  return { titulo, contenido, curso };
 }
 
-function validar(titulo: string, contenido: string): CodigoError | null {
+const MAX_NOMBRE_CURSO = 200;
+
+function validar(
+  titulo: string,
+  contenido: string,
+  curso: string | null,
+): CodigoError | null {
   // El editor es HTML: un documento vacío igual llega como "<p></p>", así que
   // "sin contenido" se decide sobre el texto plano, no sobre el largo del HTML.
   if (!titulo && estaVacio(contenido)) return "nota_vacia";
@@ -55,6 +64,7 @@ function validar(titulo: string, contenido: string): CodigoError | null {
   // Se topean las dos cosas: lo que el usuario escribió y el HTML que lo envuelve.
   if (textoPlano(contenido).length > MAX_CONTENIDO) return "contenido_muy_largo";
   if (contenido.length > MAX_CONTENIDO_HTML) return "contenido_muy_largo";
+  if (curso && curso.length > MAX_NOMBRE_CURSO) return "curso_invalido";
   return null;
 }
 
@@ -65,13 +75,13 @@ export async function crearNota(
   const email = await emailActual();
   if (!email) return err("no_autenticado");
 
-  const { titulo, contenido } = leerCampos(formData);
-  const problema = validar(titulo, contenido);
+  const { titulo, contenido, curso } = leerCampos(formData);
+  const problema = validar(titulo, contenido, curso);
   if (problema) return err(problema);
 
   try {
     const db = await getDb();
-    await db.insert(notas).values({ ownerEmail: email, titulo, contenido });
+    await db.insert(notas).values({ ownerEmail: email, titulo, contenido, curso });
   } catch (error) {
     console.error("Error al crear la nota:", error);
     return err("error_db");
@@ -93,15 +103,15 @@ export async function editarNota(
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return err("falta_id");
 
-  const { titulo, contenido } = leerCampos(formData);
-  const problema = validar(titulo, contenido);
+  const { titulo, contenido, curso } = leerCampos(formData);
+  const problema = validar(titulo, contenido, curso);
   if (problema) return err(problema);
 
   try {
     const db = await getDb();
     const filas = await db
       .update(notas)
-      .set({ titulo, contenido, updatedAt: new Date() })
+      .set({ titulo, contenido, curso, updatedAt: new Date() })
       .where(and(eq(notas.id, id), eq(notas.ownerEmail, email)))
       .returning({ id: notas.id });
     if (filas.length === 0) return err("nota_no_encontrada");

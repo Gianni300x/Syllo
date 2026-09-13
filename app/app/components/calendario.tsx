@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { bgParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { Tarea, estaCompletada, fechaVencimiento } from "../lib/classroom";
+import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "../lib/classroom";
 import { capitalizar } from "../lib/fechas";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -42,6 +42,7 @@ function etiquetaDiaLargo(fecha: Date): string {
   );
 }
 
+import SuscribirCalendarioModal from "./suscribir-calendario-modal";
 import AgregarEventoModal from "./agregar-evento-modal";
 import DetalleEventoModal from "./detalle-evento-modal";
 
@@ -168,15 +169,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <AgregarEventoModal />
-          <a
-            href="/api/tareas/ics"
-            download="syllo.ics"
-            title="Exportar vencimientos a Google/Apple Calendar"
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:border-slate-600"
-          >
-            <Download size={15} />
-            Exportar
-          </a>
+          <SuscribirCalendarioModal />
           <button
             onClick={irAHoy}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:border-slate-600"
@@ -451,7 +444,7 @@ function DetalleDia({
         <div className="flex flex-col gap-1">
           {tareas.map((tarea, i) => (
             <PillTarea
-              key={i}
+              key={claveTarea(tarea) ?? tarea.eventoId ?? i}
               tarea={tarea}
               nombresCursos={nombresCursos}
               onAbrirEvento={onAbrirEvento}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   Archive,
@@ -13,9 +14,11 @@ import {
   Search,
 } from "lucide-react";
 import { bgParaCurso, colorParaCurso } from "./sidebar";
+import ControlesTarea from "./controles-tarea";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import {
   Tarea,
+  claveTarea,
   diasHastaVencimiento,
   estaCompletada,
   formatearFecha,
@@ -24,11 +27,14 @@ import {
 import {
   clasificarTareas,
   contarPendientesPorCurso,
+  ordenarPorPrioridad,
 } from "../lib/tareas-service";
 import { capitalizar } from "../lib/fechas";
+import { normalizar } from "../lib/texto";
 
 type Tab =
   | "pendientes"
+  | "empezadas"
   | "urgentes"
   | "vencidas"
   | "semana"
@@ -38,6 +44,8 @@ type VistaLayout = "grid" | "lista";
 
 const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
   { valor: "pendientes", etiqueta: "Pendientes" },
+  // Solo se muestra cuando hay al menos una tarea marcada como empezada.
+  { valor: "empezadas", etiqueta: "Empezadas" },
   { valor: "semana", etiqueta: "Esta semana" },
   { valor: "urgentes", etiqueta: "Urgentes" },
   { valor: "vencidas", etiqueta: "Vencidas" },
@@ -45,6 +53,34 @@ const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
   // Solo se muestra cuando hay al menos un curso archivado.
   { valor: "archivados", etiqueta: "Archivados" },
 ];
+
+const TABS_VALIDOS = new Set<string>(TABS_MAP.map((t) => t.valor));
+
+/** Un `?tab=` inventado o viejo cae a Pendientes en vez de dejar la vista vacía. */
+function leerTab(valor: string | null): Tab {
+  return valor && TABS_VALIDOS.has(valor) ? (valor as Tab) : "pendientes";
+}
+
+/**
+ * Escribe un parámetro en la URL sin pedirle la página al servidor: el tab y la
+ * vista son filtros de cliente sobre datos que ya están cargados.
+ *
+ * Los valores por defecto se borran en vez de escribirse, para que la URL de
+ * "todo como viene" quede limpia.
+ */
+function escribirParam(
+  clave: string,
+  valor: string | null,
+  modo: "push" | "replace",
+) {
+  const params = new URLSearchParams(window.location.search);
+  if (valor === null) params.delete(clave);
+  else params.set(clave, valor);
+  const query = params.toString();
+  const url = query ? `?${query}` : window.location.pathname;
+  if (modo === "push") window.history.pushState(null, "", url);
+  else window.history.replaceState(null, "", url);
+}
 
 function colorEtiquetaVencimiento(
   dias: number | null,
@@ -57,14 +93,6 @@ function colorEtiquetaVencimiento(
   return "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300";
 }
 
-/** Normaliza un string para búsqueda insensible a mayúsculas y tildes. */
-function normalizar(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
 export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
   const {
     cursosSeleccionados,
@@ -74,12 +102,28 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     archivando,
     renombres,
   } = useFiltroCursos();
-  const [tabElegido, setTab] = useState<Tab>("pendientes");
+  const searchParams = useSearchParams();
+  // El tab va con `push` porque es un paso de navegación: "atrás" tiene que
+  // devolverte a la pestaña anterior.
+  const tabElegido = leerTab(searchParams.get("tab"));
+  const setTab = useCallback(
+    (valor: Tab) =>
+      escribirParam("tab", valor === "pendientes" ? null : valor, "push"),
+    [],
+  );
   const [busqueda, setBusqueda] = useState("");
   // La lupa abre el campo de búsqueda en su lugar; queda abierto mientras haya texto.
   const [buscadorAbierto, setBuscadorAbierto] = useState(false);
   const mostrarBuscador = buscadorAbierto || busqueda.length > 0;
-  const [vistaLayout, setVistaLayout] = useState<VistaLayout>("grid");
+  // La vista es una preferencia, no un paso de navegación: `replace`, para no
+  // llenar el historial de entradas por cambiar de cuadrícula a lista.
+  const vistaLayout: VistaLayout =
+    searchParams.get("vista") === "lista" ? "lista" : "grid";
+  const setVistaLayout = useCallback(
+    (valor: VistaLayout) =>
+      escribirParam("vista", valor === "grid" ? null : valor, "replace"),
+    [],
+  );
 
   const nombresCursos = useMemo(
     () => Array.from(new Set(tareas.map((t) => t.curso))),
@@ -106,10 +150,6 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     return conteo;
   }, [tareasArchivadas]);
 
-  // Si se restauró todo mientras estaba abierta la pestaña, cae a Pendientes.
-  const tab: Tab =
-    tabElegido === "archivados" && !hayArchivados ? "pendientes" : tabElegido;
-
   const conteoPendientes = useMemo(
     () => contarPendientesPorCurso(tareasActivas),
     [tareasActivas],
@@ -128,15 +168,30 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     [tareasActivas, cursosSeleccionados],
   );
 
-  const { pendientes, vencidasRecientes, urgentes, estaSemana, completadas } =
-    useMemo(
-      () => clasificarTareas(tareasFiltradasPorCurso),
-      [tareasFiltradasPorCurso],
-    );
+  const {
+    pendientes,
+    vencidasRecientes,
+    urgentes,
+    estaSemana,
+    empezadas,
+    completadas,
+  } = useMemo(
+    () => clasificarTareas(tareasFiltradasPorCurso),
+    [tareasFiltradasPorCurso],
+  );
+
+  // Si la pestaña abierta se quedó sin contenido (se restauraron todos los
+  // cursos, o se desmarcó la última empezada), cae a Pendientes.
+  const tab: Tab =
+    (tabElegido === "archivados" && !hayArchivados) ||
+    (tabElegido === "empezadas" && empezadas.length === 0)
+      ? "pendientes"
+      : tabElegido;
 
   /** Conteos para los badges en tabs y statcards. */
   const conteosPorTab: Record<Tab, number> = {
     pendientes: pendientes.length,
+    empezadas: empezadas.length,
     urgentes: urgentes.length,
     vencidas: vencidasRecientes.length,
     semana: estaSemana.length,
@@ -147,15 +202,17 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
   const tareasDelTab =
     tab === "pendientes"
       ? pendientes
-      : tab === "urgentes"
-        ? urgentes
-        : tab === "vencidas"
-          ? vencidasRecientes
-          : tab === "semana"
-            ? estaSemana
-            : tab === "completadas"
-              ? completadas
-              : tareasArchivadas;
+      : tab === "empezadas"
+        ? empezadas
+        : tab === "urgentes"
+          ? urgentes
+          : tab === "vencidas"
+            ? vencidasRecientes
+            : tab === "semana"
+              ? estaSemana
+              : tab === "completadas"
+                ? completadas
+                : tareasArchivadas;
 
   /** Aplica búsqueda sobre el tab activo, sin ir al servidor. */
   const tareasFiltradas = useMemo(() => {
@@ -169,11 +226,8 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     );
   }, [tareasDelTab, busqueda, renombres]);
 
-  const ordenadas = [...tareasFiltradas].sort((a, b) => {
-    const diasA = diasHastaVencimiento(a.vencimiento) ?? Infinity;
-    const diasB = diasHastaVencimiento(b.vencimiento) ?? Infinity;
-    return diasA - diasB;
-  });
+  // Lo que el alumno fijó va arriba de todo, en cualquier pestaña.
+  const ordenadas = ordenarPorPrioridad(tareasFiltradas);
 
   const hoy = capitalizar(
     new Date().toLocaleDateString("es-AR", {
@@ -305,7 +359,9 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
           como rota. Si el total es impar, la última ocupa las dos columnas. */}
       <div className="mb-6 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         {TABS_MAP.filter(
-          ({ valor }) => valor !== "archivados" || hayArchivados,
+          ({ valor }) =>
+            (valor !== "archivados" || hayArchivados) &&
+            (valor !== "empezadas" || empezadas.length > 0),
         ).map(({ valor, etiqueta }) => (
           <button
             key={valor}
@@ -416,12 +472,16 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             const dias = diasHastaVencimiento(tarea.vencimiento);
             const completada = estaCompletada(tarea);
             return (
-              <a
-                key={i}
-                href={tarea.link}
-                target="_blank"
-                rel="noreferrer"
-                className="block bg-white border border-slate-200 shadow-sm rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:hover:border-indigo-500"
+              // Link estirado: la tarjeta es un div y el `after:` del link del
+              // título la cubre entera, así los controles de estado pueden ser
+              // hermanos del link en vez de ir anidados adentro.
+              <div
+                key={claveTarea(tarea) ?? i}
+                className={`group relative bg-white border shadow-sm rounded-xl p-4 transition-all hover:border-indigo-300 hover:shadow-md focus-within:border-indigo-300 dark:bg-slate-800 dark:hover:border-indigo-500 ${
+                  tarea.fijada
+                    ? "border-amber-300 dark:border-amber-500/60"
+                    : "border-slate-200 dark:border-slate-700"
+                }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <span
@@ -433,17 +493,27 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                   >
                     {renombres[tarea.curso] || tarea.curso}
                   </span>
-                  <span
-                    className={`shrink-0 text-xs px-2 py-1 rounded-full ${colorEtiquetaVencimiento(
-                      dias,
-                      completada,
-                    )}`}
-                  >
-                    {completada ? "Entregada" : etiquetaVencimiento(dias)}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <ControlesTarea tarea={tarea} />
+                    <span
+                      className={`shrink-0 text-xs px-2 py-1 rounded-full ${colorEtiquetaVencimiento(
+                        dias,
+                        completada,
+                      )}`}
+                    >
+                      {completada ? "Entregada" : etiquetaVencimiento(dias)}
+                    </span>
+                  </div>
                 </div>
                 <h3 className="font-medium mb-1 text-slate-900 dark:text-slate-100">
-                  {tarea.titulo}
+                  <a
+                    href={tarea.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-indigo-500"
+                  >
+                    {tarea.titulo}
+                  </a>
                 </h3>
                 {tarea.descripcion && (
                   <p className="text-sm text-slate-500 mb-4 line-clamp-2 dark:text-slate-400">
@@ -452,9 +522,16 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 )}
                 <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
                   <span>{formatearFecha(tarea.vencimiento)}</span>
-                  {tarea.puntos !== null && <span>{tarea.puntos} pts</span>}
+                  <span className="flex items-center gap-2">
+                    {tarea.empezada && (
+                      <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                        Empezada
+                      </span>
+                    )}
+                    {tarea.puntos !== null && <span>{tarea.puntos} pts</span>}
+                  </span>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>
@@ -473,12 +550,11 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
               ? "Entregada"
               : etiquetaVencimiento(dias);
             return (
-              <a
-                key={i}
-                href={tarea.link}
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer sm:flex-nowrap sm:gap-4 sm:px-5 dark:hover:bg-slate-700"
+              // Mismo link estirado que la vista cuadrícula, para poder poner
+              // los controles de estado al lado sin anidarlos en el link.
+              <div
+                key={claveTarea(tarea) ?? i}
+                className="group relative flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-slate-50 sm:flex-nowrap sm:gap-4 sm:px-5 dark:hover:bg-slate-700"
               >
                 {/* Indicador de estado */}
                 <span
@@ -495,8 +571,17 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
 
                 {/* Titulo */}
                 <span className="min-w-0 flex-1 text-sm font-medium text-slate-900 truncate dark:text-slate-100">
-                  {tarea.titulo}
+                  <a
+                    href={tarea.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-indigo-500"
+                  >
+                    {tarea.titulo}
+                  </a>
                 </span>
+
+                <ControlesTarea tarea={tarea} />
 
                 {/* Badge de la primera línea (solo mobile) */}
                 <span className={`${claseBadge} sm:hidden`}>{textoBadge}</span>
@@ -529,7 +614,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     {formatearFecha(tarea.vencimiento)}
                   </span>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>

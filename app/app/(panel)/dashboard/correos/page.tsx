@@ -72,12 +72,12 @@ function LimiteGmail() {
  */
 function PermisoFaltante() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8 font-[family-name:var(--font-poppins)]">
-      <div className="max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <h1 className="mb-2 text-lg font-semibold text-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8 font-[family-name:var(--font-poppins)] dark:bg-slate-900">
+      <div className="max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h1 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
           Falta el permiso de Gmail
         </h1>
-        <p className="mb-6 text-sm text-slate-500">
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
           Para mostrarte los correos de Classroom y CVG, Syllo necesita permiso
           de solo lectura sobre tu Gmail. Volvé a iniciar sesión para otorgarlo.
         </p>
@@ -94,9 +94,21 @@ function PermisoFaltante() {
             Reconectar con Google
           </button>
         </form>
+        {/* Reconectar es otorgar el permiso de nuevo: la política tiene que
+            estar a la vista acá igual que en la landing. */}
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          Al continuar aceptás la{" "}
+          <Link
+            href="/privacidad"
+            className="text-slate-600 underline underline-offset-2 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+          >
+            política de privacidad
+          </Link>
+          .
+        </p>
         <Link
           href="/dashboard"
-          className="mt-4 inline-block text-sm text-slate-500 hover:text-slate-700"
+          className="mt-4 inline-block text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
         >
           Volver a mis tareas
         </Link>

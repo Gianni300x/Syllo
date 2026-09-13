@@ -3,6 +3,7 @@
  * Este archivo no importa `googleapis`: lo usan tanto el servidor como el cliente.
  */
 import { MESES_CORTOS } from "./fechas";
+import { normalizar } from "./texto";
 
 export type OrigenCorreo = "Classroom" | "CVG";
 
@@ -81,14 +82,6 @@ export function detectarCurso(texto: string, cursos: string[]): string | null {
   }
 
   return encontrado;
-}
-
-function normalizar(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
 }
 
 /** Hoy muestra la hora; el resto del año, día y mes. */

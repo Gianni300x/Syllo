@@ -1,8 +1,12 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import type { Tarea } from "../../app/lib/classroom";
 import {
+  aplicarEstados,
+  tareaDelFeedComoTarea,
+  tareasParaFeed,
   clasificarTareas,
   contarPendientesPorCurso,
+  ordenarPorPrioridad,
 } from "../../app/lib/tareas-service";
 
 const HOY = new Date(2026, 8, 12, 12, 0, 0); // 12 de septiembre de 2026
@@ -105,5 +109,162 @@ describe("contarPendientesPorCurso", () => {
 
   test("sin tareas devuelve un objeto vacío", () => {
     expect(contarPendientesPorCurso([])).toEqual({});
+  });
+});
+
+describe("clasificarTareas > empezadas", () => {
+  test("junta las pendientes que el alumno marcó como empezadas", () => {
+    const tareas = [
+      enDias(3, { titulo: "Empezada", empezada: true }),
+      enDias(4, { titulo: "Ni tocada" }),
+      enDias(-2, { titulo: "Vencida empezada", empezada: true }),
+      enDias(1, { titulo: "Entregada empezada", estado: "TURNED_IN", empezada: true }),
+    ];
+
+    const { empezadas } = clasificarTareas(tareas);
+
+    // Solo las pendientes: una vencida o ya entregada no es "en progreso".
+    expect(titulos(empezadas)).toEqual(["Empezada"]);
+  });
+});
+
+describe("aplicarEstados", () => {
+  test("pega el estado propio cruzando por courseId/courseWorkId", () => {
+    const tareas = [
+      enDias(3, { titulo: "TP con estado", courseId: "c1", courseWorkId: "w1" }),
+      enDias(5, { titulo: "TP sin estado", courseId: "c1", courseWorkId: "w2" }),
+    ];
+
+    const [conEstado, sinEstado] = aplicarEstados(tareas, {
+      "c1/w1": { empezada: true, fijada: true },
+    });
+
+    expect(conEstado.empezada).toBe(true);
+    expect(conEstado.fijada).toBe(true);
+    expect(sinEstado.empezada).toBeUndefined();
+    expect(sinEstado.fijada).toBeUndefined();
+  });
+
+  test("deja pasar intactas las tareas sin ids (los eventos personales)", () => {
+    const evento = enDias(1, { titulo: "Final", eventoId: "e1" });
+
+    const [resultado] = aplicarEstados([evento], {
+      "c1/w1": { empezada: true, fijada: true },
+    });
+
+    expect(resultado).toEqual(evento);
+  });
+
+  test("no muta las tareas originales", () => {
+    const tarea = enDias(2, { courseId: "c1", courseWorkId: "w1" });
+
+    aplicarEstados([tarea], { "c1/w1": { empezada: true, fijada: false } });
+
+    expect(tarea.empezada).toBeUndefined();
+  });
+});
+
+describe("ordenarPorPrioridad", () => {
+  test("las fijadas van primero aunque venzan mucho después", () => {
+    const tareas = [
+      enDias(1, { titulo: "Urgente" }),
+      enDias(20, { titulo: "Lejana fijada", fijada: true }),
+      enDias(5, { titulo: "Del medio" }),
+    ];
+
+    expect(titulos(ordenarPorPrioridad(tareas))).toEqual([
+      "Lejana fijada",
+      "Urgente",
+      "Del medio",
+    ]);
+  });
+
+  test("dentro de cada grupo ordena por cercanía de la entrega", () => {
+    const tareas = [
+      enDias(9, { titulo: "Fijada lejana", fijada: true }),
+      enDias(2, { titulo: "Fijada cercana", fijada: true }),
+      enDias(8, { titulo: "Suelta lejana" }),
+      enDias(4, { titulo: "Suelta cercana" }),
+    ];
+
+    expect(titulos(ordenarPorPrioridad(tareas))).toEqual([
+      "Fijada cercana",
+      "Fijada lejana",
+      "Suelta cercana",
+      "Suelta lejana",
+    ]);
+  });
+
+  test("las tareas sin fecha quedan al final", () => {
+    const tareas = [
+      enDias(3, { titulo: "Con fecha" }),
+      { ...enDias(3, { titulo: "Sin fecha" }), vencimiento: null },
+    ];
+
+    expect(titulos(ordenarPorPrioridad(tareas))).toEqual([
+      "Con fecha",
+      "Sin fecha",
+    ]);
+  });
+
+  test("no muta el array original", () => {
+    const tareas = [
+      enDias(9, { titulo: "Lejana" }),
+      enDias(1, { titulo: "Cercana" }),
+    ];
+
+    ordenarPorPrioridad(tareas);
+
+    expect(titulos(tareas)).toEqual(["Lejana", "Cercana"]);
+  });
+});
+
+describe("tareasParaFeed", () => {
+  test("solo publica entregas pendientes, con fecha y con ids", () => {
+    const tareas = [
+      enDias(3, { titulo: "Va", courseId: "c1", courseWorkId: "w1" }),
+      enDias(3, {
+        titulo: "Entregada",
+        estado: "TURNED_IN",
+        courseId: "c1",
+        courseWorkId: "w2",
+      }),
+      {
+        ...enDias(3, { titulo: "Sin fecha", courseId: "c1", courseWorkId: "w3" }),
+        vencimiento: null,
+      },
+      enDias(3, { titulo: "Evento personal", eventoId: "e1" }),
+    ];
+
+    expect(tareasParaFeed(tareas).map((t) => t.titulo)).toEqual(["Va"]);
+  });
+
+  test("guarda lo justo para el VEVENT, sin la descripción", () => {
+    const [guardada] = tareasParaFeed([
+      enDias(1, {
+        descripcion: "Resolver los ejercicios del capítulo 3",
+        courseId: "c1",
+        courseWorkId: "w1",
+      }),
+    ]);
+
+    expect(Object.keys(guardada).sort()).toEqual([
+      "courseId",
+      "courseWorkId",
+      "curso",
+      "link",
+      "titulo",
+      "vencimiento",
+    ]);
+  });
+
+  test("la ida y vuelta conserva la clave, que es lo que fija el UID", () => {
+    const original = enDias(2, { courseId: "c1", courseWorkId: "w1" });
+    const [guardada] = tareasParaFeed([original]);
+    const vuelta = tareaDelFeedComoTarea(guardada);
+
+    expect(vuelta.courseId).toBe("c1");
+    expect(vuelta.courseWorkId).toBe("w1");
+    expect(vuelta.vencimiento).toEqual(original.vencimiento);
   });
 });

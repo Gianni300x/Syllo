@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useTransition } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import Sidebar, { type UsuarioSidebar } from "../components/sidebar";
 import { FiltroCursosContext, type FiltroCursosValue } from "./filtro-cursos";
@@ -12,6 +12,7 @@ import {
 } from "./archivados-actions";
 import { renombrarCursoAction } from "./renombrados-actions";
 import ThemeToggle from "./theme-toggle";
+import Aviso from "../components/aviso";
 
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {
@@ -37,7 +38,6 @@ export default function PanelShell({
   onCerrarSesion?: () => void;
   children: React.ReactNode;
 }) {
-  const [cursosSeleccionados, setCursosSeleccionados] = useState<string[]>([]);
   const [conteoPorCurso, setConteoPorCurso] = useState<Record<string, number>>({});
   const [renombresOptimistas, setRenombresOptimistas] = useState<Record<string, string>>({});
   const [actualizando, startActualizar] = useTransition();
@@ -45,35 +45,101 @@ export default function PanelShell({
   const [renombrando, startRenombrar] = useTransition();
   // Solo en mobile: en `lg+` el sidebar está siempre a la vista.
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  /**
+   * El filtro de cursos vive en la URL (`?curso=A&curso=B`), no en estado de
+   * React: así sobrevive a recargar, se puede compartir un link filtrado y el
+   * botón "atrás" deshace un curso por vez.
+   */
+  const cursosSeleccionados = useMemo(
+    () => searchParams.getAll("curso"),
+    [searchParams],
+  );
+
+  /**
+   * Reescribe los `curso` de la URL.
+   *
+   * Va por `history.pushState` y no por `router.push`: Next sincroniza
+   * `useSearchParams` con la API nativa sin volver a pedirle la página al
+   * servidor. El filtro es puramente de cliente —las tareas ya están todas
+   * cargadas—, así que un pedido por clic sería puro desperdicio.
+   *
+   * Lee de `window.location` en vez de la closure para no trabajar nunca sobre
+   * un valor viejo.
+   */
+  const escribirCursos = useCallback(
+    (cursos: string[], modo: "push" | "replace" = "push") => {
+      const params = new URLSearchParams(window.location.search);
+      params.delete("curso");
+      for (const curso of cursos) params.append("curso", curso);
+      const query = params.toString();
+      const url = query ? `?${query}` : window.location.pathname;
+      if (modo === "push") window.history.pushState(null, "", url);
+      else window.history.replaceState(null, "", url);
+    },
+    [],
+  );
+
+  const cursosDeLaUrl = () =>
+    new URLSearchParams(window.location.search).getAll("curso");
+
+  /** Una ruta del panel con el filtro actual pegado, para los links del sidebar. */
+  const hrefConFiltro = useCallback(
+    (ruta: string) => {
+      if (cursosSeleccionados.length === 0) return ruta;
+      const params = new URLSearchParams();
+      for (const curso of cursosSeleccionados) params.append("curso", curso);
+      return `${ruta}?${params.toString()}`;
+    },
+    [cursosSeleccionados],
+  );
 
   const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
+  const avisar = useCallback((mensaje: string) => setAviso(mensaje), []);
+  const cerrarAviso = useCallback(() => setAviso(null), []);
 
   const renombresEfectivos = useMemo(() => ({
     ...renombres,
     ...renombresOptimistas,
   }), [renombres, renombresOptimistas]);
 
-  const toggleCurso = useCallback((curso: string) => {
-    setCursosSeleccionados((prev) =>
-      prev.includes(curso) ? prev.filter((c) => c !== curso) : [...prev, curso],
-    );
-  }, []);
+  const toggleCurso = useCallback(
+    (curso: string) => {
+      const actuales = cursosDeLaUrl();
+      escribirCursos(
+        actuales.includes(curso)
+          ? actuales.filter((c) => c !== curso)
+          : [...actuales, curso],
+      );
+    },
+    [escribirCursos],
+  );
 
-  const limpiarCursos = useCallback(() => setCursosSeleccionados([]), []);
+  const limpiarCursos = useCallback(() => escribirCursos([]), [escribirCursos]);
 
   const archivarCursos = useCallback(
     (lista: string[]) => {
       if (lista.length === 0) return;
-      setCursosSeleccionados((prev) => prev.filter((c) => !lista.includes(c)));
+      // Un curso archivado no puede seguir filtrando la vista.
+      const filtroPrevio = cursosDeLaUrl();
+      escribirCursos(filtroPrevio.filter((c) => !lista.includes(c)));
       startArchivar(async () => {
         const resultado = await archivarCursosAction(lista);
-        if (resultado.error) console.error("No se pudo archivar:", resultado.error);
+        if (resultado.error) {
+          console.error("No se pudo archivar:", resultado.error);
+          avisar("No pudimos archivar el curso. Probá de nuevo.");
+          // Si no se archivó, el filtro tiene que volver a como estaba.
+          // `replace` para no dejar el intento fallido en el historial.
+          escribirCursos(filtroPrevio, "replace");
+        }
         router.refresh();
       });
     },
-    [router],
+    [router, avisar, escribirCursos],
   );
 
   const restaurarCursos = useCallback(
@@ -81,11 +147,14 @@ export default function PanelShell({
       if (lista.length === 0) return;
       startArchivar(async () => {
         const resultado = await restaurarCursosAction(lista);
-        if (resultado.error) console.error("No se pudo restaurar:", resultado.error);
+        if (resultado.error) {
+          console.error("No se pudo restaurar:", resultado.error);
+          avisar("No pudimos desarchivar el curso. Probá de nuevo.");
+        }
         router.refresh();
       });
     },
-    [router],
+    [router, avisar],
   );
 
   const renombrarCurso = useCallback(
@@ -93,15 +162,19 @@ export default function PanelShell({
       setRenombresOptimistas((prev) => ({ ...prev, [original]: nuevo }));
       startRenombrar(async () => {
         const result = await renombrarCursoAction(original, nuevo);
-        if (result.error) console.error("Error renombrando:", result.error);
+        if (result.error) {
+          console.error("Error renombrando:", result.error);
+          avisar("No pudimos guardar el nombre. Probá de nuevo.");
+        }
         router.refresh();
       });
     },
-    [router],
+    [router, avisar],
   );
 
   const value = useMemo<FiltroCursosValue>(
     () => ({
+      cursos,
       cursosSeleccionados,
       toggleCurso,
       limpiarCursos,
@@ -114,8 +187,11 @@ export default function PanelShell({
       renombres: renombresEfectivos,
       renombrarCurso,
       renombrando,
+      avisar,
+      hrefConFiltro,
     }),
     [
+      cursos,
       cursosSeleccionados,
       toggleCurso,
       limpiarCursos,
@@ -127,6 +203,8 @@ export default function PanelShell({
       renombresEfectivos,
       renombrarCurso,
       renombrando,
+      avisar,
+      hrefConFiltro,
     ],
   );
 
@@ -168,6 +246,7 @@ export default function PanelShell({
         </div>
         {/* En mobile el toggle vive en la barra de arriba (ver más abajo). */}
         <ThemeToggle variante="flotante" className="hidden lg:flex" />
+        <Aviso mensaje={aviso} onCerrar={cerrarAviso} />
       </div>
     </FiltroCursosContext.Provider>
   );

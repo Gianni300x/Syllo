@@ -4,8 +4,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 /**
  * Fuerza traer datos frescos en la próxima carga, descartando el
- * cache de `unstable_cache` de tareas, correos, notas, nombres de cursos y
- * cursos archivados.
+ * cache de `unstable_cache` de tareas, correos, notas, nombres de cursos,
+ * cursos archivados y estado propio de las tareas.
  */
 export async function actualizarDatos() {
   revalidateTag("tareas", "max");
@@ -13,5 +13,6 @@ export async function actualizarDatos() {
   revalidateTag("nombres-cursos", "max");
   revalidateTag("notas", "max");
   revalidateTag("cursos-archivados", "max");
+  revalidateTag("estados-tareas", "max");
   revalidatePath("/dashboard/notas");
 }

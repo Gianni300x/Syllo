@@ -1,17 +1,28 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, NotebookPen, Plus, Trash2, X } from "lucide-react";
+import { Loader2, NotebookPen, Plus, Search, Trash2, X } from "lucide-react";
 import {
   MAX_TITULO,
+  contarNotasPorCurso,
   contenidoComoHtml,
   fechaRelativa,
+  filtrarNotas,
   resumen,
   tituloMostrado,
   type Nota,
 } from "../lib/notas";
 import { capitalizar } from "../lib/fechas";
+import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import { colorParaCurso } from "./sidebar";
 import EditorRico from "./editor-rico";
 import type { ResultadoNota } from "../(panel)/dashboard/notas/actions";
 
@@ -25,6 +36,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   nota_vacia: "Escribí un título o algo de contenido.",
   titulo_muy_largo: "El título es demasiado largo.",
   contenido_muy_largo: "La nota es demasiado larga.",
+  curso_invalido: "Ese curso no es válido.",
   falta_id: "No se pudo guardar. Probá de nuevo.",
   nota_no_encontrada: "No encontramos esa nota.",
   error_db: "No se pudo guardar. Probá de nuevo.",
@@ -50,6 +62,26 @@ export default function Notas({
 }) {
   // `null` = nada abierto · `"nueva"` = creando · id = editando esa nota
   const [abierta, setAbierta] = useState<string | null>(null);
+  const [busqueda, setBusqueda] = useState("");
+
+  const { cursos, cursosSeleccionados, setConteoPorCurso, renombres } =
+    useFiltroCursos();
+
+  // Publica el conteo por curso al Sidebar compartido, igual que hacen Tareas,
+  // Correos e Inicio. Antes Notas dejaba a la vista el conteo de la sección
+  // anterior.
+  const conteoPorCurso = useMemo(
+    () => contarNotasPorCurso(notas),
+    [notas],
+  );
+  useEffect(() => {
+    setConteoPorCurso(conteoPorCurso);
+  }, [conteoPorCurso, setConteoPorCurso]);
+
+  const visibles = useMemo(
+    () => filtrarNotas(notas, cursosSeleccionados, busqueda, renombres),
+    [notas, cursosSeleccionados, busqueda, renombres],
+  );
 
   const hoy = capitalizar(
     new Date().toLocaleDateString("es-AR", {
@@ -70,35 +102,67 @@ export default function Notas({
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Notas
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {hoy}
-          </p>
+      <div className="mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              {/* El título dice qué filtro está puesto, igual que en Tareas. */}
+              {cursosSeleccionados.length === 0
+                ? "Notas"
+                : cursosSeleccionados.length === 1
+                  ? renombres[cursosSeleccionados[0]] || cursosSeleccionados[0]
+                  : `${cursosSeleccionados.length} cursos seleccionados`}
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{hoy}</p>
+          </div>
+          <button
+            onClick={() => setAbierta("nueva")}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <Plus size={16} />
+            Nueva nota
+          </button>
         </div>
-        <button
-          onClick={() => setAbierta("nueva")}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-        >
-          <Plus size={16} />
-          Nueva nota
-        </button>
+
+        {/* Las notas ya están todas en el cliente: la búsqueda es en memoria,
+            sin debounce (a diferencia de Correos, que consulta a Gmail). */}
+        <div className="relative mt-4 sm:max-w-xs">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setBusqueda("");
+            }}
+            placeholder="Buscar en tus notas…"
+            aria-label="Buscar en tus notas"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+          />
+        </div>
       </div>
 
       {notas.length === 0 && abierta !== "nueva" ? (
         <EstadoVacio onNueva={() => setAbierta("nueva")} />
+      ) : visibles.length === 0 ? (
+        <p className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">
+          {busqueda
+            ? `Sin resultados para "${busqueda}".`
+            : "No hay notas en los cursos seleccionados."}
+        </p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {notas.map((nota) => (
+          {visibles.map((nota) => (
             <li key={nota.id}>
               <TarjetaNota
                 nota={nota}
                 activa={abierta === nota.id}
                 onAbrir={() => setAbierta(nota.id)}
                 eliminarNota={eliminarNota}
+                cursos={cursos}
+                renombres={renombres}
               />
             </li>
           ))}
@@ -115,6 +179,11 @@ export default function Notas({
           nota={notaEnEdicion}
           accion={notaEnEdicion ? editarNota : crearNota}
           onCerrar={() => setAbierta(null)}
+          cursos={cursos}
+          cursoSugerido={
+            cursosSeleccionados.length === 1 ? cursosSeleccionados[0] : null
+          }
+          renombres={renombres}
         />
       </PanelLateral>
     </main>
@@ -237,11 +306,15 @@ function TarjetaNota({
   activa,
   onAbrir,
   eliminarNota,
+  cursos,
+  renombres,
 }: {
   nota: Nota;
   activa: boolean;
   onAbrir: () => void;
   eliminarNota: AccionNota;
+  cursos: string[];
+  renombres: Record<string, string>;
 }) {
   const [confirmando, setConfirmando] = useState(false);
   const [estado, accion, pendiente] = useActionState(eliminarNota, INICIAL);
@@ -267,6 +340,17 @@ function TarjetaNota({
         onClick={onAbrir}
         className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
       >
+        {nota.curso && (
+          <span
+            className={`mb-1 block truncate text-xs font-medium ${colorParaCurso(
+              nota.curso,
+              cursos,
+            )}`}
+            title={renombres[nota.curso] || nota.curso}
+          >
+            {renombres[nota.curso] || nota.curso}
+          </span>
+        )}
         <h3 className="line-clamp-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
           {tituloMostrado(nota)}
         </h3>
@@ -334,10 +418,17 @@ function EditorNota({
   nota,
   accion,
   onCerrar,
+  cursos,
+  cursoSugerido,
+  renombres,
 }: {
   nota: Nota | null;
   accion: AccionNota;
   onCerrar: () => void;
+  cursos: string[];
+  /** Con un solo curso filtrado, la nota nueva arranca en ese curso. */
+  cursoSugerido: string | null;
+  renombres: Record<string, string>;
 }) {
   const [estado, enviar, pendiente] = useActionState(accion, INICIAL);
   // HTML del editor. Las notas viejas están en markdown: `contenidoComoHtml`
@@ -382,6 +473,25 @@ function EditorNota({
           maxLength={MAX_TITULO}
           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
+
+        <select
+          name="curso"
+          defaultValue={nota?.curso ?? cursoSugerido ?? ""}
+          aria-label="Curso de la nota"
+          className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        >
+          <option value="">Sin curso</option>
+          {/* Si la nota quedó colgada de un curso que ya no está en Classroom,
+              su opción igual aparece para no perderla al guardar. */}
+          {(nota?.curso && !cursos.includes(nota.curso)
+            ? [...cursos, nota.curso]
+            : cursos
+          ).map((curso) => (
+            <option key={curso} value={curso}>
+              {renombres[curso] || curso}
+            </option>
+          ))}
+        </select>
 
         {/* El valor viaja al form acá: Tiptap vive fuera del ciclo de formularios. */}
         <input type="hidden" name="contenido" value={contenido} />

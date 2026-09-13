@@ -347,9 +347,13 @@ function EnlaceSeccion({
   /** En mobile el drawer se cierra al elegir una sección. */
   onNavegar?: () => void;
 }) {
+  // El filtro vive en la URL, así que cambiar de sección lo perdería si el link
+  // no se lo lleva puesto. Solo viaja `curso`: `tab` y `vista` son de Tareas.
+  const { hrefConFiltro } = useFiltroCursos();
+
   return (
     <Link
-      href={href}
+      href={hrefConFiltro(href)}
       onClick={onNavegar}
       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
         activo

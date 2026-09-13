@@ -86,6 +86,11 @@ export async function fetchTareasDesdeClassroom(
           vencimiento: normalizarVencimiento(trabajo.dueDate),
           estado: estadoPorTrabajo.get(trabajo.id ?? "") ?? "CREATED",
           link: trabajo.alternateLink ?? "",
+          // Los ids viajan con la tarea (antes se usaban solo como clave del
+          // Map de arriba y se tiraban): son la única clave estable donde
+          // colgar el estado propio del alumno y el UID del calendario.
+          courseId: curso.id ?? undefined,
+          courseWorkId: trabajo.id ?? undefined,
         }) satisfies Tarea,
     );
   });

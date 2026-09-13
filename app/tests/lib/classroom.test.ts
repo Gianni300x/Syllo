@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import {
+  claveTarea,
   diasHastaVencimiento,
   estaCompletada,
   etiquetaVencimiento,
@@ -97,5 +98,44 @@ describe("etiquetaVencimiento", () => {
     expect(etiquetaVencimiento(0)).toBe("Vence hoy");
     expect(etiquetaVencimiento(1)).toBe("Vence mañana");
     expect(etiquetaVencimiento(5)).toBe("5 días restantes");
+  });
+});
+
+describe("claveTarea", () => {
+  const base: Tarea = {
+    curso: "Análisis",
+    titulo: "TP 4",
+    descripcion: "",
+    puntos: null,
+    vencimiento: null,
+    estado: "CREATED",
+    link: "https://classroom.google.com/x",
+  };
+
+  test("arma la clave con los dos ids de Classroom", () => {
+    expect(claveTarea({ ...base, courseId: "c1", courseWorkId: "w1" })).toBe(
+      "c1/w1",
+    );
+  });
+
+  test("no depende del nombre del curso, del título ni de la fecha", () => {
+    const antes = { ...base, courseId: "c1", courseWorkId: "w1" };
+    const despues = {
+      ...antes,
+      curso: "Análisis Matemático II",
+      titulo: "TP 4 (reprogramado)",
+      vencimiento: { year: 2026, month: 10, day: 1 },
+    };
+
+    expect(claveTarea(despues)).toBe(claveTarea(antes));
+  });
+
+  test("devuelve null para un evento personal", () => {
+    expect(claveTarea({ ...base, eventoId: "e1" })).toBeNull();
+  });
+
+  test("devuelve null si falta alguno de los dos ids", () => {
+    expect(claveTarea({ ...base, courseId: "c1" })).toBeNull();
+    expect(claveTarea({ ...base, courseWorkId: "w1" })).toBeNull();
   });
 });

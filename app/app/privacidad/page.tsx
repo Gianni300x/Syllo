@@ -47,48 +47,65 @@ export default function PrivacidadPage() {
           </p>
         </Seccion>
 
-        <Seccion titulo="Qué permisos pedimos y para qué">
-          <ul className="space-y-3">
-            <Permiso scope="classroom.courses.readonly">
-              Listar tus cursos activos, para armar la barra lateral y agrupar
-              todo por materia.
-            </Permiso>
-            <Permiso scope="classroom.coursework.me.readonly">
-              Leer el trabajo asignado de cada curso: título, descripción,
-              puntaje y fecha de entrega.
-            </Permiso>
-            <Permiso scope="classroom.student-submissions.me.readonly">
-              Saber si cada tarea está entregada o pendiente, para poder
-              clasificarlas.
-            </Permiso>
-            <Permiso scope="gmail.readonly">
-              Leer únicamente los correos que te mandan Google Classroom y tu
-              universidad, para mostrarlos en la bandeja de Syllo. La búsqueda
-              está acotada a esos remitentes: el resto de tu correo no se
-              consulta.
-            </Permiso>
-          </ul>
-        </Seccion>
-
         <Seccion titulo="Qué se guarda y qué no">
           <p>
-            <strong>No guardamos</strong> tus tareas ni tus correos en nuestra
-            base de datos. Se piden a Google en el momento y quedan en una
-            memoria temporal de pocos minutos, solo para que la app no vuelva a
-            consultar lo mismo en cada clic.
+            <strong>No guardamos</strong> tus correos en nuestra base de datos.
+            Se piden a Google en el momento y quedan en una memoria temporal de
+            pocos minutos, solo para que la app no vuelva a consultar lo mismo
+            en cada clic. Lo mismo vale para el contenido de tus tareas.
           </p>
           <p>
             <strong>Sí guardamos</strong>, asociado a tu dirección de correo, lo
             que vos creás dentro de Syllo:
           </p>
           <ul className="ml-5 list-disc space-y-1">
-            <li>Las notas que escribís (título y contenido).</li>
+            <li>Las notas que escribís (título, contenido y curso).</li>
             <li>Los eventos que agregás al calendario.</li>
             <li>Qué cursos archivaste y los nombres cortos que les pusiste.</li>
+            <li>
+              Qué entregas marcaste como empezadas o fijaste, para que sigan
+              así la próxima vez que entrés.
+            </li>
           </ul>
           <p>
+            Si activás el calendario suscribible, guardamos además el{" "}
+            <strong>curso, el título, la fecha y el link</strong> de tus
+            entregas pendientes. Es la única forma de que Google o Apple
+            consulten tu calendario cuando vos no estás usando la app: lo hacen
+            sin tu sesión, así que los datos tienen que estar de nuestro lado.
+            No se guarda la descripción de las tareas, ni las que ya entregaste.
+            Podés apagarlo generando un link nuevo y no suscribiéndolo, o
+            pidiéndonos que lo borremos.
+          </p>
+          <p>
             Tu sesión vive en una cookie cifrada que contiene los tokens de
-            acceso de Google. No se almacenan en nuestra base de datos.
+            acceso de Google. <strong>No</strong> se almacenan en nuestra base
+            de datos: Syllo no puede entrar a tu cuenta de Google si vos no
+            estás usando la app.
+          </p>
+        </Seccion>
+
+        <Seccion titulo="Cookies">
+          <p>
+            Syllo usa <strong>una sola cookie propia</strong>: la de tu sesión.
+            Va cifrada, no se puede leer desde otras páginas y es lo que te
+            mantiene adentro sin tener que entrar de nuevo en cada clic. Al
+            momento de iniciar sesión, Google suma unas cookies pasajeras para
+            completar el ingreso de forma segura.
+          </p>
+          <p>
+            Son las mínimas para que la app funcione: sin ellas no hay sesión
+            posible, así que no hay nada que activar ni desactivar.
+          </p>
+          <p>
+            <strong>No hay cookies de terceros, ni de analítica, ni de
+            publicidad.</strong> Lo único que Syllo guarda además en tu
+            navegador es si preferís el modo claro u oscuro: no es un dato
+            personal, no se envía a ningún lado y no sale de ese dispositivo.
+          </p>
+          <p>
+            Se borran cuando cerrás sesión, o cuando borrás los datos del sitio
+            desde tu navegador.
           </p>
         </Seccion>
 
@@ -105,16 +122,15 @@ export default function PrivacidadPage() {
           <p>
             Con nadie, salvo la infraestructura necesaria para que la app
             funcione: <strong>Google</strong> (de donde vienen tus datos) y el
-            proveedor de la base de datos donde se guardan tus notas, eventos y
-            preferencias de cursos. Ninguno de los dos los usa para otra cosa.
+            proveedor de la base de datos donde se guardan tus notas, eventos,
+            preferencias de cursos y vencimientos. Ninguno de los dos los usa
+            para otra cosa.
           </p>
         </Seccion>
 
         <Seccion titulo="Cómo borrar tus datos">
           <p>
             Podés borrar tus notas y eventos desde la app en cualquier momento.
-            Para eliminar toda tu información, escribinos y damos de baja todo
-            lo asociado a tu cuenta.
           </p>
           <p>
             También podés cortarle el acceso a Syllo cuando quieras desde{" "}
@@ -132,13 +148,25 @@ export default function PrivacidadPage() {
 
         <Seccion titulo="Contacto">
           <p>
-            Syllo lo construyen dos estudiantes. Si tenés una duda o querés que
-            borremos tus datos, escribinos a{" "}
-            <strong>hola@syllo.app</strong>.
+            Syllo lo construyen dos estudiantes. Si tenés una duda o querés implementar algo, escribinos a <Mail />.
           </p>
         </Seccion>
       </div>
     </main>
+  );
+}
+
+/** El mail de contacto, en un solo lugar: aparece en dos secciones. */
+const MAIL_CONTACTO = "gnnmessina@gmail.com";
+
+function Mail() {
+  return (
+    <a
+      href={`mailto:${MAIL_CONTACTO}`}
+      className="font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+    >
+      {MAIL_CONTACTO}
+    </a>
   );
 }
 
@@ -161,19 +189,4 @@ function Seccion({
   );
 }
 
-function Permiso({
-  scope,
-  children,
-}: {
-  scope: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
-      <code className="text-xs font-[family-name:var(--font-geist-mono)] text-indigo-600 dark:text-indigo-400">
-        {scope}
-      </code>
-      <p className="mt-1">{children}</p>
-    </li>
-  );
-}
+

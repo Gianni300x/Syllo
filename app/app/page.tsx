@@ -86,13 +86,18 @@ export default function Home() {
                   Continuá con Google
                 </button>
               </form>
+              {/* El texto va envuelto en un `span`: `.note` es flex, y un nodo
+                  de texto suelto más el link serían dos ítems en la misma fila. */}
               <p className="note">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <circle cx="12" cy="12" r="9" />
                   <path d="M12 11v5M12 8h.01" strokeLinecap="round" />
                 </svg>
-                Syllo solo lee tus cursos, tareas y correos. Nunca modifica ni
-                envía nada por vos.
+                <span>
+                  Syllo solo lee tus cursos, tareas y correos. Nunca modifica ni
+                  envía nada por vos. Al continuar aceptás la{" "}
+                  <Link href="/privacidad">política de privacidad</Link>.
+                </span>
               </p>
             </HeroFadeIn>
           </section>
@@ -290,9 +295,9 @@ export default function Home() {
                   Calendario
                 </h3>
                 <p>
-                  Los vencimientos de Classroom en una vista mensual. Con un
-                  click los exportás a Google o Apple Calendar para que te
-                  avisen ellos.
+                  Los vencimientos de Classroom en una vista mensual. Suscribís
+                  tu calendario con un link y te avisa el celular el día antes
+                  de cada entrega.
                 </p>
               </div>
               <div className="mini cal" aria-hidden="true">
@@ -305,7 +310,7 @@ export default function Home() {
                     <span key={n} className={`d${clase ? ` ${clase}` : ""}`}>{n}</span>
                   ))}
                 </div>
-                <div className="foot"><span>↓ Exportar .ics</span></div>
+                <div className="foot"><span>↗ Suscribirse</span></div>
               </div>
             </ScrollFadeInLi>
           </ul>
@@ -531,6 +536,17 @@ const CSS = `
     flex: none;
     margin-top: 0.15rem;
   }
+
+  /* Subrayado desde el principio: un link legal tiene que verse sin pasar el
+     mouse por encima. Mismo lenguaje que el del footer, un tono más marcado. */
+  .syllo-landing .note a {
+    color: var(--text-2);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+
+  .syllo-landing .note a:hover,
+  .syllo-landing .note a:focus-visible { color: var(--text); }
 
   /* ---------- Maqueta del panel ---------- */
 

@@ -10,6 +10,38 @@ export interface Tarea {
   link: string;
   /** Presente solo si es un evento personal (tabla `eventos`), no una tarea de Classroom. */
   eventoId?: string;
+  /** Ids de Classroom. Ausentes en los eventos personales (ver `eventoId`). */
+  courseId?: string;
+  courseWorkId?: string;
+  /** Estado propio del alumno, de la tabla `estados_tareas`. Lo pega `aplicarEstados`. */
+  empezada?: boolean;
+  fijada?: boolean;
+}
+
+/**
+ * Clave estable de una tarea de Classroom, para colgarle estado propio.
+ *
+ * Es el par (curso, trabajo) que devuelve Google: sobrevive a que el usuario
+ * renombre el curso, a que el profesor cambie el título y a que se mueva la
+ * fecha de entrega. Devuelve `null` para lo que no es una tarea de Classroom
+ * (un evento personal) o para una tarea a la que Google no le mandó los ids.
+ */
+export function claveTarea(tarea: Tarea): string | null {
+  if (!tarea.courseId || !tarea.courseWorkId) return null;
+  return `${tarea.courseId}/${tarea.courseWorkId}`;
+}
+
+/**
+ * Lo mínimo de una entrega para armar su VEVENT en el feed de calendario.
+ * Es lo único que se persiste de Classroom (tabla `snapshot_tareas`).
+ */
+export interface TareaDelFeed {
+  courseId: string;
+  courseWorkId: string;
+  curso: string;
+  titulo: string;
+  vencimiento: NonNullable<Tarea["vencimiento"]>;
+  link: string;
 }
 
 const ESTADOS_COMPLETADOS = ["TURNED_IN", "RETURNED"];

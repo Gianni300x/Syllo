@@ -1,10 +1,12 @@
 /**
  * Genera un calendario .ics (RFC 5545) a partir de las tareas, para que el
- * usuario lo importe a Google/Apple Calendar y reciba sus recordatorios
- * nativos. No hay feed en vivo: es una foto de las tareas pendientes al
- * momento de exportar (ver contexto en el plan de esta feature).
+ * usuario reciba los recordatorios nativos de su celular.
+ *
+ * Sirve a los dos consumidores: la descarga de una vez (`/api/tareas/ics`) y
+ * el feed suscribible (`/api/calendario/[token]`), que es el mismo texto con
+ * las cabeceras de publicación puestas.
  */
-import { estaCompletada, type Tarea } from "./classroom";
+import { claveTarea, estaCompletada, type Tarea } from "./classroom";
 
 /** Escapa texto para un campo de contenido ICS (coma, punto y coma, backslash, salto de línea). */
 function escaparTexto(texto: string): string {
@@ -66,13 +68,53 @@ function hashCorto(texto: string): string {
   return (h >>> 0).toString(36);
 }
 
-export function generarIcs(tareas: Tarea[]): string {
+/**
+ * UID del evento: tiene que sobrevivir a los cambios, o el calendario del
+ * usuario borra el evento viejo y agrega uno nuevo cada vez que se renombra un
+ * curso o se mueve una fecha (y pierde lo que él le haya puesto encima).
+ *
+ * Por eso se usan los ids de Classroom, o el id del evento personal. El hash
+ * de curso+título+fecha queda solo como fallback para lo que no tenga ninguno.
+ */
+function uidPara(tarea: Tarea, fechaInicio: string): string {
+  const clave = claveTarea(tarea);
+  if (clave) return `${clave.replace("/", "-")}@syllo.app`;
+  if (tarea.eventoId) return `evento-${tarea.eventoId}@syllo.app`;
+  return `${hashCorto(`${tarea.curso}|${tarea.titulo}|${fechaInicio}`)}@syllo.app`;
+}
+
+export interface OpcionesIcs {
+  /** Nombre del calendario en Google/Apple. */
+  nombre?: string;
+  /**
+   * Cabeceras de feed suscribible. En la descarga de una vez no van: no hay
+   * ninguna URL que refrescar.
+   */
+  comoFeed?: boolean;
+  /** Nombres a mostrar por curso (los renombres del usuario). */
+  renombres?: Record<string, string>;
+}
+
+export function generarIcs(
+  tareas: Tarea[],
+  opciones: OpcionesIcs = {},
+): string {
+  const { nombre = "Syllo", comoFeed = false, renombres = {} } = opciones;
+
   const lineas = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Syllo//Tareas//ES",
     "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    `X-WR-CALNAME:${escaparTexto(nombre)}`,
   ];
+
+  if (comoFeed) {
+    // Cuánto esperar antes de volver a pedir el feed. Google y Apple lo toman
+    // como sugerencia: igual refrescan cada varias horas por su cuenta.
+    lineas.push("REFRESH-INTERVAL;VALUE=DURATION:PT6H", "X-PUBLISHED-TTL:PT6H");
+  }
 
   for (const tarea of tareas) {
     if (estaCompletada(tarea) || !tarea.vencimiento) continue;
@@ -85,7 +127,8 @@ export function generarIcs(tareas: Tarea[]): string {
     const fin = new Date(inicio);
     fin.setDate(fin.getDate() + 1); // DTEND es exclusivo en eventos de todo el día
 
-    const uid = `${hashCorto(`${tarea.curso}|${tarea.titulo}|${fechaComoYYYYMMDD(inicio)}`)}@syllo.app`;
+    const uid = uidPara(tarea, fechaComoYYYYMMDD(inicio));
+    const curso = renombres[tarea.curso] || tarea.curso;
 
     lineas.push(
       "BEGIN:VEVENT",
@@ -93,7 +136,7 @@ export function generarIcs(tareas: Tarea[]): string {
       `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
       `DTSTART;VALUE=DATE:${fechaComoYYYYMMDD(inicio)}`,
       `DTEND;VALUE=DATE:${fechaComoYYYYMMDD(fin)}`,
-      `SUMMARY:${escaparTexto(`${tarea.curso}: ${tarea.titulo}`)}`,
+      `SUMMARY:${escaparTexto(`${curso}: ${tarea.titulo}`)}`,
     );
 
     if (tarea.descripcion) {
@@ -102,6 +145,17 @@ export function generarIcs(tareas: Tarea[]): string {
     if (tarea.link && tarea.link !== "#") {
       lineas.push(`URL:${escaparTexto(tarea.link)}`);
     }
+
+    // El recordatorio, que es para lo que existe todo esto. En un evento de
+    // todo el día DTSTART es la medianoche del día de entrega: 15 horas antes
+    // cae a las 9 de la mañana del día anterior.
+    lineas.push(
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      "TRIGGER;RELATED=START:-PT15H",
+      `DESCRIPTION:${escaparTexto(`${curso}: ${tarea.titulo}`)}`,
+      "END:VALARM",
+    );
 
     lineas.push("END:VEVENT");
   }

@@ -3,11 +3,14 @@
  * No importa `db` ni nada de servidor: lo usan tanto el server como el cliente.
  */
 import { quitarMarcas, renderMarkdown } from "./markdown";
+import { normalizar } from "./texto";
 
 export interface Nota {
   id: string;
   titulo: string;
   contenido: string;
+  /** Nombre del curso, o `null` si la nota no es de ninguna materia. */
+  curso: string | null;
   /** ISO string, para poder serializar del server component al client. */
   createdAt: string;
   updatedAt: string;
@@ -101,4 +104,44 @@ export function fechaRelativa(iso: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+/**
+ * Notas que quedan tras aplicar el filtro de cursos del sidebar y el buscador.
+ *
+ * Con cursos seleccionados, las notas sin curso quedan afuera: si estás
+ * mirando "Análisis", una nota suelta no es de Análisis. Sin selección se ven
+ * todas.
+ */
+export function filtrarNotas(
+  notas: Nota[],
+  cursosSeleccionados: string[],
+  busqueda: string,
+  renombres: Record<string, string> = {},
+): Nota[] {
+  const porCurso =
+    cursosSeleccionados.length === 0
+      ? notas
+      : notas.filter((n) => n.curso && cursosSeleccionados.includes(n.curso));
+
+  const q = normalizar(busqueda);
+  if (!q) return porCurso;
+
+  return porCurso.filter((nota) => {
+    const curso = nota.curso ? renombres[nota.curso] || nota.curso : "";
+    return (
+      normalizar(nota.titulo).includes(q) ||
+      normalizar(textoPlano(nota.contenido)).includes(q) ||
+      normalizar(curso).includes(q)
+    );
+  });
+}
+
+/** Notas por curso, para el contador del sidebar. */
+export function contarNotasPorCurso(notas: Nota[]): Record<string, number> {
+  const conteo: Record<string, number> = {};
+  for (const nota of notas) {
+    if (nota.curso) conteo[nota.curso] = (conteo[nota.curso] ?? 0) + 1;
+  }
+  return conteo;
 }

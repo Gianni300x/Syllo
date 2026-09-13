@@ -1,12 +1,15 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import {
+  contarNotasPorCurso,
   contenidoComoHtml,
   esHtml,
   estaVacio,
   fechaRelativa,
+  filtrarNotas,
   resumen,
   textoPlano,
   tituloMostrado,
+  type Nota,
 } from "../../app/lib/notas";
 
 const HOY = new Date(2026, 8, 12, 12, 0, 0); // 12 de septiembre de 2026
@@ -136,5 +139,80 @@ describe("fechaRelativa", () => {
 
   test("más de un mes muestra la fecha", () => {
     expect(fechaRelativa(haceMinutos(60 * 24 * 60))).toContain("2026");
+  });
+});
+
+function nota(parcial: Partial<Nota> = {}): Nota {
+  return {
+    id: Math.random().toString(36).slice(2),
+    titulo: "Sin título",
+    contenido: "",
+    curso: null,
+    createdAt: HOY.toISOString(),
+    updatedAt: HOY.toISOString(),
+    ...parcial,
+  };
+}
+
+const titulos = (notas: Nota[]) => notas.map((n) => n.titulo);
+
+describe("filtrarNotas", () => {
+  const notas = [
+    nota({ titulo: "Resumen de límites", curso: "Análisis" }),
+    nota({ titulo: "Fórmulas", curso: "Física" }),
+    nota({ titulo: "Lista del súper", curso: null }),
+  ];
+
+  test("sin filtro ni búsqueda devuelve todo", () => {
+    expect(filtrarNotas(notas, [], "")).toHaveLength(3);
+  });
+
+  test("filtra por los cursos seleccionados en el sidebar", () => {
+    expect(titulos(filtrarNotas(notas, ["Análisis"], ""))).toEqual([
+      "Resumen de límites",
+    ]);
+  });
+
+  test("con cursos seleccionados, las notas sin curso quedan afuera", () => {
+    const resultado = filtrarNotas(notas, ["Análisis", "Física"], "");
+    expect(titulos(resultado)).not.toContain("Lista del súper");
+  });
+
+  test("busca en el título sin importar tildes ni mayúsculas", () => {
+    expect(titulos(filtrarNotas(notas, [], "LIMITES"))).toEqual([
+      "Resumen de límites",
+    ]);
+  });
+
+  test("busca dentro del contenido, sea HTML o markdown viejo", () => {
+    const conContenido = [
+      nota({ titulo: "Una", contenido: "<p>derivadas parciales</p>" }),
+      nota({ titulo: "Otra", contenido: "## Repaso de **integrales**" }),
+    ];
+
+    expect(titulos(filtrarNotas(conContenido, [], "parciales"))).toEqual(["Una"]);
+    expect(titulos(filtrarNotas(conContenido, [], "integrales"))).toEqual(["Otra"]);
+  });
+
+  test("busca por el nombre corto que el usuario le puso al curso", () => {
+    const resultado = filtrarNotas(notas, [], "am2", { Análisis: "AM2" });
+    expect(titulos(resultado)).toEqual(["Resumen de límites"]);
+  });
+
+  test("el filtro del sidebar y la búsqueda se aplican juntos", () => {
+    expect(filtrarNotas(notas, ["Física"], "límites")).toEqual([]);
+  });
+});
+
+describe("contarNotasPorCurso", () => {
+  test("cuenta por curso y saltea las notas sueltas", () => {
+    const conteo = contarNotasPorCurso([
+      nota({ curso: "Análisis" }),
+      nota({ curso: "Análisis" }),
+      nota({ curso: "Física" }),
+      nota({ curso: null }),
+    ]);
+
+    expect(conteo).toEqual({ Análisis: 2, Física: 1 });
   });
 });

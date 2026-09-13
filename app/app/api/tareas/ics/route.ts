@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { getTareas } from "@/app/lib/tareas-server";
 import { getCursosArchivados } from "@/app/lib/archivados-server";
+import { getCursosRenombrados } from "@/app/lib/renombrados-server";
 import { eventoComoTarea, getEventos } from "@/app/lib/eventos-service";
 import { generarIcs } from "@/app/lib/ics";
 import { NextResponse } from "next/server";
@@ -13,10 +14,11 @@ export async function GET() {
   }
 
   const userId = session.user?.email ?? "anon";
-  const [tareas, cursosArchivados, eventosRaw] = await Promise.all([
+  const [tareas, cursosArchivados, eventosRaw, renombres] = await Promise.all([
     getTareas(session.access_token, userId),
     getCursosArchivados(userId),
     getEventos(userId),
+    getCursosRenombrados(userId),
   ]);
 
   const tareasActivas = tareas.filter(
@@ -26,7 +28,14 @@ export async function GET() {
     .map(eventoComoTarea)
     .filter((t) => !cursosArchivados.includes(t.curso));
 
-  return new NextResponse(generarIcs([...tareasActivas, ...eventosActivos]), {
+  // La descarga de una vez, para quien no quiera suscribirse. El feed en vivo
+  // vive en `/api/calendario/[token]`.
+  const ics = generarIcs([...tareasActivas, ...eventosActivos], {
+    nombre: "Syllo",
+    renombres,
+  });
+
+  return new NextResponse(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": 'attachment; filename="syllo.ics"',
