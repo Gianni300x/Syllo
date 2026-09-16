@@ -12,6 +12,7 @@ import {
   diasHastaVencimiento,
 } from "@/features/tareas/services/classroom";
 import NuevoEventoModal from "./nuevo-evento-modal";
+import { Button } from "@/components/ui/button";
 
 export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
   // Estable entre renders: un `new Date()` suelto cambia la identidad de las
@@ -169,13 +170,10 @@ export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-center bg-slate-50/50 dark:bg-slate-800/20 min-h-[200px]">
                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">No tienes eventos ni tareas para este mes.</p>
-               <button
-                  onClick={() => setModalAbierto(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm cursor-pointer"
-                >
+               <Button onClick={() => setModalAbierto(true)} size="lg" className="rounded-xl">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M10 16h4"/><path d="M12 14v4"/></svg>
                   Agregar Evento
-               </button>
+               </Button>
             </div>
           )}
         </div>

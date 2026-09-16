@@ -6,6 +6,7 @@ import { bgParaCurso } from "@/lib/cursos-color";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "@/features/tareas/services/classroom";
 import { capitalizar } from "@/lib/fechas";
+import { Button } from "@/components/ui/button";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -170,27 +171,32 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <AgregarEventoModal />
           <SuscribirCalendarioModal />
-          <button
+          <Button
             onClick={irAHoy}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:border-slate-600"
+            variant="outline"
+            className="text-slate-600 dark:text-slate-300"
           >
             Hoy
-          </button>
+          </Button>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
-            <button
+            <Button
               onClick={() => irAMes(-1)}
+              variant="ghost"
+              size="icon-sm"
               title="Mes anterior"
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-colors cursor-pointer dark:hover:text-slate-100"
+              className="text-slate-500 dark:hover:text-slate-100"
             >
               <ChevronLeft size={16} />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => irAMes(1)}
+              variant="ghost"
+              size="icon-sm"
               title="Mes siguiente"
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-colors cursor-pointer dark:hover:text-slate-100"
+              className="text-slate-500 dark:hover:text-slate-100"
             >
               <ChevronRight size={16} />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -433,13 +439,15 @@ function DetalleDia({
           <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
             {etiquetaDiaLargo(fecha)}
           </p>
-          <button
+          <Button
             onClick={onCerrar}
+            variant="ghost"
+            size="icon-xs"
             title="Cerrar"
-            className="shrink-0 rounded-md p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer dark:hover:text-slate-200"
+            className="shrink-0 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
           >
             <X size={16} />
-          </button>
+          </Button>
         </div>
         <div className="flex flex-col gap-1">
           {tareas.map((tarea, i) => (
