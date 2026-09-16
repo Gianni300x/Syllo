@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { fetchCorreoCompleto } from "@/app/lib/correos-server";
-import { getNombresCursos } from "@/app/lib/tareas-server";
+import { getNombresCursos } from "@/features/tareas/services/tareas-server";
 
 export async function GET(
   _request: NextRequest,

@@ -4,7 +4,7 @@ import {
   fetchCorreosDeClassroom,
   MAX_CORREOS_POR_PAGINA,
 } from "@/app/lib/correos-server";
-import { getNombresCursos } from "@/app/lib/tareas-server";
+import { getNombresCursos } from "@/features/tareas/services/tareas-server";
 
 export async function GET(request: NextRequest) {
   const session = await auth();

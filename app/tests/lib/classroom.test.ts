@@ -8,7 +8,7 @@ import {
   fechaVencimiento,
   formatearFecha,
   type Tarea,
-} from "../../src/app/lib/classroom";
+} from "@/features/tareas/services/classroom";
 
 /**
  * Fecha de referencia de toda la suite. Sin congelar el reloj, cualquier test

@@ -10,8 +10,8 @@ import { randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { feedsCalendario, snapshotTareas } from "./schema";
-import type { Tarea, TareaDelFeed } from "./classroom";
-import { tareasParaFeed } from "./tareas-service";
+import type { Tarea, TareaDelFeed } from "@/features/tareas/services/classroom";
+import { tareasParaFeed } from "@/features/tareas/services/tareas-service";
 
 /**
  * 24 bytes de entropía. La URL del feed es la credencial —viaja a Google y

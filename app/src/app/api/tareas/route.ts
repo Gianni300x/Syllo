@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getTareas } from "@/app/lib/tareas-server";
+import { getTareas } from "@/features/tareas/services/tareas-server";
 import { NextResponse } from "next/server";
 
 export async function GET() {

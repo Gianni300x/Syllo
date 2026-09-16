@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getTareas } from "@/app/lib/tareas-server";
+import { getTareas } from "@/features/tareas/services/tareas-server";
 import { getCursosArchivados } from "@/app/lib/archivados-server";
 import { getCursosRenombrados } from "@/app/lib/renombrados-server";
 import { eventoComoTarea, getEventos } from "@/app/lib/eventos-service";

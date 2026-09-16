@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getTareas } from "../../../lib/tareas-server";
+import { getTareas } from "@/features/tareas/services/tareas-server";
 import { eventoComoTarea, getEventosCached } from "../../../lib/eventos-service";
 import Calendario from "../../../components/calendario";
-import type { Tarea } from "../../../lib/classroom";
+import type { Tarea } from "@/features/tareas/services/classroom";
 
 export default async function CalendarioPage() {
   const session = await auth();

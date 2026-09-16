@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
-import { getNombresCursos } from "../lib/tareas-server";
+import { getNombresCursos } from "@/features/tareas/services/tareas-server";
 import { getCursosArchivados } from "../lib/archivados-server";
 import { getCursosRenombrados } from "../lib/renombrados-server";
 import PanelShell from "./PanelShell";

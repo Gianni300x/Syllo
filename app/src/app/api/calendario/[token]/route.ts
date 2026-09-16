@@ -3,7 +3,7 @@ import { fetchCursosArchivados } from "@/app/lib/archivados-server";
 import { fetchCursosRenombrados } from "@/app/lib/renombrados-server";
 import { eventoComoTarea, getEventos } from "@/app/lib/eventos-service";
 import { emailPorToken, getSnapshotTareas } from "@/app/lib/feed-server";
-import { tareaDelFeedComoTarea } from "@/app/lib/tareas-service";
+import { tareaDelFeedComoTarea } from "@/features/tareas/services/tareas-service";
 import { generarIcs } from "@/app/lib/ics";
 
 /**

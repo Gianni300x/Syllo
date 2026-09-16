@@ -6,17 +6,11 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { eq } from "drizzle-orm";
-import { getDb } from "./db";
-import { estadosTareas } from "./schema";
+import { getDb } from "@/app/lib/db";
+import { estadosTareas } from "@/app/lib/schema";
+import type { EstadoTarea, EstadosPorTarea } from "../types";
 
-/** Flags que el alumno puso sobre una tarea. */
-export interface EstadoTarea {
-  empezada: boolean;
-  fijada: boolean;
-}
-
-/** Estados indexados por `claveTarea()` (`courseId/courseWorkId`). */
-export type EstadosPorTarea = Record<string, EstadoTarea>;
+export type { EstadoTarea, EstadosPorTarea };
 
 export async function fetchEstadosTareas(
   userId: string,

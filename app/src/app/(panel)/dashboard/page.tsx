@@ -1,12 +1,12 @@
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getTareas, getNombresCursos } from "../../lib/tareas-server";
+import { getTareas, getNombresCursos } from "@/features/tareas/services/tareas-server";
 import { getCorreosInicial } from "../../lib/correos-server";
 import { getNotas } from "../../lib/notas-server";
 import { eventoComoTarea, getEventosCached } from "../../lib/eventos-service";
-import { getEstadosTareas } from "../../lib/estados-tareas-server";
-import { aplicarEstados } from "../../lib/tareas-service";
+import { getEstadosTareas } from "@/features/tareas/services/estados-tareas-server";
+import { aplicarEstados } from "@/features/tareas/services/tareas-service";
 import { refrescarSnapshotDelFeed } from "../../lib/feed-server";
 import HomeView from "../../components/home-view";
 

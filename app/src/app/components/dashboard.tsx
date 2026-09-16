@@ -14,7 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import { bgParaCurso, colorParaCurso } from "./sidebar";
-import ControlesTarea from "./controles-tarea";
+import ControlesTarea from "@/features/tareas/components/controles-tarea";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import {
   Tarea,
@@ -23,12 +23,12 @@ import {
   estaCompletada,
   formatearFecha,
   etiquetaVencimiento,
-} from "../lib/classroom";
+} from "@/features/tareas/services/classroom";
 import {
   clasificarTareas,
   contarPendientesPorCurso,
   ordenarPorPrioridad,
-} from "../lib/tareas-service";
+} from "@/features/tareas/services/tareas-service";
 import { capitalizar } from "../lib/fechas";
 import { normalizar } from "../lib/texto";
 

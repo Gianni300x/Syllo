@@ -2,7 +2,7 @@ import { getDb } from "./db";
 import { eventos } from "./schema";
 import { and, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
-import type { Tarea } from "./classroom";
+import type { Tarea } from "@/features/tareas/services/classroom";
 
 export async function getEventos(userId: string) {
   const db = getDb();

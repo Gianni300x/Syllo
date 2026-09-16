@@ -10,7 +10,7 @@ import {
   claveTarea,
   cuentaRegresivaEvento,
   diasHastaVencimiento,
-} from "../lib/classroom";
+} from "@/features/tareas/services/classroom";
 import NuevoEventoModal from "./nuevo-evento-modal";
 
 export function MiniCalendar({ tareas }: { tareas: Tarea[] }) {

@@ -6,7 +6,7 @@
  * el feed suscribible (`/api/calendario/[token]`), que es el mismo texto con
  * las cabeceras de publicación puestas.
  */
-import { claveTarea, estaCompletada, type Tarea } from "./classroom";
+import { claveTarea, estaCompletada, type Tarea } from "@/features/tareas/services/classroom";
 
 /** Escapa texto para un campo de contenido ICS (coma, punto y coma, backslash, salto de línea). */
 function escaparTexto(texto: string): string {

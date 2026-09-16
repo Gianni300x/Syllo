@@ -6,7 +6,7 @@
  * que el `userId` usado en el resto del código y en los tags de cache.
  */
 import { sql } from "drizzle-orm";
-import type { TareaDelFeed } from "./classroom";
+import type { TareaDelFeed } from "@/features/tareas/services/classroom";
 import {
   boolean,
   index,

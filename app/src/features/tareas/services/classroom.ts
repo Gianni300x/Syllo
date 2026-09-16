@@ -1,22 +1,7 @@
-import { MESES_CORTOS } from "./fechas";
+import { MESES_CORTOS } from "@/app/lib/fechas";
+import type { Tarea, TareaDelFeed, CuentaRegresiva } from "../types";
 
-export interface Tarea {
-  curso: string;
-  titulo: string;
-  descripcion: string;
-  puntos: number | null;
-  vencimiento: { year: number; month: number; day: number } | null;
-  estado: string;
-  link: string;
-  /** Presente solo si es un evento personal (tabla `eventos`), no una tarea de Classroom. */
-  eventoId?: string;
-  /** Ids de Classroom. Ausentes en los eventos personales (ver `eventoId`). */
-  courseId?: string;
-  courseWorkId?: string;
-  /** Estado propio del alumno, de la tabla `estados_tareas`. Lo pega `aplicarEstados`. */
-  empezada?: boolean;
-  fijada?: boolean;
-}
+export type { Tarea, TareaDelFeed, CuentaRegresiva };
 
 /**
  * Clave estable de una tarea de Classroom, para colgarle estado propio.
@@ -29,19 +14,6 @@ export interface Tarea {
 export function claveTarea(tarea: Tarea): string | null {
   if (!tarea.courseId || !tarea.courseWorkId) return null;
   return `${tarea.courseId}/${tarea.courseWorkId}`;
-}
-
-/**
- * Lo mínimo de una entrega para armar su VEVENT en el feed de calendario.
- * Es lo único que se persiste de Classroom (tabla `snapshot_tareas`).
- */
-export interface TareaDelFeed {
-  courseId: string;
-  courseWorkId: string;
-  curso: string;
-  titulo: string;
-  vencimiento: NonNullable<Tarea["vencimiento"]>;
-  link: string;
 }
 
 const ESTADOS_COMPLETADOS = ["TURNED_IN", "RETURNED"];
@@ -76,12 +48,6 @@ export function etiquetaVencimiento(dias: number | null): string {
   if (dias === 0) return "Vence hoy";
   if (dias === 1) return "Vence mañana";
   return `${dias} días restantes`;
-}
-
-export interface CuentaRegresiva {
-  texto: string;
-  dias: number;
-  tipo: "hoy" | "manana" | "proximo" | "pasado" | "completado";
 }
 
 /**

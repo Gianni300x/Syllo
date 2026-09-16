@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Trash2, X } from "lucide-react";
 import { editarEventoAction, eliminarEventoAction } from "../(panel)/dashboard/calendario/eventos-actions";
 import { motion, AnimatePresence } from "motion/react";
-import type { Tarea } from "../lib/classroom";
+import type { Tarea } from "@/features/tareas/services/classroom";
 
 /** `YYYY-MM-DD` para prellenar el input `type="date"`. */
 function fechaInput(vencimiento: Tarea["vencimiento"]): string {

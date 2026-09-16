@@ -11,16 +11,16 @@ import {
   ArrowRight,
   Sun
 } from "lucide-react";
-import { Tarea, claveTarea, estaCompletada } from "../lib/classroom";
+import { Tarea, claveTarea, estaCompletada } from "@/features/tareas/services/classroom";
 import { Correo } from "../lib/correos";
 import { Nota, fechaRelativa } from "../lib/notas";
 import {
   contarPendientesPorCurso,
   ordenarPorPrioridad,
-} from "../lib/tareas-service";
+} from "@/features/tareas/services/tareas-service";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
 import { MiniCalendar } from "./mini-calendar";
-import ControlesTarea from "./controles-tarea";
+import ControlesTarea from "@/features/tareas/components/controles-tarea";
 
 export default function HomeView({
   tareas,

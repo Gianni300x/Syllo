@@ -3,12 +3,12 @@
 import { useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CircleDashed, CirclePlay, Pin } from "lucide-react";
-import type { Tarea } from "../lib/classroom";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import type { Tarea } from "@/features/tareas/services/classroom";
+import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
 import {
   alternarEstadoTarea,
   type CampoEstado,
-} from "../(panel)/dashboard/tareas/estados-actions";
+} from "@/features/tareas/services/estados-actions";
 
 /**
  * Los dos controles de estado propio de una tarea: "ya la empecé" y "fijar".

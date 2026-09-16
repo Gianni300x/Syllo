@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, signIn } from "@/auth";
 import { getCorreosInicial } from "@/app/lib/correos-server";
-import { getNombresCursos } from "@/app/lib/tareas-server";
+import { getNombresCursos } from "@/features/tareas/services/tareas-server";
 import Correos from "@/app/components/correos";
 
 export default async function CorreosPage() {

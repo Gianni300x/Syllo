@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { bgParaCurso } from "./sidebar";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "../lib/classroom";
+import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "@/features/tareas/services/classroom";
 import { capitalizar } from "../lib/fechas";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
