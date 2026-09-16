@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { crearEventoAction } from "@/features/calendario/services/eventos-actions";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function NuevoEventoModal({
@@ -129,9 +128,9 @@ export default function NuevoEventoModal({
                 </div>
 
                 {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                    {error}
+                  </p>
                 )}
               </div>
 

@@ -42,7 +42,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -464,9 +463,9 @@ function TarjetaNota({
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mt-2 py-1.5 text-xs [&_[data-slot=alert-description]]:text-xs">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+          {error}
+        </p>
       )}
     </Card>
   );
@@ -626,9 +625,9 @@ function VisorNota({
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-4 py-1.5 text-xs shrink-0 [&_[data-slot=alert-description]]:text-xs">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 shrink-0">
+          {error}
+        </p>
       )}
 
       {/* Contenedor tipo documento de la nota a todo el ancho y alto */}
@@ -722,7 +721,7 @@ function EditorNota({
   );
   // Base UI (como Radix) no permite value="" en un SelectItem, así que el
   // "Sin curso" usa este centinela y se traduce a "" recién al mandar el form.
-  const SIN_CURSO = "Personal/General";
+  const SIN_CURSO = "__general__";
   const [cursoValor, setCursoValor] = useState(
     nota?.curso ?? cursoSugerido ?? SIN_CURSO,
   );
@@ -825,9 +824,9 @@ function EditorNota({
         </div>
 
         {error && (
-          <Alert variant="destructive" className="shrink-0">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 shrink-0">
+            {error}
+          </p>
         )}
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 shrink-0">

@@ -25,7 +25,6 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Correos({
   cursos,
@@ -273,9 +272,9 @@ export default function Correos({
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+          {error}
+        </p>
       )}
 
       {/* En mobile la lista y el lector se turnan: antes el lector se
@@ -467,9 +466,9 @@ function Lector({ id, cursos }: { id: string | null; cursos: string[] }) {
 
   if (error || !correo) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error ?? "No pudimos abrir este correo."}</AlertDescription>
-      </Alert>
+      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+        {error ?? "No pudimos abrir este correo."}
+      </p>
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { Menu } from "lucide-react";
 import Sidebar, { type UsuarioSidebar } from "./sidebar";
 import { FiltroCursosContext, type FiltroCursosValue } from "../hooks/filtro-cursos";
 import { actualizarDatos } from "../services/actions";
@@ -12,11 +13,7 @@ import {
 import { renombrarCursoAction } from "@/features/archivados/services/renombrados-actions";
 import ThemeToggle from "./theme-toggle";
 import Aviso from "@/components/ui/aviso";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {
@@ -32,7 +29,6 @@ export default function PanelShell({
   cursosArchivados,
   renombres,
   usuario,
-  sidebarAbierto,
   onCerrarSesion,
   children,
 }: {
@@ -40,8 +36,6 @@ export default function PanelShell({
   cursosArchivados: string[];
   renombres: Record<string, string>;
   usuario?: UsuarioSidebar;
-  /** Estado inicial del sidebar (cookie `sidebar_state`), para que el primer render no parpadee. */
-  sidebarAbierto: boolean;
   onCerrarSesion?: () => void;
   children: React.ReactNode;
 }) {
@@ -50,6 +44,8 @@ export default function PanelShell({
   const [actualizando, startActualizar] = useTransition();
   const [archivando, startArchivar] = useTransition();
   const [renombrando, startRenombrar] = useTransition();
+  // Solo en mobile: en `lg+` el sidebar está siempre a la vista.
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -103,6 +99,7 @@ export default function PanelShell({
     [cursosSeleccionados],
   );
 
+  const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
   const avisar = useCallback((mensaje: string) => setAviso(mensaje), []);
   const cerrarAviso = useCallback(() => setAviso(null), []);
 
@@ -221,31 +218,39 @@ export default function PanelShell({
 
   return (
     <FiltroCursosContext.Provider value={value}>
-      <SidebarProvider
-        defaultOpen={sidebarAbierto}
-        className="bg-background text-foreground font-[family-name:var(--font-poppins)]"
-      >
+      <div className="flex min-h-screen bg-background text-foreground font-[family-name:var(--font-poppins)]">
         <Sidebar
           cursos={cursos}
           usuario={usuario}
           onCerrarSesion={onCerrarSesion}
           onActualizar={actualizar}
           actualizando={actualizando}
+          abierto={menuAbierto}
+          onCerrarMenu={cerrarMenu}
         />
-        <SidebarInset className="min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
           {/* Barra superior de mobile: es el único acceso al menú cuando el
               sidebar está fuera de pantalla. */}
           <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-slate-700 dark:bg-slate-800">
-            <SidebarTrigger className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100" />
+            <Button
+              onClick={() => setMenuAbierto(true)}
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Abrir menú"
+              aria-expanded={menuAbierto}
+              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+            >
+              <Menu size={20} />
+            </Button>
             <span className="font-bold text-[#4F46E5]">{tituloSeccion(pathname)}</span>
             <ThemeToggle variante="barra" className="ml-auto" />
           </div>
           {children}
-        </SidebarInset>
+        </div>
         {/* En mobile el toggle vive en la barra de arriba (ver más abajo). */}
         <ThemeToggle variante="flotante" className="hidden lg:flex" />
         <Aviso mensaje={aviso} onCerrar={cerrarAviso} />
-      </SidebarProvider>
+      </div>
     </FiltroCursosContext.Provider>
   );
 }
