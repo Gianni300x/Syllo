@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { fetchCursosArchivados } from "@/app/lib/archivados-server";
 import { fetchCursosRenombrados } from "@/app/lib/renombrados-server";
-import { eventoComoTarea, getEventos } from "@/app/lib/eventos-service";
-import { emailPorToken, getSnapshotTareas } from "@/app/lib/feed-server";
+import { eventoComoTarea, getEventos } from "@/features/calendario/services/eventos-service";
+import { emailPorToken, getSnapshotTareas } from "@/features/calendario/services/feed-server";
 import { tareaDelFeedComoTarea } from "@/features/tareas/services/tareas-service";
-import { generarIcs } from "@/app/lib/ics";
+import { generarIcs } from "@/features/calendario/services/ics";
 
 /**
  * Feed de calendario suscribible, en `webcal://` o `https://`.

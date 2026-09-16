@@ -8,8 +8,8 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { getDb } from "./db";
-import { feedsCalendario, snapshotTareas } from "./schema";
+import { getDb } from "@/app/lib/db";
+import { feedsCalendario, snapshotTareas } from "@/app/lib/schema";
 import type { Tarea, TareaDelFeed } from "@/features/tareas/services/classroom";
 import { tareasParaFeed } from "@/features/tareas/services/tareas-service";
 

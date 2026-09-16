@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { auth } from "@/auth";
-import { addEvento, deleteEvento, updateEvento } from "../../../lib/eventos-service";
+import { addEvento, deleteEvento, updateEvento } from "./eventos-service";
 
 export async function crearEventoAction(formData: FormData) {
   const session = await auth();

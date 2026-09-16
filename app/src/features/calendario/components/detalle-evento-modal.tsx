@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2, X } from "lucide-react";
-import { editarEventoAction, eliminarEventoAction } from "../(panel)/dashboard/calendario/eventos-actions";
+import { editarEventoAction, eliminarEventoAction } from "@/features/calendario/services/eventos-actions";
 import { motion, AnimatePresence } from "motion/react";
 import type { Tarea } from "@/features/tareas/services/classroom";
 

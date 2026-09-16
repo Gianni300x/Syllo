@@ -4,10 +4,10 @@ import { auth } from "@/auth";
 import { getTareas, getNombresCursos } from "@/features/tareas/services/tareas-server";
 import { getCorreosInicial } from "@/features/correos/services/correos-server";
 import { getNotas } from "@/features/notas/services/notas-server";
-import { eventoComoTarea, getEventosCached } from "../../lib/eventos-service";
+import { eventoComoTarea, getEventosCached } from "@/features/calendario/services/eventos-service";
 import { getEstadosTareas } from "@/features/tareas/services/estados-tareas-server";
 import { aplicarEstados } from "@/features/tareas/services/tareas-service";
-import { refrescarSnapshotDelFeed } from "../../lib/feed-server";
+import { refrescarSnapshotDelFeed } from "@/features/calendario/services/feed-server";
 import HomeView from "../../components/home-view";
 
 export default async function DashboardHomePage() {

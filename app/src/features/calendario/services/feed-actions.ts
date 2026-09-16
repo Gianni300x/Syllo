@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import {
   getOCrearTokenFeed,
   regenerarTokenFeed,
-} from "@/app/lib/feed-server";
+} from "@/features/calendario/services/feed-server";
 
 export interface ResultadoFeed {
   /** La URL completa del feed, lista para pegar en Google o Apple Calendar. */

@@ -6,7 +6,7 @@ import { CalendarPlus, Check, Copy, Download, Loader2, RefreshCw, X } from "luci
 import {
   obtenerLinkFeed,
   regenerarLinkFeed,
-} from "../(panel)/dashboard/calendario/feed-actions";
+} from "@/features/calendario/services/feed-actions";
 
 const MENSAJES: Record<string, string> = {
   no_autenticado: "Se cerró tu sesión. Volvé a entrar y probá de nuevo.",

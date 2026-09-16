@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getTareas } from "@/features/tareas/services/tareas-server";
-import { eventoComoTarea, getEventosCached } from "../../../lib/eventos-service";
-import Calendario from "../../../components/calendario";
+import { eventoComoTarea, getEventosCached } from "@/features/calendario/services/eventos-service";
+import Calendario from "@/features/calendario/components/calendario";
 import type { Tarea } from "@/features/tareas/services/classroom";
 
 export default async function CalendarioPage() {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
-import { crearEventoAction } from "../(panel)/dashboard/calendario/eventos-actions";
+import { crearEventoAction } from "@/features/calendario/services/eventos-actions";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function NuevoEventoModal({

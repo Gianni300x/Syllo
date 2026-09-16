@@ -2,8 +2,8 @@ import { auth } from "@/auth";
 import { getTareas } from "@/features/tareas/services/tareas-server";
 import { getCursosArchivados } from "@/app/lib/archivados-server";
 import { getCursosRenombrados } from "@/app/lib/renombrados-server";
-import { eventoComoTarea, getEventos } from "@/app/lib/eventos-service";
-import { generarIcs } from "@/app/lib/ics";
+import { eventoComoTarea, getEventos } from "@/features/calendario/services/eventos-service";
+import { generarIcs } from "@/features/calendario/services/ics";
 import { NextResponse } from "next/server";
 
 export async function GET() {

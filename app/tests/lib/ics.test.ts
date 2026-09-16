@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import type { Tarea } from "@/features/tareas/services/classroom";
-import { generarIcs } from "../../src/app/lib/ics";
+import { generarIcs } from "@/features/calendario/services/ics";
 
 const HOY = new Date(2026, 8, 12, 12, 0, 0); // 12 de septiembre de 2026
 

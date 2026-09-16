@@ -19,7 +19,7 @@ import {
   ordenarPorPrioridad,
 } from "@/features/tareas/services/tareas-service";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { MiniCalendar } from "./mini-calendar";
+import { MiniCalendar } from "@/features/calendario/components/mini-calendar";
 import ControlesTarea from "@/features/tareas/components/controles-tarea";
 
 export default function HomeView({
