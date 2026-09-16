@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useFiltroCursos } from "../hooks/filtro-cursos";
 import { CursoItem } from "@/features/archivados/components/curso-item";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 
 export type Seccion = "inicio" | "tareas" | "correos" | "notas" | "calendario";
@@ -124,24 +125,28 @@ export default function Sidebar({
           <span className="font-bold text-lg">Syllo</span>
           <div className="flex items-center gap-1">
             {onActualizar && (
-              <button
+              <Button
                 onClick={onActualizar}
                 disabled={actualizando}
+                variant="ghost"
+                size="icon-sm"
                 title="Actualizar datos"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
+                className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
               >
                 <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
-              </button>
+              </Button>
             )}
             {onCerrarMenu && (
-              <button
+              <Button
                 onClick={onCerrarMenu}
+                variant="ghost"
+                size="icon-sm"
                 title="Cerrar menú"
                 aria-label="Cerrar menú"
-                className="p-1.5 rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 lg:hidden dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                className="text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden dark:hover:bg-slate-700 dark:hover:text-slate-300"
               >
                 <X size={16} />
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -191,12 +196,14 @@ export default function Sidebar({
             MIS CURSOS
           </p>
           {haySeleccion && (
-            <button
+            <Button
               onClick={limpiarCursos}
-              className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer dark:text-indigo-400 dark:hover:text-indigo-300"
+              variant="link"
+              size="xs"
+              className="h-auto p-0 text-[11px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Ver todos
-            </button>
+            </Button>
           )}
         </div>
 
@@ -290,13 +297,15 @@ export default function Sidebar({
           </div>
 
           {onCerrarSesion && (
-            <button
+            <Button
               onClick={onCerrarSesion}
+              variant="ghost"
+              size="icon-sm"
               title="Cerrar sesión"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0 dark:hover:text-red-400 dark:hover:bg-red-500/10"
+              className="text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 dark:hover:text-red-400 dark:hover:bg-red-500/10"
             >
               <LogOut size={16} />
-            </button>
+            </Button>
           )}
         </div>
       )}

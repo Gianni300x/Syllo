@@ -13,6 +13,7 @@ import {
 import { renombrarCursoAction } from "@/features/archivados/services/renombrados-actions";
 import ThemeToggle from "./theme-toggle";
 import Aviso from "@/components/ui/aviso";
+import { Button } from "@/components/ui/button";
 
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {
@@ -231,14 +232,16 @@ export default function PanelShell({
           {/* Barra superior de mobile: es el único acceso al menú cuando el
               sidebar está fuera de pantalla. */}
           <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-slate-700 dark:bg-slate-800">
-            <button
+            <Button
               onClick={() => setMenuAbierto(true)}
+              variant="ghost"
+              size="icon-sm"
               aria-label="Abrir menú"
               aria-expanded={menuAbierto}
-              className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
             >
               <Menu size={20} />
-            </button>
+            </Button>
             <span className="font-bold text-[#4F46E5]">{tituloSeccion(pathname)}</span>
             <ThemeToggle variante="barra" className="ml-auto" />
           </div>

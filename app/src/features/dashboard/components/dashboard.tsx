@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { bgParaCurso, colorParaCurso } from "@/lib/cursos-color";
 import ControlesTarea from "@/features/tareas/components/controles-tarea";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useFiltroCursos } from "../hooks/filtro-cursos";
 import {
   Tarea,
@@ -265,7 +267,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     size={15}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                   />
-                  <input
+                  <Input
                     autoFocus
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}
@@ -279,18 +281,20 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                       }
                     }}
                     placeholder="Buscar entregas, temas o TPs…"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    className="w-full pl-9"
                   />
                 </div>
               ) : (
-                <button
+                <Button
                   onClick={() => setBuscadorAbierto(true)}
+                  variant="outline"
+                  size="icon"
                   title="Buscar entregas, temas o TPs"
                   aria-label="Buscar entregas, temas o TPs"
-                  className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:hover:text-slate-100 dark:hover:border-slate-600"
+                  className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   <Search size={16} />
-                </button>
+                </Button>
               )}
             </div>
 
@@ -304,14 +308,14 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
             size={15}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
-          <input
+          <Input
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setBusqueda("");
             }}
             placeholder="Buscar entregas, temas o TPs…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+            className="w-full pl-9"
           />
         </div>
       </div>
@@ -400,13 +404,15 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                 </span>
               </div>
               {cursosArchivados.length > 1 && (
-                <button
+                <Button
                   onClick={() => restaurarCursos(cursosArchivados)}
                   disabled={archivando}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:text-indigo-400 dark:hover:text-indigo-300"
+                  variant="link"
+                  size="xs"
+                  className="h-auto p-0 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   Desarchivar todos
-                </button>
+                </Button>
               )}
             </div>
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -428,15 +434,17 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
                     <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
                       {cantidad === 1 ? "1 tarea" : `${cantidad} tareas`}
                     </span>
-                    <button
+                    <Button
                       onClick={() => restaurarCursos([nombre])}
                       disabled={archivando}
+                      variant="outline"
+                      size="xs"
                       title="Volver a mostrar este curso"
-                      className="inline-flex items-center gap-1.5 shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default dark:border-slate-600 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
+                      className="shrink-0 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
                     >
                       <ArchiveRestore size={13} />
                       Desarchivar
-                    </button>
+                    </Button>
                   </div>
                 );
               })}

@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 
 import { alternarTema } from "@/lib/tema";
+import { Button } from "@/components/ui/button";
 
 /** Dónde vive el botón: flotando sobre el panel, o embebido en una barra. */
 export type VarianteTema = "flotante" | "barra";
@@ -32,14 +33,16 @@ export default function ThemeToggle({
   className?: string;
 }) {
   return (
-    <button
+    <Button
       onClick={alternarTema}
+      variant="outline"
+      size="icon-lg"
       title="Cambiar entre modo claro y oscuro"
       aria-label="Cambiar entre modo claro y oscuro"
-      className={`flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100 ${POSICION[variante]} ${className}`}
+      className={`rounded-full text-slate-600 dark:text-slate-300 ${POSICION[variante]} ${className}`}
     >
       <Moon size={15} className="dark:hidden" />
       <Sun size={15} className="hidden dark:block" />
-    </button>
+    </Button>
   );
 }
