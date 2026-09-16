@@ -104,34 +104,34 @@ export default function Sidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1.5">
               <EnlaceSeccion
                 href="/dashboard"
-                icono={<Home size={16} />}
+                icono={<Home size={18} />}
                 etiqueta="Inicio"
                 activo={seccion === "inicio"}
               />
               <EnlaceSeccion
                 href="/dashboard/tareas"
-                icono={<ListChecks size={16} />}
+                icono={<ListChecks size={18} />}
                 etiqueta="Tareas"
                 activo={seccion === "tareas"}
               />
               <EnlaceSeccion
                 href="/dashboard/correos"
-                icono={<Mail size={16} />}
+                icono={<Mail size={18} />}
                 etiqueta="Correos"
                 activo={seccion === "correos"}
               />
               <EnlaceSeccion
                 href="/dashboard/notas"
-                icono={<NotebookPen size={16} />}
+                icono={<NotebookPen size={18} />}
                 etiqueta="Notas"
                 activo={seccion === "notas"}
               />
               <EnlaceSeccion
                 href="/dashboard/calendario"
-                icono={<CalendarDays size={16} />}
+                icono={<CalendarDays size={18} />}
                 etiqueta="Calendario"
                 activo={seccion === "calendario"}
               />
@@ -140,7 +140,7 @@ export default function Sidebar({
         </SidebarGroup>
 
         {/* Cursos: multi-selección, scrollea internamente */}
-        <SidebarGroup className="flex-1 min-h-0 flex flex-col">
+        <SidebarGroup className="flex-1 min-h-0 flex flex-col mt-4">
           <SidebarGroupLabel>MIS CURSOS</SidebarGroupLabel>
           {haySeleccion && (
             <SidebarGroupAction
@@ -161,15 +161,16 @@ export default function Sidebar({
           )}
 
           <SidebarGroupContent className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={limpiarCursos}
                   isActive={!haySeleccion}
                   tooltip="Todos los cursos"
+                  className="h-auto py-2.5 text-base font-medium"
                 >
                   <BookOpen
-                    size={16}
+                    size={17}
                     className={!haySeleccion ? "text-indigo-600 dark:text-indigo-400" : ""}
                   />
                   <span>Todos los cursos</span>
@@ -219,7 +220,7 @@ export default function Sidebar({
       {/* Pie: perfil de usuario y logout */}
       {usuario && (
         <SidebarFooter>
-          <div className="pt-2 border-t border-sidebar-border flex items-center justify-between gap-3 group-data-[collapsible=icon]:justify-center">
+          <div className="pt-4 border-t border-sidebar-border flex items-center justify-between gap-3 group-data-[collapsible=icon]:justify-center">
             <div className="flex items-center gap-2.5 min-w-0">
               <Avatar className="ring-1 ring-slate-200 shrink-0 dark:ring-slate-600">
                 {usuario.image && (
@@ -283,7 +284,8 @@ function EnlaceSeccion({
       <SidebarMenuButton
         isActive={activo}
         tooltip={etiqueta}
-        className={NAV_ACTIVO}
+        size="lg"
+        className={`text-base font-medium ${NAV_ACTIVO}`}
         render={
           <Link
             href={hrefConFiltro(href)}
