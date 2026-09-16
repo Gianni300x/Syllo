@@ -68,7 +68,7 @@ export function CursoItem({
   const casilla = (
     <span
       aria-hidden
-      className={`flex-shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-all ${
+      className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${
         seleccionado
           ? `${bgParaCurso(nombre, listaCursos)} border-transparent`
           : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700"
@@ -154,7 +154,6 @@ export function CursoItem({
         onClick={() => toggleCurso(nombre)}
         isActive={seleccionado}
         tooltip={nombreMostrar}
-        className="h-auto py-2.5 text-base"
       >
         {casilla}
         <span className={colorParaCurso(nombre, listaCursos)}>{nombreMostrar}</span>
