@@ -81,8 +81,8 @@ export default function Sidebar({
 
   return (
     <SidebarPrimitive collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center justify-between gap-3 px-2 py-1 text-[#4F46E5]">
+      <SidebarHeader className="px-4 pt-4 pb-6">
+        <div className="flex items-center justify-between gap-3 text-[#4F46E5]">
           <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
             Syllo
           </span>
