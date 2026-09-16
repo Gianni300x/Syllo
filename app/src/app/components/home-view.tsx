@@ -12,7 +12,7 @@ import {
   Sun
 } from "lucide-react";
 import { Tarea, claveTarea, estaCompletada } from "@/features/tareas/services/classroom";
-import { Correo } from "../lib/correos";
+import { Correo } from "@/features/correos/services/correos";
 import { Nota, fechaRelativa } from "../lib/notas";
 import {
   contarPendientesPorCurso,

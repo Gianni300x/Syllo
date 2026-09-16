@@ -10,10 +10,10 @@ import {
   Search,
   Star,
 } from "lucide-react";
-import { colorParaCurso } from "./sidebar";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { useTemaOscuro } from "../lib/tema";
-import { capitalizar } from "../lib/fechas";
+import { colorParaCurso } from "@/app/components/sidebar";
+import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
+import { useTemaOscuro } from "@/app/lib/tema";
+import { capitalizar } from "@/app/lib/fechas";
 import {
   formatearFechaCompleta,
   formatearFechaCorreo,
@@ -21,7 +21,7 @@ import {
   type CorreoCompleto,
   type OrigenCorreo,
   type PaginaCorreos,
-} from "../lib/correos";
+} from "../services/correos";
 
 export default function Correos({
   cursos,

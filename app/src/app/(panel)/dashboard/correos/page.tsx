@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, signIn } from "@/auth";
-import { getCorreosInicial } from "@/app/lib/correos-server";
+import { getCorreosInicial } from "@/features/correos/services/correos-server";
 import { getNombresCursos } from "@/features/tareas/services/tareas-server";
-import Correos from "@/app/components/correos";
+import Correos from "@/features/correos/components/correos";
 
 export default async function CorreosPage() {
   const session = await auth();

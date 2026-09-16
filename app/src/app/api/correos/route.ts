@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import {
   fetchCorreosDeClassroom,
   MAX_CORREOS_POR_PAGINA,
-} from "@/app/lib/correos-server";
+} from "@/features/correos/services/correos-server";
 import { getNombresCursos } from "@/features/tareas/services/tareas-server";
 
 export async function GET(request: NextRequest) {
