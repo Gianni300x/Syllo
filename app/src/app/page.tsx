@@ -1,6 +1,6 @@
 import { signIn } from "@/auth";
 import Link from "next/link";
-import ThemeToggle from "./(panel)/theme-toggle";
+import ThemeToggle from "@/features/dashboard/components/theme-toggle";
 import {
   MotionProvider,
   HeroFadeIn,

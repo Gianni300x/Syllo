@@ -8,7 +8,7 @@ import { eventoComoTarea, getEventosCached } from "@/features/calendario/service
 import { getEstadosTareas } from "@/features/tareas/services/estados-tareas-server";
 import { aplicarEstados } from "@/features/tareas/services/tareas-service";
 import { refrescarSnapshotDelFeed } from "@/features/calendario/services/feed-server";
-import HomeView from "../../components/home-view";
+import HomeView from "@/features/dashboard/components/home-view";
 
 export default async function DashboardHomePage() {
   const session = await auth();

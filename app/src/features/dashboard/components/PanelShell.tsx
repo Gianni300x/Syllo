@@ -3,16 +3,16 @@
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Menu } from "lucide-react";
-import Sidebar, { type UsuarioSidebar } from "../components/sidebar";
-import { FiltroCursosContext, type FiltroCursosValue } from "./filtro-cursos";
-import { actualizarDatos } from "./actions";
+import Sidebar, { type UsuarioSidebar } from "./sidebar";
+import { FiltroCursosContext, type FiltroCursosValue } from "../hooks/filtro-cursos";
+import { actualizarDatos } from "../services/actions";
 import {
   archivarCursos as archivarCursosAction,
   restaurarCursos as restaurarCursosAction,
 } from "@/features/archivados/services/archivados-actions";
 import { renombrarCursoAction } from "@/features/archivados/services/renombrados-actions";
 import ThemeToggle from "./theme-toggle";
-import Aviso from "../components/aviso";
+import Aviso from "@/app/components/aviso";
 
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {

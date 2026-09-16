@@ -13,9 +13,9 @@ import {
   List,
   Search,
 } from "lucide-react";
-import { bgParaCurso, colorParaCurso } from "./sidebar";
+import { bgParaCurso, colorParaCurso } from "@/lib/cursos-color";
 import ControlesTarea from "@/features/tareas/components/controles-tarea";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import { useFiltroCursos } from "../hooks/filtro-cursos";
 import {
   Tarea,
   claveTarea,
@@ -29,8 +29,8 @@ import {
   contarPendientesPorCurso,
   ordenarPorPrioridad,
 } from "@/features/tareas/services/tareas-service";
-import { capitalizar } from "../lib/fechas";
-import { normalizar } from "../lib/texto";
+import { capitalizar } from "@/app/lib/fechas";
+import { normalizar } from "@/app/lib/texto";
 
 type Tab =
   | "pendientes"

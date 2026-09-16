@@ -10,8 +10,8 @@ import {
   Search,
   Star,
 } from "lucide-react";
-import { colorParaCurso } from "@/app/components/sidebar";
-import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
+import { colorParaCurso } from "@/lib/cursos-color";
+import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { useTemaOscuro } from "@/app/lib/tema";
 import { capitalizar } from "@/app/lib/fechas";
 import {

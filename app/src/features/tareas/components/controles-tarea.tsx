@@ -4,7 +4,7 @@ import { useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CircleDashed, CirclePlay, Pin } from "lucide-react";
 import type { Tarea } from "@/features/tareas/services/classroom";
-import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
+import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import {
   alternarEstadoTarea,
   type CampoEstado,

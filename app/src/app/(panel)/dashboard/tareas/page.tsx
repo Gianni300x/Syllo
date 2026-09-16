@@ -5,7 +5,7 @@ import { getTareas } from "@/features/tareas/services/tareas-server";
 import { getEstadosTareas } from "@/features/tareas/services/estados-tareas-server";
 import { aplicarEstados } from "@/features/tareas/services/tareas-service";
 import { refrescarSnapshotDelFeed } from "@/features/calendario/services/feed-server";
-import Dashboard from "../../../components/dashboard";
+import Dashboard from "@/features/dashboard/components/dashboard";
 
 export default async function DashboardPage() {
   const session = await auth();

@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { bgParaCurso } from "@/app/components/sidebar";
-import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
+import { bgParaCurso } from "@/lib/cursos-color";
+import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "@/features/tareas/services/classroom";
 import { capitalizar } from "@/app/lib/fechas";
 

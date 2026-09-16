@@ -2,7 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 
-import { alternarTema } from "../lib/tema";
+import { alternarTema } from "@/app/lib/tema";
 
 /** Dónde vive el botón: flotando sobre el panel, o embebido en una barra. */
 export type VarianteTema = "flotante" | "barra";

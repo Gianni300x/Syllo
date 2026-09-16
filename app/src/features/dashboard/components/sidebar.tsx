@@ -15,37 +15,9 @@ import {
   Home,
   X
 } from "lucide-react";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import { useFiltroCursos } from "../hooks/filtro-cursos";
 import { CursoItem } from "@/features/archivados/components/curso-item";
 import { motion, AnimatePresence } from "motion/react";
-
-const COLORES_CURSO = [
-  "text-sky-600",
-  "text-amber-600",
-  "text-emerald-600",
-  "text-rose-600",
-  "text-cyan-600",
-  "text-violet-600",
-];
-
-const COLORES_CURSO_BG = [
-  "bg-sky-500",
-  "bg-amber-500",
-  "bg-emerald-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-violet-500",
-];
-
-export function colorParaCurso(nombre: string, listaCursos: string[]): string {
-  const indice = listaCursos.indexOf(nombre);
-  return COLORES_CURSO[indice % COLORES_CURSO.length];
-}
-
-export function bgParaCurso(nombre: string, listaCursos: string[]): string {
-  const indice = listaCursos.indexOf(nombre);
-  return COLORES_CURSO_BG[indice % COLORES_CURSO_BG.length];
-}
 
 export type Seccion = "inicio" | "tareas" | "correos" | "notas" | "calendario";
 
