@@ -41,24 +41,29 @@ Syllo es una agenda pensada para estudiantes que centraliza las tareas y los cor
 
 ## Estructura del proyecto
 
-El código de la aplicación vive en `app/` (proyecto Next.js independiente). El panel autenticado está bajo el route group `(panel)`, que comparte layout, sidebar y el contexto del filtro de cursos:
+El código de la aplicación vive en `app/` (proyecto Next.js independiente), organizado por
+funcionalidad (`src/features/`) con una capa de servicios separada de los componentes, siguiendo
+Next.js App Router con carpeta `src/`:
 
-- `app/app/page.tsx` — landing page e inicio de sesión.
-- `app/app/privacidad/page.tsx` — política de privacidad (requisito de Google).
-- `app/app/(panel)/layout.tsx` — guard de sesión y carga de cursos, archivados y renombres.
-- `app/app/(panel)/PanelShell.tsx` — shell cliente: sidebar, menú de mobile y contexto de filtros.
-- `app/app/(panel)/filtro-cursos.tsx` — contexto del filtro de cursos, compartido entre secciones.
-- `app/app/(panel)/error.tsx` — límite de error del panel.
-- `app/app/(panel)/dashboard/` — las cinco secciones: Inicio (`page.tsx`), `tareas/`, `correos/`, `notas/` y `calendario/`, cada una con su `loading.tsx`.
-- `app/app/components/` — los componentes cliente de cada sección (`dashboard.tsx`, `correos.tsx`, `notas.tsx`, `calendario.tsx`, `home-view.tsx`, `sidebar.tsx`, `curso-item.tsx`, `mini-calendar.tsx` y los modales de evento).
-- `app/app/api/tareas/route.ts` — endpoint que expone las tareas del usuario autenticado.
-- `app/app/api/tareas/ics/route.ts` — descarga del calendario en formato `.ics`.
-- `app/app/api/calendario/[token]/route.ts` — feed de calendario suscribible (ruta pública, sin sesión).
-- `app/app/api/correos/route.ts` — listado paginado de correos de Classroom y CVG.
-- `app/app/api/correos/[id]/route.ts` — cuerpo completo de un correo.
-- `app/app/api/auth/[...nextauth]/route.ts` — endpoint de autenticación de NextAuth.
-- `app/app/lib/` — capas puras y de datos: `classroom.ts` y `tareas-service.ts` (tipos y reglas de tareas), `tareas-server.ts` (Classroom API), `correos.ts` / `correos-server.ts` (Gmail), `notas.ts` / `notas-server.ts`, `eventos-service.ts`, `archivados-server.ts`, `renombrados-server.ts`, `estados-tareas-server.ts` (estado propio de las tareas), `feed-server.ts` (token y snapshot del calendario), `markdown.ts`, `fechas.ts`, `texto.ts`, `ics.ts`, `tema.ts`, `schema.ts` y `db.ts`.
-- `app/auth.ts` — configuración de NextAuth (proveedor Google, scopes y refresco de token).
+- `src/app/` — solo routing: layouts, páginas, `loading`/`error` y route handlers. El panel
+  autenticado está bajo el route group `(panel)/dashboard/`, con las cinco secciones (Inicio,
+  `tareas/`, `correos/`, `notas/`, `calendario/`) y sus rutas de API en `app/api/`.
+- `src/features/` — un directorio por dominio, cada uno con `components/` (UI cliente) y
+  `services/` (fetch a Google/DB, server actions, capas puras de tipos y reglas):
+  - `tareas/` — Classroom API (`tareas-server.ts`), reglas de urgencia (`tareas-service.ts`),
+    estado propio (empezada/fijada), tipos en `types.ts`.
+  - `correos/` — bandeja de Gmail (Classroom + CVG).
+  - `notas/` — CRUD de notas, editor Tiptap, conversión markdown/HTML.
+  - `calendario/` — eventos personales, feed suscribible por token y generación de `.ics`.
+  - `archivados/` — cursos archivados y renombrados.
+  - `dashboard/` — shell del panel: sidebar, layout, hook del filtro de cursos
+    (`hooks/filtro-cursos.tsx`) y la action de revalidación de cache.
+- `src/lib/` — infraestructura compartida entre features: cliente de Postgres (`db.ts`), esquema
+  de Drizzle (`schema.ts`), utilidades genéricas (`fechas.ts`, `texto.ts`, `tema.ts`) y el color
+  determinístico por curso (`cursos-color.ts`).
+- `src/components/ui/` — componentes genéricos sin lógica de dominio (`aviso.tsx`).
+- `app/auth.ts` — configuración de NextAuth (proveedor Google, scopes y refresco de token). Queda
+  fuera de `src/` por convención de NextAuth.
 
 ### Base de datos
 
