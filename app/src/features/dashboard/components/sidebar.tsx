@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import {
   Archive,
   BookOpen,
@@ -17,6 +16,7 @@ import {
 import { useFiltroCursos } from "../hooks/filtro-cursos";
 import { CursoItem } from "@/features/archivados/components/curso-item";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar as SidebarPrimitive,
   SidebarContent,
@@ -61,7 +61,6 @@ export default function Sidebar({
   actualizando?: boolean;
 }) {
   const pathname = usePathname();
-  const [fotoFallo, setFotoFallo] = useState(false);
   const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
     ? "correos"
     : pathname?.startsWith("/dashboard/notas")
@@ -222,20 +221,18 @@ export default function Sidebar({
         <SidebarFooter>
           <div className="pt-2 border-t border-sidebar-border flex items-center justify-between gap-3 group-data-[collapsible=icon]:justify-center">
             <div className="flex items-center gap-2.5 min-w-0">
-              {usuario.image && !fotoFallo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={usuario.image}
-                  alt={usuario.name ?? "Avatar"}
-                  referrerPolicy="no-referrer"
-                  onError={() => setFotoFallo(true)}
-                  className="w-8 h-8 rounded-full ring-1 ring-slate-200 shrink-0 dark:ring-slate-600"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center text-xs shrink-0 select-none dark:bg-indigo-500/20 dark:text-indigo-300">
+              <Avatar className="ring-1 ring-slate-200 shrink-0 dark:ring-slate-600">
+                {usuario.image && (
+                  <AvatarImage
+                    src={usuario.image}
+                    alt={usuario.name ?? "Avatar"}
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <AvatarFallback className="bg-indigo-100 text-indigo-700 font-semibold select-none dark:bg-indigo-500/20 dark:text-indigo-300">
                   {usuario.name?.[0]?.toUpperCase() ?? "U"}
-                </div>
-              )}
+                </AvatarFallback>
+              </Avatar>
               <div className="min-w-0 group-data-[collapsible=icon]:hidden">
                 <p className="text-xs font-semibold truncate">
                   {usuario.name ?? "Estudiante"}
