@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalizar } from "../../app/lib/texto";
+import { normalizar } from "../../src/app/lib/texto";
 
 describe("normalizar", () => {
   test("saca tildes, mayúsculas y espacios de los bordes", () => {

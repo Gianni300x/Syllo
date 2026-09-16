@@ -4,7 +4,7 @@ import {
   detectarOrigen,
   formatearFechaCorreo,
   parsearRemitente,
-} from "../../app/lib/correos";
+} from "../../src/app/lib/correos";
 
 const HOY = new Date(2026, 8, 12, 12, 0, 0); // 12 de septiembre de 2026
 

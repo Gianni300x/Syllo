@@ -12,7 +12,7 @@ import {
   textoPlano,
   tituloMostrado,
   type Nota,
-} from "../../app/lib/notas";
+} from "../../src/app/lib/notas";
 
 const HOY = new Date(2026, 8, 12, 12, 0, 0); // 12 de septiembre de 2026
 
