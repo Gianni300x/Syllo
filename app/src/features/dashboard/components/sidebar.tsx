@@ -166,7 +166,6 @@ export default function Sidebar({
                 <SidebarMenuButton
                   onClick={limpiarCursos}
                   isActive={!haySeleccion}
-                  tooltip="Todos los cursos"
                 >
                   <BookOpen
                     size={16}
@@ -282,7 +281,6 @@ function EnlaceSeccion({
     <SidebarMenuItem>
       <SidebarMenuButton
         isActive={activo}
-        tooltip={etiqueta}
         className={NAV_ACTIVO}
         render={
           <Link

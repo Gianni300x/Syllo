@@ -153,7 +153,6 @@ export function CursoItem({
       <SidebarMenuButton
         onClick={() => toggleCurso(nombre)}
         isActive={seleccionado}
-        tooltip={nombreMostrar}
       >
         {casilla}
         <span className={colorParaCurso(nombre, listaCursos)}>{nombreMostrar}</span>
