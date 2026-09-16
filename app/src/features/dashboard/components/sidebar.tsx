@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   Archive,
   BookOpen,
@@ -13,35 +13,28 @@ import {
   NotebookPen,
   RefreshCw,
   Home,
-  X
 } from "lucide-react";
 import { useFiltroCursos } from "../hooks/filtro-cursos";
 import { CursoItem } from "@/features/archivados/components/curso-item";
 import { Button } from "@/components/ui/button";
+import {
+  Sidebar as SidebarPrimitive,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 
 export type Seccion = "inicio" | "tareas" | "correos" | "notas" | "calendario";
-
-/**
- * ¿Estamos en `lg+`? Hace falta en JS y no solo en CSS porque `inert` no
- * entiende de media queries: el drawer cerrado tiene que salir del orden de
- * tabulación en mobile, pero nunca en escritorio, donde está siempre a la vista.
- * Arranca en `true` para que el primer render del servidor no marque inerte un
- * sidebar que en escritorio es visible.
- */
-function useEsEscritorio(): boolean {
-  const [esEscritorio, setEsEscritorio] = useState(true);
-
-  useEffect(() => {
-    const consulta = window.matchMedia("(min-width: 1024px)");
-    const sincronizar = () => setEsEscritorio(consulta.matches);
-    sincronizar();
-    consulta.addEventListener("change", sincronizar);
-    return () => consulta.removeEventListener("change", sincronizar);
-  }, []);
-
-  return esEscritorio;
-}
 
 export interface UsuarioSidebar {
   name?: string | null;
@@ -49,27 +42,26 @@ export interface UsuarioSidebar {
   image?: string | null;
 }
 
+/** Pill sólida cuando está activo, igual que antes — el resto de la sidebar
+ *  usa el tinte suave de `--sidebar-accent` (selección de curso). */
+const NAV_ACTIVO =
+  "data-active:bg-indigo-600 data-active:text-white data-active:hover:bg-indigo-600 data-active:hover:text-white dark:data-active:bg-indigo-600";
+
 export default function Sidebar({
   cursos,
   usuario,
   onCerrarSesion,
   onActualizar,
   actualizando = false,
-  abierto = false,
-  onCerrarMenu,
 }: {
   cursos: string[];
   usuario?: UsuarioSidebar;
   onCerrarSesion?: () => void;
   onActualizar?: () => void;
   actualizando?: boolean;
-  /** Solo aplica en mobile: en `lg+` el sidebar está siempre visible. */
-  abierto?: boolean;
-  onCerrarMenu?: () => void;
 }) {
   const pathname = usePathname();
   const [fotoFallo, setFotoFallo] = useState(false);
-  const esEscritorio = useEsEscritorio();
   const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
     ? "correos"
     : pathname?.startsWith("/dashboard/notas")
@@ -81,22 +73,7 @@ export default function Sidebar({
           : "inicio";
 
   // El resto del contexto (toggle, conteos, archivar) lo consume `CursoItem`.
-  const { cursosSeleccionados, limpiarCursos, cursosArchivados } =
-    useFiltroCursos();
-
-  useEffect(() => {
-    if (!abierto || !onCerrarMenu) return;
-    function alTecla(e: KeyboardEvent) {
-      if (e.key === "Escape") onCerrarMenu!();
-    }
-    document.addEventListener("keydown", alTecla);
-    const overflowPrevio = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", alTecla);
-      document.body.style.overflow = overflowPrevio;
-    };
-  }, [abierto, onCerrarMenu]);
+  const { cursosSeleccionados, limpiarCursos, cursosArchivados } = useFiltroCursos();
 
   const haySeleccion = cursosSeleccionados.length > 0;
   // Los archivados no se listan, pero `cursos` completo se sigue usando para
@@ -104,213 +81,187 @@ export default function Sidebar({
   const cursosVisibles = cursos.filter((c) => !cursosArchivados.includes(c));
 
   return (
-    <>
-      {/* Fondo oscurecido: solo existe en mobile, con el drawer abierto. */}
-      <div
-        aria-hidden
-        onClick={onCerrarMenu}
-        className={`fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
-          abierto ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      />
-
-      <aside
-        aria-label="Navegación principal"
-        inert={!esEscritorio && !abierto}
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-72 max-w-[85vw] flex-col border-r border-slate-200 bg-white p-6 transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-auto lg:w-64 lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:transition-none dark:border-slate-700 dark:bg-slate-800 ${
-          abierto ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between gap-3 text-[#4F46E5] mb-8">
-          <span className="font-bold text-lg">Syllo</span>
-          <div className="flex items-center gap-1">
-            {onActualizar && (
-              <Button
-                onClick={onActualizar}
-                disabled={actualizando}
-                variant="ghost"
-                size="icon-sm"
-                title="Actualizar datos"
-                className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
-              >
-                <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
-              </Button>
-            )}
-            {onCerrarMenu && (
-              <Button
-                onClick={onCerrarMenu}
-                variant="ghost"
-                size="icon-sm"
-                title="Cerrar menú"
-                aria-label="Cerrar menú"
-                className="text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden dark:hover:bg-slate-700 dark:hover:text-slate-300"
-              >
-                <X size={16} />
-              </Button>
-            )}
-          </div>
-        </div>
-
-      <nav className="flex flex-col gap-1 mb-8">
-        <EnlaceSeccion
-          href="/dashboard"
-          icono={<Home size={16} />}
-          etiqueta="Inicio"
-          onNavegar={onCerrarMenu}
-          activo={seccion === "inicio"}
-        />
-        <EnlaceSeccion
-          href="/dashboard/tareas"
-          icono={<ListChecks size={16} />}
-          etiqueta="Tareas"
-          onNavegar={onCerrarMenu}
-          activo={seccion === "tareas"}
-        />
-        <EnlaceSeccion
-          href="/dashboard/correos"
-          icono={<Mail size={16} />}
-          etiqueta="Correos"
-          onNavegar={onCerrarMenu}
-          activo={seccion === "correos"}
-        />
-        <EnlaceSeccion
-          href="/dashboard/notas"
-          icono={<NotebookPen size={16} />}
-          etiqueta="Notas"
-          onNavegar={onCerrarMenu}
-          activo={seccion === "notas"}
-        />
-        <EnlaceSeccion
-          href="/dashboard/calendario"
-          icono={<CalendarDays size={16} />}
-          etiqueta="Calendario"
-          onNavegar={onCerrarMenu}
-          activo={seccion === "calendario"}
-        />
-      </nav>
-
-      {/* Cursos: multi-selección, scrollea internamente */}
-      <div className="flex-1 min-h-0 flex flex-col">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium text-slate-900 tracking-wider dark:text-slate-100">
-            MIS CURSOS
-          </p>
-          {haySeleccion && (
+    <SidebarPrimitive collapsible="icon">
+      <SidebarHeader>
+        <div className="flex items-center justify-between gap-3 px-2 py-1 text-[#4F46E5]">
+          <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
+            Syllo
+          </span>
+          {onActualizar && (
             <Button
-              onClick={limpiarCursos}
-              variant="link"
-              size="xs"
-              className="h-auto p-0 text-[11px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+              onClick={onActualizar}
+              disabled={actualizando}
+              variant="ghost"
+              size="icon-sm"
+              title="Actualizar datos"
+              className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
             >
-              Ver todos
+              <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
             </Button>
           )}
         </div>
+      </SidebarHeader>
 
-        {/* Indicador de cantidad seleccionada */}
-        {haySeleccion && (
-          <p className="text-[11px] text-slate-400 mb-2 dark:text-slate-500">
-            {cursosSeleccionados.length === 1
-              ? "1 curso seleccionado"
-              : `${cursosSeleccionados.length} cursos seleccionados`}
-          </p>
-        )}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <EnlaceSeccion
+                href="/dashboard"
+                icono={<Home size={16} />}
+                etiqueta="Inicio"
+                activo={seccion === "inicio"}
+              />
+              <EnlaceSeccion
+                href="/dashboard/tareas"
+                icono={<ListChecks size={16} />}
+                etiqueta="Tareas"
+                activo={seccion === "tareas"}
+              />
+              <EnlaceSeccion
+                href="/dashboard/correos"
+                icono={<Mail size={16} />}
+                etiqueta="Correos"
+                activo={seccion === "correos"}
+              />
+              <EnlaceSeccion
+                href="/dashboard/notas"
+                icono={<NotebookPen size={16} />}
+                etiqueta="Notas"
+                activo={seccion === "notas"}
+              />
+              <EnlaceSeccion
+                href="/dashboard/calendario"
+                icono={<CalendarDays size={16} />}
+                etiqueta="Calendario"
+                activo={seccion === "calendario"}
+              />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-        <nav className="flex flex-col gap-0.5 pb-24 text-slate-900 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden dark:text-slate-100">
-          {/* Opción "Todos" */}
-          <button
-            onClick={limpiarCursos}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              !haySeleccion
-                ? "bg-indigo-50 text-slate-900 dark:bg-indigo-500/15 dark:text-slate-100"
-                : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
-            }`}
-          >
-            <BookOpen size={16} className={!haySeleccion ? "text-indigo-600 dark:text-indigo-400" : ""} />
-            Todos los cursos
-          </button>
+        {/* Cursos: multi-selección, scrollea internamente */}
+        <SidebarGroup className="flex-1 min-h-0 flex flex-col">
+          <SidebarGroupLabel>MIS CURSOS</SidebarGroupLabel>
+          {haySeleccion && (
+            <SidebarGroupAction
+              onClick={limpiarCursos}
+              className="w-auto whitespace-nowrap px-1.5 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              Ver todos
+            </SidebarGroupAction>
+          )}
 
-          <AnimatePresence mode="popLayout">
-            {[
-              ...cursosVisibles.map((nombre) => (
-                <CursoItem
-                  key={nombre}
-                  nombre={nombre}
-                  listaCursos={cursos}
-                  seleccionado={cursosSeleccionados.includes(nombre)}
-                  esArchivado={false}
-                />
-              )),
-              cursosArchivados.length > 0 ? (
-                <motion.div
-                  key="archivados-header"
-                  layout="position"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="mt-4 mb-1 px-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 tracking-wider dark:text-slate-500"
+          {/* Indicador de cantidad seleccionada */}
+          {haySeleccion && (
+            <p className="px-2 text-[11px] text-slate-400 mb-1 group-data-[collapsible=icon]:hidden dark:text-slate-500">
+              {cursosSeleccionados.length === 1
+                ? "1 curso seleccionado"
+                : `${cursosSeleccionados.length} cursos seleccionados`}
+            </p>
+          )}
+
+          <SidebarGroupContent className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={limpiarCursos}
+                  isActive={!haySeleccion}
+                  tooltip="Todos los cursos"
                 >
-                  <Archive size={12} />
-                  ARCHIVADOS
-                </motion.div>
-              ) : null,
-              ...cursosArchivados.map((nombre) => (
-                <CursoItem
-                  key={nombre}
-                  nombre={nombre}
-                  listaCursos={cursos}
-                  seleccionado={cursosSeleccionados.includes(nombre)}
-                  esArchivado={true}
-                />
-              ))
-            ]}
-          </AnimatePresence>
-        </nav>
-      </div>
+                  <BookOpen
+                    size={16}
+                    className={!haySeleccion ? "text-indigo-600 dark:text-indigo-400" : ""}
+                  />
+                  <span>Todos los cursos</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <AnimatePresence mode="popLayout">
+                {[
+                  ...cursosVisibles.map((nombre) => (
+                    <CursoItem
+                      key={nombre}
+                      nombre={nombre}
+                      listaCursos={cursos}
+                      seleccionado={cursosSeleccionados.includes(nombre)}
+                      esArchivado={false}
+                    />
+                  )),
+                  cursosArchivados.length > 0 ? (
+                    <motion.li
+                      key="archivados-header"
+                      layout="position"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="mt-4 mb-1 px-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 tracking-wider group-data-[collapsible=icon]:hidden dark:text-slate-500"
+                    >
+                      <Archive size={12} />
+                      ARCHIVADOS
+                    </motion.li>
+                  ) : null,
+                  ...cursosArchivados.map((nombre) => (
+                    <CursoItem
+                      key={nombre}
+                      nombre={nombre}
+                      listaCursos={cursos}
+                      seleccionado={cursosSeleccionados.includes(nombre)}
+                      esArchivado={true}
+                    />
+                  )),
+                ]}
+              </AnimatePresence>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
       {/* Pie: perfil de usuario y logout */}
       {usuario && (
-        <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-3 dark:border-slate-700">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {usuario.image && !fotoFallo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={usuario.image}
-                alt={usuario.name ?? "Avatar"}
-                referrerPolicy="no-referrer"
-                onError={() => setFotoFallo(true)}
-                className="w-8 h-8 rounded-full ring-1 ring-slate-200 shrink-0 dark:ring-slate-600"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center text-xs shrink-0 select-none dark:bg-indigo-500/20 dark:text-indigo-300">
-                {usuario.name?.[0]?.toUpperCase() ?? "U"}
+        <SidebarFooter>
+          <div className="pt-2 border-t border-sidebar-border flex items-center justify-between gap-3 group-data-[collapsible=icon]:justify-center">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {usuario.image && !fotoFallo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={usuario.image}
+                  alt={usuario.name ?? "Avatar"}
+                  referrerPolicy="no-referrer"
+                  onError={() => setFotoFallo(true)}
+                  className="w-8 h-8 rounded-full ring-1 ring-slate-200 shrink-0 dark:ring-slate-600"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center text-xs shrink-0 select-none dark:bg-indigo-500/20 dark:text-indigo-300">
+                  {usuario.name?.[0]?.toUpperCase() ?? "U"}
+                </div>
+              )}
+              <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+                <p className="text-xs font-semibold truncate">
+                  {usuario.name ?? "Estudiante"}
+                </p>
+                <p className="text-[11px] text-slate-500 truncate dark:text-slate-400">
+                  {usuario.email ?? ""}
+                </p>
               </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 truncate dark:text-slate-100">
-                {usuario.name ?? "Estudiante"}
-              </p>
-              <p className="text-[11px] text-slate-500 truncate dark:text-slate-400">
-                {usuario.email ?? ""}
-              </p>
             </div>
-          </div>
 
-          {onCerrarSesion && (
-            <Button
-              onClick={onCerrarSesion}
-              variant="ghost"
-              size="icon-sm"
-              title="Cerrar sesión"
-              className="text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 dark:hover:text-red-400 dark:hover:bg-red-500/10"
-            >
-              <LogOut size={16} />
-            </Button>
-          )}
-        </div>
+            {onCerrarSesion && (
+              <Button
+                onClick={onCerrarSesion}
+                variant="ghost"
+                size="icon-sm"
+                title="Cerrar sesión"
+                className="text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 group-data-[collapsible=icon]:hidden dark:hover:text-red-400 dark:hover:bg-red-500/10"
+              >
+                <LogOut size={16} />
+              </Button>
+            )}
+          </div>
+        </SidebarFooter>
       )}
-      </aside>
-    </>
+      <SidebarRail />
+    </SidebarPrimitive>
   );
 }
 
@@ -319,31 +270,36 @@ function EnlaceSeccion({
   icono,
   etiqueta,
   activo,
-  onNavegar,
 }: {
   href: string;
   icono: React.ReactNode;
   etiqueta: string;
   activo: boolean;
-  /** En mobile el drawer se cierra al elegir una sección. */
-  onNavegar?: () => void;
 }) {
   // El filtro vive en la URL, así que cambiar de sección lo perdería si el link
   // no se lo lleva puesto. Solo viaja `curso`: `tab` y `vista` son de Tareas.
   const { hrefConFiltro } = useFiltroCursos();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
-    <Link
-      href={hrefConFiltro(href)}
-      onClick={onNavegar}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-        activo
-          ? "bg-indigo-600 text-white"
-          : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-      }`}
-    >
-      {icono}
-      {etiqueta}
-    </Link>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        isActive={activo}
+        tooltip={etiqueta}
+        className={NAV_ACTIVO}
+        render={
+          <Link
+            href={hrefConFiltro(href)}
+            onClick={() => {
+              // En mobile el drawer se cierra al elegir una sección.
+              if (isMobile) setOpenMobile(false);
+            }}
+          />
+        }
+      >
+        {icono}
+        <span>{etiqueta}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }

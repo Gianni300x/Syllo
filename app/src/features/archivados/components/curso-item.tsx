@@ -5,16 +5,20 @@ import { motion } from "motion/react";
 import { Archive, ArchiveRestore, Edit2, MoreVertical, Check, X } from "lucide-react";
 import { colorParaCurso, bgParaCurso } from "@/lib/cursos-color";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import {
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 /**
  * Fila de curso del sidebar: alterna la selección y abre el menú de
@@ -84,25 +88,19 @@ export function CursoItem({
     </span>
   );
 
-  return (
-    <motion.div
-      layout="position"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-      className={`relative group flex items-center rounded-lg text-sm transition-colors ${
-        menuAbierto ? "z-50" : "z-0"
-      } ${esArchivado ? "opacity-75 hover:opacity-100 " : ""}${
-        seleccionado
-          ? "bg-indigo-50 dark:bg-indigo-500/15"
-          : "hover:bg-slate-100 dark:hover:bg-slate-700"
-      }`}
-    >
-      {editando ? (
+  if (editando) {
+    return (
+      <motion.li
+        layout="position"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+        className="group/menu-item relative"
+      >
         <form
           onSubmit={guardarNombre}
-          className="flex flex-1 items-center gap-2 min-w-0 px-3 py-2"
+          className="flex flex-1 items-center gap-2 min-w-0 px-2 py-1.5"
         >
           {casilla}
           <Input
@@ -139,86 +137,62 @@ export function CursoItem({
             <X size={14} />
           </Button>
         </form>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={() => toggleCurso(nombre)}
-            aria-pressed={seleccionado}
-            title={nombreMostrar}
-            className={`flex flex-1 items-center gap-2 min-w-0 px-3 py-2 text-left rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-              seleccionado
-                ? "text-slate-900 dark:text-slate-100"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
+      </motion.li>
+    );
+  }
+
+  return (
+    <motion.li
+      layout="position"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+      className={`group/menu-item relative ${esArchivado ? "opacity-75 hover:opacity-100" : ""}`}
+    >
+      <SidebarMenuButton
+        onClick={() => toggleCurso(nombre)}
+        isActive={seleccionado}
+        tooltip={nombreMostrar}
+      >
+        {casilla}
+        <span className={colorParaCurso(nombre, listaCursos)}>{nombreMostrar}</span>
+      </SidebarMenuButton>
+
+      {conteo > 0 && <SidebarMenuBadge className="right-8">{conteo}</SidebarMenuBadge>}
+
+      <DropdownMenu open={menuAbierto} onOpenChange={setMenuAbierto}>
+        <SidebarMenuAction
+          render={<DropdownMenuTrigger aria-label={`Opciones de ${nombreMostrar}`} />}
+          showOnHover
+        >
+          <MoreVertical size={14} />
+        </SidebarMenuAction>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            onClick={() => {
+              setNuevoNombre(renombres[nombre] || nombre);
+              setEditando(true);
+            }}
           >
-            {casilla}
-            <span className={`truncate ${colorParaCurso(nombre, listaCursos)}`}>
-              {nombreMostrar}
-            </span>
-          </button>
+            <Edit2 size={12} /> Renombrar
+          </DropdownMenuItem>
 
-          <div className="flex items-center shrink-0 pr-2">
-            {conteo > 0 && (
-              <Badge
-                variant="secondary"
-                className={`mr-1 rounded-full ${
-                  seleccionado
-                    ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
-                    : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-                }`}
-              >
-                {conteo}
-              </Badge>
-            )}
-
-            <DropdownMenu open={menuAbierto} onOpenChange={setMenuAbierto}>
-              <DropdownMenuTrigger
-                aria-label={`Opciones de ${nombreMostrar}`}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon-xs" }),
-                  "text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 dark:hover:text-slate-200",
-                  // En mobile no hay hover: sin el prefijo `sm:` el menú era
-                  // inalcanzable y archivar o renombrar un curso no existía desde
-                  // el celular. Mismo patrón que `controles-tarea.tsx`.
-                  menuAbierto
-                    ? "opacity-100"
-                    : "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
-                )}
-              >
-                <MoreVertical size={14} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setNuevoNombre(renombres[nombre] || nombre);
-                    setEditando(true);
-                  }}
-                >
-                  <Edit2 size={12} /> Renombrar
-                </DropdownMenuItem>
-
-                {esArchivado ? (
-                  <DropdownMenuItem
-                    onClick={() => restaurarCursos([nombre])}
-                    disabled={archivando}
-                    className="text-indigo-600 dark:text-indigo-400"
-                  >
-                    <ArchiveRestore size={12} /> Desarchivar
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() => archivarCursos([nombre])}
-                    disabled={archivando}
-                  >
-                    <Archive size={12} /> Archivar
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </>
-      )}
-    </motion.div>
+          {esArchivado ? (
+            <DropdownMenuItem
+              onClick={() => restaurarCursos([nombre])}
+              disabled={archivando}
+              className="text-indigo-600 dark:text-indigo-400"
+            >
+              <ArchiveRestore size={12} /> Desarchivar
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => archivarCursos([nombre])} disabled={archivando}>
+              <Archive size={12} /> Archivar
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </motion.li>
   );
 }

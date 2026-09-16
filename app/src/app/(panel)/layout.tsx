@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { getNombresCursos } from "@/features/tareas/services/tareas-server";
@@ -15,6 +16,12 @@ export default async function PanelLayout({
   if (!session?.access_token || session.error) {
     redirect("/");
   }
+
+  // Estado del sidebar (expandido/colapsado) persistido por el propio
+  // componente de shadcn en esta cookie. Se lee acá para que el primer
+  // render del servidor ya arranque en el estado correcto, sin parpadeo.
+  const cookieStore = await cookies();
+  const sidebarAbierto = cookieStore.get("sidebar_state")?.value !== "false";
 
   const userId = session.user?.email ?? "anon";
   const [cursos, archivados, renombres] = await Promise.all([
@@ -38,6 +45,7 @@ export default async function PanelLayout({
       cursosArchivados={cursosArchivados}
       renombres={renombres}
       usuario={usuario}
+      sidebarAbierto={sidebarAbierto}
       onCerrarSesion={async () => {
         "use server";
         await signOut({ redirectTo: "/" });
