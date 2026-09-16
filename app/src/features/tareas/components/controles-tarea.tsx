@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CircleDashed, CirclePlay, Pin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Tarea } from "@/features/tareas/services/classroom";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import {
@@ -120,18 +121,18 @@ function Boton({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       disabled={pendiente}
       aria-pressed={activo}
       title={etiqueta}
       aria-label={etiqueta}
-      className={`rounded-md p-1 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:hover:bg-slate-700 ${
-        activo ? colorActivo : "text-slate-400 dark:text-slate-500"
-      }`}
+      variant="ghost"
+      size="icon-xs"
+      className={activo ? colorActivo : "text-slate-400 dark:text-slate-500"}
     >
       {children}
-    </button>
+    </Button>
   );
 }
