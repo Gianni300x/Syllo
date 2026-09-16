@@ -38,6 +38,17 @@ import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { colorParaCurso } from "@/lib/cursos-color";
 import EditorRico from "./editor-rico";
 import type { ResultadoNota } from "@/features/notas/services/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type AccionNota = (
   prev: ResultadoNota,
@@ -215,13 +226,10 @@ export default function Notas({
                   </h1>
                   <p className="text-sm text-slate-500 dark:text-slate-400">{hoy}</p>
                 </div>
-                <button
-                  onClick={handleAbrirNueva}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                >
+                <Button onClick={handleAbrirNueva} className="shrink-0">
                   <Plus size={16} />
                   Nueva nota
-                </button>
+                </Button>
               </div>
 
               {/* Las notas ya están todas en el cliente: la búsqueda es en memoria. */}
@@ -230,7 +238,7 @@ export default function Notas({
                   size={15}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
-                <input
+                <Input
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   onKeyDown={(e) => {
@@ -238,7 +246,7 @@ export default function Notas({
                   }}
                   placeholder="Buscar en tus notas…"
                   aria-label="Buscar en tus notas"
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  className="w-full pl-9"
                 />
               </div>
             </div>
@@ -320,13 +328,10 @@ function EstadoVacio({ onNueva }: { onNueva: () => void }) {
       <p className="text-sm text-slate-500 dark:text-slate-400">
         Todavía no escribiste ninguna nota.
       </p>
-      <button
-        onClick={onNueva}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-      >
+      <Button onClick={onNueva} className="mt-4">
         <Plus size={16} />
         Escribir la primera
-      </button>
+      </Button>
     </div>
   );
 }
@@ -358,11 +363,11 @@ function TarjetaNota({
   }, [estado.ok, router]);
 
   return (
-    <div
-      className={`flex h-full flex-col rounded-xl border bg-white p-4 shadow-sm transition-colors dark:bg-slate-800 ${
+    <Card
+      className={`flex h-full flex-col gap-0 p-4 shadow-sm transition-colors ${
         activa
           ? "border-indigo-400 dark:border-indigo-500"
-          : "border-slate-200 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:hover:border-indigo-500"
+          : "hover:border-indigo-300 hover:shadow-md dark:hover:border-indigo-500"
       }`}
     >
       <button
@@ -397,18 +402,20 @@ function TarjetaNota({
         </span>
 
         <div className="flex items-center gap-1">
-          <button
+          <Button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               descargarNota(nota);
             }}
+            variant="ghost"
+            size="icon-sm"
             title="Descargar como .md"
             aria-label="Descargar como .md"
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-pointer"
+            className="text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
           >
             <Download size={14} />
-          </button>
+          </Button>
 
           {confirmando ? (
             <form action={accion} className="flex items-center gap-1">
@@ -416,35 +423,41 @@ function TarjetaNota({
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 ¿Eliminar?
               </span>
-              <button
+              <Button
                 type="submit"
                 disabled={pendiente}
-                className="rounded-md px-1.5 py-0.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
+                variant="ghost"
+                size="xs"
+                className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
               >
                 {pendiente ? (
                   <Loader2 size={13} className="animate-spin" />
                 ) : (
                   "Sí"
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setConfirmando(false)}
-                className="rounded-md px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 cursor-pointer"
+                variant="ghost"
+                size="xs"
+                className="text-slate-500 dark:text-slate-400"
               >
                 No
-              </button>
+              </Button>
             </form>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={() => setConfirmando(true)}
+              variant="ghost"
+              size="icon-sm"
               title="Eliminar nota"
               aria-label="Eliminar nota"
-              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 cursor-pointer"
+              className="text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
             >
               <Trash2 size={14} />
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -454,7 +467,7 @@ function TarjetaNota({
           {error}
         </p>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -521,37 +534,36 @@ function VisorNota({
     <div className="flex flex-1 flex-col w-full h-full min-h-0">
       {/* Barra de navegación superior */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={onVolverALista}
-          className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-        >
+        <Button type="button" onClick={onVolverALista} variant="ghost">
           <ArrowLeft size={16} />
           <span>Volver a notas</span>
-        </button>
+        </Button>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
+          <Button
             type="button"
             onClick={() => descargarNota(nota)}
+            variant="outline"
+            size="sm"
             title="Descargar como .md"
             aria-label="Descargar como .md"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Download size={14} />
             <span className="hidden sm:inline">Descargar .md</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => compartirONotificar(nota, alCopiar)}
+            variant="outline"
+            size="sm"
             title="Compartir o copiar nota"
             aria-label="Compartir o copiar nota"
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            className={
               copiado
-                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300"
-                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            }`}
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300"
+                : ""
+            }
           >
             {copiado ? (
               <Check size={14} className="text-emerald-600 dark:text-emerald-400" />
@@ -561,18 +573,12 @@ function VisorNota({
             <span className="hidden sm:inline">
               {copiado ? "¡Copiado!" : "Compartir"}
             </span>
-          </button>
+          </Button>
 
-          <button
-            type="button"
-            onClick={onEditar}
-            title="Editar nota"
-            aria-label="Editar nota"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
+          <Button type="button" onClick={onEditar} size="sm" title="Editar nota" aria-label="Editar nota">
             <Pencil size={13} />
             <span>Editar</span>
-          </button>
+          </Button>
 
           {confirmando ? (
             <form action={accion} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 p-1 dark:border-red-500/30 dark:bg-red-500/10">
@@ -580,35 +586,40 @@ function VisorNota({
               <span className="px-1 text-xs text-red-700 dark:text-red-300">
                 ¿Eliminar?
               </span>
-              <button
+              <Button
                 type="submit"
                 disabled={pendiente}
-                className="rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-60 cursor-pointer"
+                variant="destructive"
+                size="xs"
               >
                 {pendiente ? (
                   <Loader2 size={13} className="animate-spin" />
                 ) : (
                   "Sí"
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setConfirmando(false)}
-                className="rounded-md px-1.5 py-1 text-xs text-slate-500 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+                variant="ghost"
+                size="xs"
+                className="text-slate-500 dark:text-slate-400"
               >
                 No
-              </button>
+              </Button>
             </form>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={() => setConfirmando(true)}
+              variant="outline"
+              size="icon-sm"
               title="Eliminar nota"
               aria-label="Eliminar nota"
-              className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-400 shadow-sm transition-colors hover:bg-red-50 hover:text-red-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-red-500/10 dark:hover:text-red-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
             >
               <Trash2 size={15} />
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -623,19 +634,17 @@ function VisorNota({
       <article className="flex flex-1 flex-col w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
         <div className="mb-4 flex flex-wrap items-center gap-2 shrink-0">
           {nota.curso ? (
-            <span
-              className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${colorParaCurso(
-                nota.curso,
-                cursos,
-              )}`}
+            <Badge
+              variant="secondary"
+              className={colorParaCurso(nota.curso, cursos)}
               title={renombres[nota.curso] || nota.curso}
             >
               {renombres[nota.curso] || nota.curso}
-            </span>
+            </Badge>
           ) : (
-            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            <Badge variant="secondary" className="text-slate-500 dark:text-slate-400">
               General
-            </span>
+            </Badge>
           )}
           <span className="text-xs text-slate-300 dark:text-slate-700">•</span>
           {fechaFormateada && (
@@ -667,14 +676,10 @@ function VisorNota({
               <p className="text-sm italic text-slate-400 dark:text-slate-500">
                 Esta nota no tiene contenido todavía.
               </p>
-              <button
-                type="button"
-                onClick={onEditar}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-700 cursor-pointer"
-              >
+              <Button type="button" onClick={onEditar} size="sm" className="mt-4">
                 <Pencil size={13} />
                 Escribir contenido
-              </button>
+              </Button>
             </div>
           ) : (
             <div
@@ -714,6 +719,12 @@ function EditorNota({
   const [contenido, setContenido] = useState(() =>
     contenidoComoHtml(nota?.contenido ?? ""),
   );
+  // Base UI (como Radix) no permite value="" en un SelectItem, así que el
+  // "Sin curso" usa este centinela y se traduce a "" recién al mandar el form.
+  const SIN_CURSO = "__general__";
+  const [cursoValor, setCursoValor] = useState(
+    nota?.curso ?? cursoSugerido ?? SIN_CURSO,
+  );
   const router = useRouter();
   const error = mensajeError(estado.error);
 
@@ -740,31 +751,24 @@ function EditorNota({
     <form action={enviar} className="flex flex-1 flex-col w-full h-full min-h-0">
       {/* Barra de navegación y acciones de edición */}
       <div className="mb-4 flex items-center justify-between gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={handleCancelar}
-          className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-        >
+        <Button type="button" onClick={handleCancelar} variant="ghost">
           <ArrowLeft size={16} />
           <span>{nota ? "Volver a la nota" : "Volver a notas"}</span>
-        </button>
+        </Button>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
             onClick={handleCancelar}
-            className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+            variant="ghost"
+            className="text-slate-500 dark:text-slate-400"
           >
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={pendiente}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-60 cursor-pointer disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
+          </Button>
+          <Button type="submit" disabled={pendiente}>
             {pendiente && <Loader2 size={15} className="animate-spin" />}
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -773,32 +777,40 @@ function EditorNota({
       {/* Contenedor del formulario a todo el ancho y alto */}
       <div className="flex flex-1 flex-col w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900 gap-5 overflow-hidden">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center shrink-0">
-          <input
+          <Input
             name="titulo"
             defaultValue={nota?.titulo ?? ""}
             placeholder="Título de la nota"
             maxLength={MAX_TITULO}
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+            className="flex-1 h-auto px-3.5 py-2.5 text-base font-semibold"
           />
 
-          <select
-            name="curso"
-            defaultValue={nota?.curso ?? cursoSugerido ?? ""}
-            aria-label="Curso de la nota"
-            className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 sm:w-64 focus-visible:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          <Select
+            value={cursoValor}
+            onValueChange={(valor) => setCursoValor(valor ?? SIN_CURSO)}
           >
-            <option value="">Sin curso (General)</option>
-            {/* Si la nota quedó colgada de un curso que ya no está en Classroom,
-                su opción igual aparece para no perderla al guardar. */}
-            {(nota?.curso && !cursos.includes(nota.curso)
-              ? [...cursos, nota.curso]
-              : cursos
-            ).map((curso) => (
-              <option key={curso} value={curso}>
-                {renombres[curso] || curso}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Curso de la nota" className="sm:w-64">
+              <SelectValue placeholder="Sin curso (General)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SIN_CURSO}>Sin curso (General)</SelectItem>
+              {/* Si la nota quedó colgada de un curso que ya no está en Classroom,
+                  su opción igual aparece para no perderla al guardar. */}
+              {(nota?.curso && !cursos.includes(nota.curso)
+                ? [...cursos, nota.curso]
+                : cursos
+              ).map((curso) => (
+                <SelectItem key={curso} value={curso}>
+                  {renombres[curso] || curso}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <input
+            type="hidden"
+            name="curso"
+            value={cursoValor === SIN_CURSO ? "" : cursoValor}
+          />
         </div>
 
         {/* El valor viaja al form acá: Tiptap vive fuera del ciclo de formularios. */}
@@ -818,21 +830,18 @@ function EditorNota({
         )}
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 shrink-0">
-          <button
+          <Button
             type="button"
             onClick={handleCancelar}
-            className="rounded-lg px-3.5 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 cursor-pointer"
+            variant="ghost"
+            className="text-slate-500 dark:text-slate-400"
           >
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={pendiente}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-60 cursor-pointer disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
+          </Button>
+          <Button type="submit" disabled={pendiente}>
             {pendiente && <Loader2 size={15} className="animate-spin" />}
             Guardar nota
-          </button>
+          </Button>
         </div>
       </div>
     </form>
