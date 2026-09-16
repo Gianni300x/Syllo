@@ -32,12 +32,12 @@ import {
   resumen,
   tituloMostrado,
   type Nota,
-} from "../lib/notas";
-import { capitalizar } from "../lib/fechas";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { colorParaCurso } from "./sidebar";
+} from "@/features/notas/services/notas";
+import { capitalizar } from "@/app/lib/fechas";
+import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
+import { colorParaCurso } from "@/app/components/sidebar";
 import EditorRico from "./editor-rico";
-import type { ResultadoNota } from "../(panel)/dashboard/notas/actions";
+import type { ResultadoNota } from "@/features/notas/services/actions";
 
 type AccionNota = (
   prev: ResultadoNota,

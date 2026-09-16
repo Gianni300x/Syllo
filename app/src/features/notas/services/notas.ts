@@ -3,18 +3,10 @@
  * No importa `db` ni nada de servidor: lo usan tanto el server como el cliente.
  */
 import { htmlAMarkdown, quitarMarcas, renderMarkdown } from "./markdown";
-import { normalizar } from "./texto";
+import { normalizar } from "@/app/lib/texto";
+import type { Nota } from "../types";
 
-export interface Nota {
-  id: string;
-  titulo: string;
-  contenido: string;
-  /** Nombre del curso, o `null` si la nota no es de ninguna materia. */
-  curso: string | null;
-  /** ISO string, para poder serializar del server component al client. */
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Nota };
 
 /** Límites de validación, compartidos entre el editor y las server actions. */
 export const MAX_TITULO = 200;

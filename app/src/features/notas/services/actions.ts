@@ -11,7 +11,7 @@ import {
   MAX_TITULO,
   estaVacio,
   textoPlano,
-} from "@/app/lib/notas";
+} from "@/features/notas/services/notas";
 
 export interface ResultadoNota {
   ok?: boolean;

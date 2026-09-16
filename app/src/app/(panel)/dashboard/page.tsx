@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getTareas, getNombresCursos } from "@/features/tareas/services/tareas-server";
 import { getCorreosInicial } from "@/features/correos/services/correos-server";
-import { getNotas } from "../../lib/notas-server";
+import { getNotas } from "@/features/notas/services/notas-server";
 import { eventoComoTarea, getEventosCached } from "../../lib/eventos-service";
 import { getEstadosTareas } from "@/features/tareas/services/estados-tareas-server";
 import { aplicarEstados } from "@/features/tareas/services/tareas-service";

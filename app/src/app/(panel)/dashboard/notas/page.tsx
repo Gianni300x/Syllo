@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getNotas } from "@/app/lib/notas-server";
-import type { Nota } from "@/app/lib/notas";
-import Notas from "@/app/components/notas";
-import { crearNota, editarNota, eliminarNota } from "./actions";
+import { getNotas } from "@/features/notas/services/notas-server";
+import type { Nota } from "@/features/notas/services/notas";
+import Notas from "@/features/notas/components/notas";
+import { crearNota, editarNota, eliminarNota } from "@/features/notas/services/actions";
 
 export default async function NotasPage() {
   const session = await auth();

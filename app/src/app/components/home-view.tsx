@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Tarea, claveTarea, estaCompletada } from "@/features/tareas/services/classroom";
 import { Correo } from "@/features/correos/services/correos";
-import { Nota, fechaRelativa } from "../lib/notas";
+import { Nota, fechaRelativa } from "@/features/notas/services/notas";
 import {
   contarPendientesPorCurso,
   ordenarPorPrioridad,

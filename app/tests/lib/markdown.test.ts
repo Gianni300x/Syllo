@@ -3,7 +3,7 @@ import {
   htmlAMarkdown,
   quitarMarcas,
   renderMarkdown,
-} from "../../src/app/lib/markdown";
+} from "@/features/notas/services/markdown";
 
 describe("renderMarkdown", () => {
   test("convierte listas escritas con saltos de Windows (CRLF)", () => {
