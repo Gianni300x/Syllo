@@ -16,7 +16,7 @@ import {
   X
 } from "lucide-react";
 import { useFiltroCursos } from "../(panel)/filtro-cursos";
-import { CursoItem } from "./curso-item";
+import { CursoItem } from "@/features/archivados/components/curso-item";
 import { motion, AnimatePresence } from "motion/react";
 
 const COLORES_CURSO = [

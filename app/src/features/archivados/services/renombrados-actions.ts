@@ -3,8 +3,8 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
-import { getDb } from "../lib/db";
-import { cursosRenombrados } from "../lib/schema";
+import { getDb } from "@/app/lib/db";
+import { cursosRenombrados } from "@/app/lib/schema";
 
 export async function renombrarCursoAction(cursoOriginal: string, nuevoNombre: string) {
   const session = await auth();

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchCursosArchivados } from "@/app/lib/archivados-server";
-import { fetchCursosRenombrados } from "@/app/lib/renombrados-server";
+import { fetchCursosArchivados } from "@/features/archivados/services/archivados-server";
+import { fetchCursosRenombrados } from "@/features/archivados/services/renombrados-server";
 import { eventoComoTarea, getEventos } from "@/features/calendario/services/eventos-service";
 import { emailPorToken, getSnapshotTareas } from "@/features/calendario/services/feed-server";
 import { tareaDelFeedComoTarea } from "@/features/tareas/services/tareas-service";

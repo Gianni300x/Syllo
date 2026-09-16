@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { Archive, ArchiveRestore, Edit2, MoreVertical, Check, X } from "lucide-react";
-import { colorParaCurso, bgParaCurso } from "./sidebar";
-import { useFiltroCursos } from "../(panel)/filtro-cursos";
+import { colorParaCurso, bgParaCurso } from "@/app/components/sidebar";
+import { useFiltroCursos } from "@/app/(panel)/filtro-cursos";
 
 /**
  * Fila de curso del sidebar: alterna la selección y abre el menú de

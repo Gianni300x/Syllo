@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { getNombresCursos } from "@/features/tareas/services/tareas-server";
-import { getCursosArchivados } from "../lib/archivados-server";
-import { getCursosRenombrados } from "../lib/renombrados-server";
+import { getCursosArchivados } from "@/features/archivados/services/archivados-server";
+import { getCursosRenombrados } from "@/features/archivados/services/renombrados-server";
 import PanelShell from "./PanelShell";
 
 export default async function PanelLayout({

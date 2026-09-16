@@ -9,8 +9,8 @@ import { actualizarDatos } from "./actions";
 import {
   archivarCursos as archivarCursosAction,
   restaurarCursos as restaurarCursosAction,
-} from "./archivados-actions";
-import { renombrarCursoAction } from "./renombrados-actions";
+} from "@/features/archivados/services/archivados-actions";
+import { renombrarCursoAction } from "@/features/archivados/services/renombrados-actions";
 import ThemeToggle from "./theme-toggle";
 import Aviso from "../components/aviso";
 
