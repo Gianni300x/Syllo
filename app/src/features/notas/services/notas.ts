@@ -3,7 +3,7 @@
  * No importa `db` ni nada de servidor: lo usan tanto el server como el cliente.
  */
 import { htmlAMarkdown, quitarMarcas, renderMarkdown } from "./markdown";
-import { normalizar } from "@/app/lib/texto";
+import { normalizar } from "@/lib/texto";
 import type { Nota } from "../types";
 
 export type { Nota };

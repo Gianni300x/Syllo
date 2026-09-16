@@ -1,5 +1,5 @@
-import { getDb } from "@/app/lib/db";
-import { eventos } from "@/app/lib/schema";
+import { getDb } from "@/lib/db";
+import { eventos } from "@/lib/schema";
 import { and, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import type { Tarea } from "@/features/tareas/services/classroom";

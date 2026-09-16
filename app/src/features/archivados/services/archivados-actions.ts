@@ -3,8 +3,8 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { and, eq, inArray } from "drizzle-orm";
 import { auth } from "@/auth";
-import { getDb } from "@/app/lib/db";
-import { cursosArchivados } from "@/app/lib/schema";
+import { getDb } from "@/lib/db";
+import { cursosArchivados } from "@/lib/schema";
 
 export interface ResultadoArchivado {
   ok?: boolean;

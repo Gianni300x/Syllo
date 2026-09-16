@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { bgParaCurso } from "@/lib/cursos-color";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { Tarea, estaCompletada, fechaVencimiento, claveTarea } from "@/features/tareas/services/classroom";
-import { capitalizar } from "@/app/lib/fechas";
+import { capitalizar } from "@/lib/fechas";
 
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 

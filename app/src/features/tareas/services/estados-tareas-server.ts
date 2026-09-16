@@ -6,8 +6,8 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { eq } from "drizzle-orm";
-import { getDb } from "@/app/lib/db";
-import { estadosTareas } from "@/app/lib/schema";
+import { getDb } from "@/lib/db";
+import { estadosTareas } from "@/lib/schema";
 import type { EstadoTarea, EstadosPorTarea } from "../types";
 
 export type { EstadoTarea, EstadosPorTarea };

@@ -12,7 +12,7 @@ import {
 } from "@/features/archivados/services/archivados-actions";
 import { renombrarCursoAction } from "@/features/archivados/services/renombrados-actions";
 import ThemeToggle from "./theme-toggle";
-import Aviso from "@/app/components/aviso";
+import Aviso from "@/components/ui/aviso";
 
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {

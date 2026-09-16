@@ -6,8 +6,8 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { asc, eq } from "drizzle-orm";
-import { getDb } from "@/app/lib/db";
-import { cursosArchivados } from "@/app/lib/schema";
+import { getDb } from "@/lib/db";
+import { cursosArchivados } from "@/lib/schema";
 
 export async function fetchCursosArchivados(userId: string): Promise<string[]> {
   const db = getDb();

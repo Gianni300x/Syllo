@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { colorParaCurso } from "@/lib/cursos-color";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
-import { useTemaOscuro } from "@/app/lib/tema";
-import { capitalizar } from "@/app/lib/fechas";
+import { useTemaOscuro } from "@/lib/tema";
+import { capitalizar } from "@/lib/fechas";
 import {
   formatearFechaCompleta,
   formatearFechaCorreo,

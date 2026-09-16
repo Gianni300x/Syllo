@@ -10,8 +10,8 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { desc, eq } from "drizzle-orm";
-import { getDb } from "@/app/lib/db";
-import { notas } from "@/app/lib/schema";
+import { getDb } from "@/lib/db";
+import { notas } from "@/lib/schema";
 import type { Nota } from "./notas";
 
 export async function fetchNotasDesdeDb(userId: string): Promise<Nota[]> {

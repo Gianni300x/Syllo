@@ -1,4 +1,4 @@
-import { MESES_CORTOS } from "@/app/lib/fechas";
+import { MESES_CORTOS } from "@/lib/fechas";
 import type { Tarea, TareaDelFeed, CuentaRegresiva } from "../types";
 
 export type { Tarea, TareaDelFeed, CuentaRegresiva };

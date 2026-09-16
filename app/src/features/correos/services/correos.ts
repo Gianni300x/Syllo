@@ -2,8 +2,8 @@
  * Tipos y helpers puros de la bandeja de correos de Classroom.
  * Este archivo no importa `googleapis`: lo usan tanto el servidor como el cliente.
  */
-import { MESES_CORTOS } from "@/app/lib/fechas";
-import { normalizar } from "@/app/lib/texto";
+import { MESES_CORTOS } from "@/lib/fechas";
+import { normalizar } from "@/lib/texto";
 import type { Correo, CorreoCompleto, OrigenCorreo, PaginaCorreos } from "../types";
 
 export type { Correo, CorreoCompleto, OrigenCorreo, PaginaCorreos };

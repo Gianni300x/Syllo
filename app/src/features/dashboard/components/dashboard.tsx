@@ -29,8 +29,8 @@ import {
   contarPendientesPorCurso,
   ordenarPorPrioridad,
 } from "@/features/tareas/services/tareas-service";
-import { capitalizar } from "@/app/lib/fechas";
-import { normalizar } from "@/app/lib/texto";
+import { capitalizar } from "@/lib/fechas";
+import { normalizar } from "@/lib/texto";
 
 type Tab =
   | "pendientes"

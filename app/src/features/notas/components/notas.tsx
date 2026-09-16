@@ -33,7 +33,7 @@ import {
   tituloMostrado,
   type Nota,
 } from "@/features/notas/services/notas";
-import { capitalizar } from "@/app/lib/fechas";
+import { capitalizar } from "@/lib/fechas";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
 import { colorParaCurso } from "@/lib/cursos-color";
 import EditorRico from "./editor-rico";
