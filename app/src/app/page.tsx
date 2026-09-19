@@ -33,8 +33,8 @@ export default function Home() {
 
             <HeroFadeIn delay={0.25} y={16}>
               <p className="sub">
-                Los anuncios de Google Classroom, las fechas del CVG y las
-                tareas de todos tus cursos, en un mismo lugar.
+                Los anuncios de Google Classroom, las fechas del CVG, las tareas
+                y tus calificaciones, en un mismo lugar.
               </p>
             </HeroFadeIn>
 
@@ -51,7 +51,7 @@ export default function Home() {
                   <path d="M9 6h11M9 12h11M9 18h11" />
                   <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeLinecap="round" />
                 </svg>
-                Tareas y vencimientos ordenados
+                Tareas, calificaciones y vencimientos
               </HeroFadeInLi>
               <HeroFadeInLi delay={0.49} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -256,7 +256,7 @@ export default function Home() {
                   Todas las entregas de todos los cursos, ordenadas por fecha y
                   con su estado: pendiente, urgente, entregada o vencida. Los
                   cursos que ya terminaste los archivás y desaparecen de la
-                  vista.
+                  vista. Las entregas corregidas quedan reunidas con su nota.
                 </p>
               </div>
               <div className="mini" aria-hidden="true">

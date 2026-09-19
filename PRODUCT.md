@@ -34,8 +34,8 @@ Google: nunca modifica ni envía nada en nombre del usuario.
 
 - Login con cuenta de Google (institucional). OAuth con scopes de solo lectura de
   Classroom, sin acceso a Gmail.
-- El panel autenticado vive bajo el route group `(panel)`, con cinco secciones:
-  Inicio, Tareas, Novedades, Notas y Calendario.
+- El panel autenticado vive bajo el route group `(panel)`, con seis secciones:
+  Inicio, Tareas, Calificaciones, Novedades, Notas y Calendario.
 - Tareas: tabs de pendientes, empezadas, esta semana, urgentes, vencidas
   (limitado a los últimos 30 días), completadas y archivados; vista cuadrícula o
   lista; buscador en memoria; tarjetas de resumen que abren su pestaña.
@@ -60,7 +60,8 @@ Google: nunca modifica ni envía nada en nombre del usuario.
 ## Capabilities and Constraints
 
 - Hoy: agregación de anuncios de Classroom y fechas del CVG; tareas de todos
-  los cursos ordenadas por entrega y estado, con estado propio del alumno
+  los cursos ordenadas por entrega y estado; calificaciones publicadas y
+  entregas que todavía esperan corrección, con estado propio del alumno
   (empezada, fijada); notas propias con curso, buscador y editor enriquecido,
   donde el formato se aplica mientras se escribe (crear, editar, borrar);
   calendario mensual con vencimientos de Classroom, fechas del CVG y eventos personales; calendario
@@ -85,7 +86,7 @@ Google: nunca modifica ni envía nada en nombre del usuario.
 
 ## Evidence on Hand
 
-- App funcional con las cinco secciones del panel ya construidas.
+- App funcional con las seis secciones del panel ya construidas.
 - Tests de las capas puras con Vitest (`npm test` en `app/`).
 - No hay métricas de uso, testimonios, clientes, precios ni benchmarks — no se
   deben fabricar.

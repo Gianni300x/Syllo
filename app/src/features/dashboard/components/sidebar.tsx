@@ -10,6 +10,7 @@ import {
   ListChecks,
   LogOut,
   Bell,
+  ChartNoAxesColumnIncreasing,
   NotebookPen,
   RefreshCw,
   Home,
@@ -20,7 +21,13 @@ import { CursoItem } from "@/features/archivados/components/curso-item";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 
-export type Seccion = "inicio" | "tareas" | "novedades" | "notas" | "calendario";
+export type Seccion =
+  | "inicio"
+  | "tareas"
+  | "calificaciones"
+  | "novedades"
+  | "notas"
+  | "calendario";
 
 /**
  * ¿Estamos en `lg+`? Hace falta en JS y no solo en CSS porque `inert` no
@@ -70,7 +77,9 @@ export default function Sidebar({
   const pathname = usePathname();
   const [fotoFallo, setFotoFallo] = useState(false);
   const esEscritorio = useEsEscritorio();
-  const seccion: Seccion = pathname?.startsWith("/dashboard/novedades") || pathname?.startsWith("/dashboard/correos")
+  const seccion: Seccion = pathname?.startsWith("/dashboard/calificaciones")
+    ? "calificaciones"
+    : pathname?.startsWith("/dashboard/novedades") || pathname?.startsWith("/dashboard/correos")
     ? "novedades"
     : pathname?.startsWith("/dashboard/notas")
       ? "notas"
@@ -131,7 +140,7 @@ export default function Sidebar({
                 variant="ghost"
                 size="icon-sm"
                 title="Actualizar datos"
-                className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/15"
+                className="text-slate-400 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-700 dark:hover:text-indigo-300"
               >
                 <RefreshCw size={15} className={actualizando ? "animate-spin" : ""} />
               </Button>
@@ -165,6 +174,13 @@ export default function Sidebar({
           etiqueta="Tareas"
           onNavegar={onCerrarMenu}
           activo={seccion === "tareas"}
+        />
+        <EnlaceSeccion
+          href="/dashboard/calificaciones"
+          icono={<ChartNoAxesColumnIncreasing size={16} />}
+          etiqueta="Calificaciones"
+          onNavegar={onCerrarMenu}
+          activo={seccion === "calificaciones"}
         />
         <EnlaceSeccion
           href="/dashboard/novedades"
@@ -222,7 +238,7 @@ export default function Sidebar({
             onClick={limpiarCursos}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               !haySeleccion
-                ? "bg-indigo-50 text-slate-900 dark:bg-indigo-500/15 dark:text-slate-100"
+                ? "bg-indigo-50 text-indigo-950 dark:bg-indigo-500/15 dark:text-indigo-50"
                 : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
             }`}
           >
@@ -302,7 +318,7 @@ export default function Sidebar({
               variant="ghost"
               size="icon-sm"
               title="Cerrar sesión"
-              className="text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 dark:hover:text-red-400 dark:hover:bg-red-500/10"
+              className="shrink-0 text-slate-400 hover:bg-slate-100 hover:text-red-600 dark:hover:bg-slate-700 dark:hover:text-red-300"
             >
               <LogOut size={16} />
             </Button>

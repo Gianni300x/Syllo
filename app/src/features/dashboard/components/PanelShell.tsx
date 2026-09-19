@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 /** Nombre de la sección actual, para la barra superior de mobile. */
 function tituloSeccion(pathname: string | null): string {
   if (pathname?.startsWith("/dashboard/tareas")) return "Tareas";
+  if (pathname?.startsWith("/dashboard/calificaciones")) return "Calificaciones";
   if (pathname?.startsWith("/dashboard/novedades") || pathname?.startsWith("/dashboard/correos")) return "Novedades";
   if (pathname?.startsWith("/dashboard/notas")) return "Notas";
   if (pathname?.startsWith("/dashboard/calendario")) return "Calendario";

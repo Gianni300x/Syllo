@@ -69,30 +69,39 @@ export async function fetchTareasDesdeClassroom(
       ),
     ]);
 
-    const estadoPorTrabajo = new Map<string, string>();
+    const entregaPorTrabajo = new Map<
+      string,
+      { estado: string; calificacion: number | null; entregaTarde: boolean }
+    >();
     for (const entrega of entregas) {
       if (entrega.courseWorkId && entrega.state) {
-        estadoPorTrabajo.set(entrega.courseWorkId, entrega.state);
+        entregaPorTrabajo.set(entrega.courseWorkId, {
+          estado: entrega.state,
+          calificacion: entrega.assignedGrade ?? null,
+          entregaTarde: entrega.late ?? false,
+        });
       }
     }
 
-    return trabajos.map(
-      (trabajo) =>
-        ({
+    return trabajos.map((trabajo) => {
+      const entrega = entregaPorTrabajo.get(trabajo.id ?? "");
+      return {
           curso: curso.name ?? "Sin curso",
           titulo: trabajo.title ?? "(sin título)",
           descripcion: trabajo.description ?? "",
           puntos: trabajo.maxPoints ?? null,
           vencimiento: normalizarVencimiento(trabajo.dueDate),
-          estado: estadoPorTrabajo.get(trabajo.id ?? "") ?? "CREATED",
+          estado: entrega?.estado ?? "CREATED",
+          calificacion: entrega?.calificacion ?? null,
+          entregaTarde: entrega?.entregaTarde ?? false,
           link: trabajo.alternateLink ?? "",
           // Los ids viajan con la tarea (antes se usaban solo como clave del
           // Map de arriba y se tiraban): son la única clave estable donde
           // colgar el estado propio del alumno y el UID del calendario.
           courseId: curso.id ?? undefined,
           courseWorkId: trabajo.id ?? undefined,
-        }) satisfies Tarea,
-    );
+        } satisfies Tarea;
+    });
   });
 
   return (await Promise.all(tareasPromises)).flat();

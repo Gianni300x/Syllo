@@ -33,8 +33,9 @@ export default function PrivacidadPage() {
 
         <Seccion titulo="Lo esencial">
           <p>
-            Syllo es una agenda que reúne en un solo panel tus tareas y anuncios
-            de Google Classroom, las fechas de tu CVG, tus notas y tu calendario.
+            Syllo es una agenda que reúne en un solo panel tus tareas,
+            calificaciones y anuncios de Google Classroom, las fechas de tu CVG,
+            tus notas y tu calendario.
             Accedemos a Google Classroom <strong>solo para leer</strong>: Syllo
             nunca modifica, envía ni borra nada. No accedemos a tu Gmail.
           </p>
@@ -46,9 +47,9 @@ export default function PrivacidadPage() {
 
         <Seccion titulo="Qué se guarda y qué no">
           <p>
-            <strong>No guardamos</strong> el contenido de tus anuncios ni de tus
-            tareas de Classroom. Se piden a Google y quedan en una memoria
-            temporal de pocos minutos para evitar consultas repetidas.
+            <strong>No guardamos</strong> el contenido de tus anuncios, tus tareas
+            ni tus calificaciones de Classroom. Se piden a Google y quedan en
+            una memoria temporal de pocos minutos para evitar consultas repetidas.
           </p>
           <p>
             Si conectás el CVG, guardamos la URL privada de calendario que ese
@@ -182,4 +183,3 @@ function Seccion({
     </section>
   );
 }
-

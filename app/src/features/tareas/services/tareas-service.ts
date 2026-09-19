@@ -146,6 +146,8 @@ export function tareaDelFeedComoTarea(tarea: TareaDelFeed): Tarea {
     puntos: null,
     vencimiento: tarea.vencimiento,
     estado: "CREATED",
+    calificacion: null,
+    entregaTarde: false,
     link: tarea.link,
     courseId: tarea.courseId,
     courseWorkId: tarea.courseWorkId,

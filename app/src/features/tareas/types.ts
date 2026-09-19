@@ -5,6 +5,10 @@ export interface Tarea {
   puntos: number | null;
   vencimiento: { year: number; month: number; day: number } | null;
   estado: string;
+  /** Nota publicada por el docente en Classroom. `null` mientras no fue calificada. */
+  calificacion?: number | null;
+  /** Classroom marca si la entrega se realizó después del vencimiento. */
+  entregaTarde?: boolean;
   link: string;
   /** Presente solo si es un evento personal (tabla `eventos`), no una tarea de Classroom. */
   eventoId?: string;

@@ -34,6 +34,8 @@ function tarea(parcial: Partial<Tarea> = {}): Tarea {
     puntos: null,
     vencimiento: null,
     estado: "CREATED",
+    calificacion: null,
+    entregaTarde: false,
     link: "https://classroom.google.com/x",
     ...parcial,
   };
@@ -110,6 +112,8 @@ describe("claveTarea", () => {
     puntos: null,
     vencimiento: null,
     estado: "CREATED",
+    calificacion: null,
+    entregaTarde: false,
     link: "https://classroom.google.com/x",
   };
 
@@ -199,4 +203,3 @@ describe("cuentaRegresivaEvento", () => {
     expect(cuentaRegresivaEvento(null)).toBeNull();
   });
 });
-

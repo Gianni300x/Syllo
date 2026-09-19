@@ -34,6 +34,8 @@ function enDias(dias: number, parcial: Partial<Tarea> = {}): Tarea {
       day: fecha.getDate(),
     },
     estado: "CREATED",
+    calificacion: null,
+    entregaTarde: false,
     link: "https://classroom.google.com/x",
     ...parcial,
   };

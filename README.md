@@ -1,6 +1,6 @@
 # Syllo
 
-Syllo es una agenda para estudiantes que centraliza tareas y anuncios de **Google Classroom**, fechas del calendario del **CVG**, notas y eventos personales. Ordena las entregas por vencimiento y evita pedir acceso a la casilla de Gmail.
+Syllo es una agenda para estudiantes que centraliza tareas, calificaciones y anuncios de **Google Classroom**, fechas del calendario del **CVG**, notas y eventos personales. Ordena las entregas por vencimiento y evita pedir acceso a la casilla de Gmail.
 
 ## Funcionalidad
 
@@ -13,11 +13,12 @@ Syllo es una agenda para estudiantes que centraliza tareas y anuncios de **Googl
   - **Estado propio sobre cada tarea**: marcarla como "ya la empecé" y fijarla. Se guarda en Postgres contra el par `courseId`/`courseWorkId` de Classroom, así que sobrevive a que renombres el curso o a que el profesor cambie el título. Las fijadas van arriba de todo en Tareas y en Inicio.
   - Tarjetas de tarea con curso, título, descripción, puntaje, fecha de vencimiento y etiqueta visual según proximidad de la fecha (vencida, vence hoy/mañana, días restantes, entregada).
   - Filtro por curso seleccionado desde la barra lateral.
+- **Calificaciones** (`/dashboard/calificaciones`): reúne los trabajos corregidos y las entregas que todavía esperan una nota, con promedio porcentual cuando Classroom informa un puntaje máximo.
 - **Novedades** (`/dashboard/novedades`), en su propia sección del sidebar:
   - Lee directamente los anuncios publicados en los cursos de Classroom.
   - Cada usuario puede pegar la URL dinámica de exportación de su CVG; Syllo valida que sea del dominio oficial y la guarda cifrada con AES-GCM.
   - Las próximas fechas del CVG se mezclan con los anuncios sin acceder al correo institucional.
-  - Buscador en memoria, filtro por origen con el control animado Rubber Segment de React Bits y filtro por curso desde la barra lateral.
+  - Buscador en memoria, filtro por origen y filtro por curso desde la barra lateral.
   - La ruta anterior `/dashboard/correos` redirige a Novedades para conservar enlaces viejos.
 - **Landing page** que explica la propuesta de valor de Syllo y permite iniciar sesión con Google para acceder al dashboard, con enlace a la política de privacidad (`/privacidad`).
 - **Inicio** (`/dashboard`): resumen del día con mini-calendario del mes, tarjetas de conteo y las últimas tareas, novedades y notas.
@@ -45,12 +46,12 @@ funcionalidad (`src/features/`) con una capa de servicios separada de los compon
 Next.js App Router con carpeta `src/`:
 
 - `src/app/` — solo routing: layouts, páginas, `loading`/`error` y route handlers. El panel
-  autenticado está bajo el route group `(panel)/dashboard/`, con las cinco secciones (Inicio,
-  `tareas/`, `novedades/`, `notas/`, `calendario/`) y sus rutas de API en `app/api/`.
+  autenticado está bajo el route group `(panel)/dashboard/`, con las seis secciones (Inicio,
+  `tareas/`, `calificaciones/`, `novedades/`, `notas/`, `calendario/`) y sus rutas de API en `app/api/`.
 - `src/features/` — un directorio por dominio, cada uno con `components/` (UI cliente) y
   `services/` (fetch a Google/DB, server actions, capas puras de tipos y reglas):
-  - `tareas/` — Classroom API (`tareas-server.ts`), reglas de urgencia (`tareas-service.ts`),
-    estado propio (empezada/fijada), tipos en `types.ts`.
+  - `tareas/` — Classroom API (`tareas-server.ts`), reglas de urgencia (`tareas-service.ts`), estado propio (empezada/fijada), tipos en `types.ts`.
+  - `calificaciones/` — transformación de entregas de Classroom y presentación de notas.
   - `novedades/` — anuncios directos de Classroom y presentación unificada.
   - `cvg/` — validación, cifrado, lectura y parseo del calendario personal del CVG.
   - `notas/` — CRUD de notas, editor Tiptap, conversión markdown/HTML.
