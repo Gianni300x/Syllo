@@ -9,10 +9,8 @@ export const metadata: Metadata = {
 };
 
 /**
- * Google exige una política de privacidad publicada para verificar la app con
- * el scope restringido `gmail.readonly` (ver README). El contenido describe lo
- * que el código realmente hace: los scopes de `auth.ts`, las tablas de
- * `lib/schema.ts` y el cacheo de `tareas-server.ts` / `correos-server.ts`.
+ * Describe los scopes de `auth.ts`, las tablas de `lib/schema.ts` y el manejo
+ * del enlace privado del CVG. Debe mantenerse alineada con el código real.
  */
 export default function PrivacidadPage() {
   return (
@@ -35,11 +33,10 @@ export default function PrivacidadPage() {
 
         <Seccion titulo="Lo esencial">
           <p>
-            Syllo es una agenda que reúne en un solo panel tus tareas de Google
-            Classroom, los correos de Classroom y de tu universidad, tus notas y
-            tu calendario. Accedemos a tu cuenta de Google <strong>solo para
-            leer</strong>: Syllo nunca modifica, envía ni borra nada en
-            Classroom ni en tu correo.
+            Syllo es una agenda que reúne en un solo panel tus tareas y anuncios
+            de Google Classroom, las fechas de tu CVG, tus notas y tu calendario.
+            Accedemos a Google Classroom <strong>solo para leer</strong>: Syllo
+            nunca modifica, envía ni borra nada. No accedemos a tu Gmail.
           </p>
           <p>
             No vendemos tus datos, no los compartimos con terceros y no usamos
@@ -49,10 +46,16 @@ export default function PrivacidadPage() {
 
         <Seccion titulo="Qué se guarda y qué no">
           <p>
-            <strong>No guardamos</strong> tus correos en nuestra base de datos.
-            Se piden a Google en el momento y quedan en una memoria temporal de
-            pocos minutos, solo para que la app no vuelva a consultar lo mismo
-            en cada clic. Lo mismo vale para el contenido de tus tareas.
+            <strong>No guardamos</strong> el contenido de tus anuncios ni de tus
+            tareas de Classroom. Se piden a Google y quedan en una memoria
+            temporal de pocos minutos para evitar consultas repetidas.
+          </p>
+          <p>
+            Si conectás el CVG, guardamos la URL privada de calendario que ese
+            campus genera para vos. Se cifra antes de llegar a la base de datos
+            y solo se usa para actualizar tus fechas. Nunca se muestra de nuevo
+            ni se comparte con otros usuarios. Podés reemplazarla o desconectarla
+            desde Novedades.
           </p>
           <p>
             <strong>Sí guardamos</strong>, asociado a tu dirección de correo, lo
@@ -79,7 +82,7 @@ export default function PrivacidadPage() {
           </p>
           <p>
             Tu sesión vive en una cookie cifrada que contiene los tokens de
-            acceso de Google. <strong>No</strong> se almacenan en nuestra base
+            acceso de Google Classroom. <strong>No</strong> se almacenan en nuestra base
             de datos: Syllo no puede entrar a tu cuenta de Google si vos no
             estás usando la app.
           </p>
@@ -109,22 +112,13 @@ export default function PrivacidadPage() {
           </p>
         </Seccion>
 
-        <Seccion titulo="Cómo protegemos el contenido de los correos">
-          <p>
-            El cuerpo de cada correo se muestra dentro de un marco aislado, sin
-            permiso para ejecutar scripts ni para acceder al resto de Syllo. Las
-            imágenes remotas quedan bloqueadas hasta que vos las pidas, así el
-            remitente no se entera de que abriste el mensaje.
-          </p>
-        </Seccion>
-
         <Seccion titulo="Con quién se comparte">
           <p>
             Con nadie, salvo la infraestructura necesaria para que la app
-            funcione: <strong>Google</strong> (de donde vienen tus datos) y el
-            proveedor de la base de datos donde se guardan tus notas, eventos,
-            preferencias de cursos y vencimientos. Ninguno de los dos los usa
-            para otra cosa.
+            funcione: <strong>Google Classroom</strong>, el <strong>CVG de UTN
+            FRRo</strong> cuando vos lo conectás, y el proveedor de la base de
+            datos donde se guardan tus notas, eventos, preferencias y el enlace
+            cifrado del CVG. Ninguno los usa para otra finalidad de Syllo.
           </p>
         </Seccion>
 
@@ -188,5 +182,4 @@ function Seccion({
     </section>
   );
 }
-
 

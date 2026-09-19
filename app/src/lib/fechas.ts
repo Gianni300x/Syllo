@@ -1,6 +1,6 @@
 /**
  * Piezas de formato de fecha compartidas. Viven acá porque las usan tanto
- * Tareas (`classroom.ts`) como Correos (`correos.ts`), y ninguna de las dos
+ * Tareas (`classroom.ts`) como Novedades, y ninguna de las dos
  * capas tiene por qué depender de la otra.
  */
 

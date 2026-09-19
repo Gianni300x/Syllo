@@ -1,6 +1,6 @@
 /**
  * Capa de datos de Notas: lee de Postgres y cachea, igual patrón que
- * `tareas-server.ts` / `correos-server.ts`.
+ * `tareas-server.ts` / `novedades-server.ts`.
  *
  * - `cache()` de React deduplica dentro de un request.
  * - `unstable_cache` persiste entre requests durante `revalidate` segundos.

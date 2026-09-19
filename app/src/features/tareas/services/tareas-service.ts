@@ -1,6 +1,6 @@
 /**
  * Capa de negocio: reglas sobre qué es "urgente", "pendiente", etc.
- * No sabe nada de Classroom/Gmail ni de cómo se renderiza en la UI.
+ * No sabe nada de las APIs de Google ni de cómo se renderiza en la UI.
  */
 import {
   claveTarea,

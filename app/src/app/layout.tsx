@@ -21,7 +21,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Syllo — Todo tu estudio en un solo lugar",
   description:
-    "Syllo reúne los correos de Google Classroom y de tu universidad y las tareas de todos tus cursos en un solo panel, más tus notas personales y un calendario con todos los vencimientos. Próximamente: recordatorios.",
+    "Syllo reúne las tareas y los anuncios de Google Classroom con las fechas del CVG, tus notas y tu calendario en un solo panel.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

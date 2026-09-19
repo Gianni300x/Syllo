@@ -4,6 +4,8 @@ import { getTareas } from "@/features/tareas/services/tareas-server";
 import { eventoComoTarea, getEventosCached } from "@/features/calendario/services/eventos-service";
 import Calendario from "@/features/calendario/components/calendario";
 import type { Tarea } from "@/features/tareas/services/classroom";
+import { getEstadoCalendarioCvg } from "@/features/cvg/services/cvg-server";
+import { eventoCvgComoTarea } from "@/features/cvg/services/cvg";
 
 export default async function CalendarioPage() {
   const session = await auth();
@@ -13,14 +15,19 @@ export default async function CalendarioPage() {
   }
 
   const userId = session.user?.email ?? "anon";
-  const [tareas, eventosRaw] = await Promise.all([
+  const [tareas, eventosRaw, estadoCvg] = await Promise.all([
     getTareas(session.access_token, userId),
-    getEventosCached(userId)
+    getEventosCached(userId),
+    getEstadoCalendarioCvg(userId),
   ]);
 
   const eventosComoTareas: Tarea[] = eventosRaw.map(eventoComoTarea);
 
-  const tareasYEventos = [...tareas, ...eventosComoTareas];
+  const tareasYEventos = [
+    ...tareas,
+    ...eventosComoTareas,
+    ...estadoCvg.eventos.map(eventoCvgComoTarea),
+  ];
 
   return <Calendario tareas={tareasYEventos} />;
 }

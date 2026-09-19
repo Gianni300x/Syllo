@@ -43,7 +43,7 @@ function invalidar(email: string) {
   revalidateTag("cursos-archivados", "max");
   revalidateTag(`u:${email}`, "max");
   revalidatePath("/dashboard");
-  revalidatePath("/dashboard/correos");
+  revalidatePath("/dashboard/novedades");
 }
 
 export async function archivarCursos(

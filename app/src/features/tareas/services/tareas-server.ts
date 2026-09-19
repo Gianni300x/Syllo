@@ -98,7 +98,7 @@ export async function fetchTareasDesdeClassroom(
   return (await Promise.all(tareasPromises)).flat();
 }
 
-/** Nombres de los cursos activos, para etiquetar los correos por curso. */
+/** Nombres de los cursos activos, para filtros y etiquetas del panel. */
 export async function fetchNombresCursos(
   accessToken: string,
 ): Promise<string[]> {

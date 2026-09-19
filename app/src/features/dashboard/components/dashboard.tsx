@@ -243,7 +243,7 @@ export default function Dashboard({ tareas }: { tareas: Tarea[] }) {
     <main className="flex-1 p-4 sm:p-6 lg:p-8">
       {/* Cabecera: título a la izquierda; buscador y modo de vista a la derecha.
           En mobile el buscador baja a su propia fila y queda siempre visible —
-          igual que en Correos—, porque la lupa que se expande dejaba un botón
+          igual que en Novedades—, porque la lupa que se expande dejaba un botón
           suelto en una fila vacía. */}
       <div className="mb-6 sm:mb-8">
         <div className="flex items-start justify-between gap-4">

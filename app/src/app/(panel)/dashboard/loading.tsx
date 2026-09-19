@@ -20,7 +20,7 @@ export default function CargandoInicio() {
         ))}
       </div>
 
-      {/* Tareas / Correos / Notas */}
+      {/* Tareas / Novedades / Notas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {Array.from({ length: 3 }).map((_, columna) => (
           <div key={columna} className="flex flex-col">

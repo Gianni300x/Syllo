@@ -5,9 +5,8 @@ import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
 /**
- * Límite de error del panel. Sin esto, un fallo de Classroom o Gmail dentro de
- * un Server Component le mostraba al usuario la pantalla cruda de Next.
- * Mismo lenguaje visual que `LimiteGmail` en `dashboard/correos/page.tsx`.
+ * Límite de error del panel. Sin esto, un fallo de Classroom o CVG dentro de
+ * un Server Component le mostraría al usuario la pantalla cruda de Next.
  */
 export default function ErrorDelPanel({
   error,

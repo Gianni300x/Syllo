@@ -14,6 +14,8 @@ export interface Tarea {
   /** Estado propio del alumno, de la tabla `estados_tareas`. Lo pega `aplicarEstados`. */
   empezada?: boolean;
   fijada?: boolean;
+  /** Distingue fuentes que comparten la vista de calendario. */
+  origen?: "classroom" | "personal" | "cvg";
 }
 
 /**

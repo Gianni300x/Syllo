@@ -140,7 +140,7 @@ export default function Notas({
     useFiltroCursos();
 
   // Publica el conteo por curso al Sidebar compartido, igual que hacen Tareas,
-  // Correos e Inicio.
+  // Novedades e Inicio.
   const conteoPorCurso = useMemo(
     () => contarNotasPorCurso(notas),
     [notas],

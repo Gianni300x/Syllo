@@ -39,6 +39,7 @@ export function eventoComoTarea(e: {
     estado: "CREATED",
     link: "#",
     eventoId: e.id,
+    origen: "personal",
   };
 }
 

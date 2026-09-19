@@ -164,7 +164,7 @@ export default function Calendario({ tareas }: { tareas: Tarea[] }) {
             {etiquetaMes}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Vencimientos de tus cursos
+            Vencimientos de Classroom, eventos personales y CVG
           </p>
         </div>
 
@@ -499,6 +499,15 @@ function PillTarea({
         {punto}
         <span className="truncate">{tarea.titulo}</span>
       </button>
+    );
+  }
+
+  if (!tarea.link) {
+    return (
+      <span title={`${tarea.curso} · ${tarea.titulo}`} className={className}>
+        {punto}
+        <span className="truncate">{tarea.titulo}</span>
+      </span>
     );
   }
 

@@ -33,8 +33,8 @@ export default function Home() {
 
             <HeroFadeIn delay={0.25} y={16}>
               <p className="sub">
-                Los correos de Google Classroom y del CVG, y las tareas de
-                todos tus cursos ordenadas por entrega, en un mismo lugar.
+                Los anuncios de Google Classroom, las fechas del CVG y las
+                tareas de todos tus cursos, en un mismo lugar.
               </p>
             </HeroFadeIn>
 
@@ -44,7 +44,7 @@ export default function Home() {
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                   <path d="m3 7 9 6 9-6" />
                 </svg>
-                Correos de Classroom y del CVG
+                Anuncios de Classroom y fechas del CVG
               </HeroFadeInLi>
               <HeroFadeInLi delay={0.42} y={10}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -94,8 +94,8 @@ export default function Home() {
                   <path d="M12 11v5M12 8h.01" strokeLinecap="round" />
                 </svg>
                 <span>
-                  Syllo solo lee tus cursos, tareas y correos. Nunca modifica ni
-                  envía nada por vos. Al continuar aceptás la{" "}
+                  Syllo solo lee tus cursos, tareas y anuncios. Nunca modifica
+                  ni envía nada por vos. Al continuar aceptás la{" "}
                   <Link href="/privacidad">política de privacidad</Link>.
                 </span>
               </p>
@@ -193,7 +193,7 @@ export default function Home() {
           <ScrollFadeIn y={16}>
             <h2>Cómo funciona</h2>
             <p className="lead">
-              Syllo no reemplaza Classroom ni tu correo: los lee y te los ordena.
+              Syllo no reemplaza Classroom ni el CVG: conecta sus datos y te los ordena.
             </p>
           </ScrollFadeIn>
           <ul className="steps">
@@ -207,8 +207,8 @@ export default function Home() {
             <ScrollFadeInLi delay={0.15} y={20}>
               <h3>Se actualiza solo</h3>
               <p>
-                Cada vez que abrís Syllo trae lo nuevo de Classroom y del
-                correo de la UTN FRRo. Si querés, lo refrescás a mano.
+                Cada vez que abrís Syllo trae lo nuevo de Classroom y actualiza
+                el calendario del CVG que conectaste. Si querés, lo refrescás a mano.
               </p>
             </ScrollFadeInLi>
             <ScrollFadeInLi delay={0.25} y={20}>
@@ -225,18 +225,18 @@ export default function Home() {
         <section className="section">
           <ScrollFadeIn y={16}>
             <h2>Lo que ves adentro</h2>
-            <p className="lead">Cuatro secciones, ordenadas como cursás.</p>
+            <p className="lead">Tu cursada, ordenada en un solo panel.</p>
           </ScrollFadeIn>
           <ul className="features">
             <ScrollFadeInLi delay={0.05} y={20}>
               <div>
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
-                  Correos
+                  Novedades
                 </h3>
                 <p>
-                  Classroom y la UTN en una sola bandeja, con el curso al que
-                  pertenece cada correo. Filtrás por materia o por no leídos.
+                  Anuncios de Classroom y próximas fechas del CVG, con filtros
+                  por origen y materia. Sin acceder a tu casilla de correo.
                 </p>  
               </div>
               <div className="mini" aria-hidden="true">
@@ -295,9 +295,9 @@ export default function Home() {
                   Calendario
                 </h3>
                 <p>
-                  Los vencimientos de Classroom en una vista mensual. Suscribís
-                  tu calendario con un link y te avisa el celular el día antes
-                  de cada entrega.
+                  Los vencimientos de Classroom, tus eventos personales y el
+                  calendario del CVG en una sola vista mensual. También podés
+                  suscribirte desde el celular.
                 </p>
               </div>
               <div className="mini cal" aria-hidden="true">

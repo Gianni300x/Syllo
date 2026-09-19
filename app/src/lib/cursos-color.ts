@@ -1,6 +1,6 @@
 /**
  * Color determinístico por curso, según su posición en la lista de cursos
- * del usuario. Lo usan sidebar, calendario, correos, notas y curso-item —
+ * del usuario. Lo usan sidebar, calendario, novedades, notas y curso-item —
  * por eso vive acá y no dentro de una sola feature.
  */
 const COLORES_CURSO = [

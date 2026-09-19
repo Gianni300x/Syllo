@@ -9,7 +9,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/classroom.courses.readonly",
   "https://www.googleapis.com/auth/classroom.coursework.me.readonly",
   "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
-  "https://www.googleapis.com/auth/gmail.readonly",
+  "https://www.googleapis.com/auth/classroom.announcements.readonly",
 ].join(" ");
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
@@ -98,4 +98,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
-

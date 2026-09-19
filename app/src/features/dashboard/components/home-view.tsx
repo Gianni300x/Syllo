@@ -5,14 +5,14 @@ import { motion, Variants } from "motion/react";
 import Link from "next/link";
 import { 
   CheckCircle2, 
-  Mail, 
+  Bell,
   NotebookPen, 
   ListChecks, 
   ArrowRight,
   Sun
 } from "lucide-react";
 import { Tarea, claveTarea, estaCompletada } from "@/features/tareas/services/classroom";
-import { Correo } from "@/features/correos/services/correos";
+import type { Novedad } from "@/features/novedades/types";
 import { Nota, fechaRelativa } from "@/features/notas/services/notas";
 import {
   contarPendientesPorCurso,
@@ -25,13 +25,13 @@ import ControlesTarea from "@/features/tareas/components/controles-tarea";
 export default function HomeView({
   tareas,
   eventos,
-  correos,
+  novedades,
   notas,
   usuario
 }: {
   tareas: Tarea[];
   eventos: Tarea[];
-  correos: Correo[];
+  novedades: Novedad[];
   notas: Nota[];
   usuario: { name?: string | null; email?: string | null; image?: string | null } | undefined;
 }) {
@@ -54,14 +54,14 @@ export default function HomeView({
     return { tareas: filtrar(tareas), eventos: filtrar(eventos) };
   }, [tareas, eventos, cursosArchivados, cursosSeleccionados]);
 
-  const correosVisibles = useMemo(
+  const novedadesVisibles = useMemo(
     () =>
-      correos.filter((c) => !c.curso || !cursosArchivados.includes(c.curso)),
-    [correos, cursosArchivados],
+      novedades.filter((n) => !n.curso || !cursosArchivados.includes(n.curso)),
+    [novedades, cursosArchivados],
   );
 
   // Publica el conteo de pendientes por curso al Sidebar compartido, igual que
-  // hacen Tareas y Correos en sus propias secciones.
+  // hacen Tareas y Novedades en sus propias secciones.
   const conteoPendientes = useMemo(
     () => contarPendientesPorCurso(visibles.tareas),
     [visibles.tareas],
@@ -74,8 +74,7 @@ export default function HomeView({
   // Lo que el alumno fijó encabeza el resumen del día; después, por entrega.
   const ultimasTareas = ordenarPorPrioridad(tareasPendientes).slice(0, 4);
 
-  const correosNoLeidos = correosVisibles.filter((c) => !c.leido);
-  const ultimosCorreos = correosNoLeidos.slice(0, 4);
+  const ultimasNovedades = novedadesVisibles.slice(0, 4);
 
   const ultimasNotas = notas.slice(0, 4);
 
@@ -88,11 +87,11 @@ export default function HomeView({
       link: "/dashboard/tareas"
     },
     {
-      titulo: "Sin leer (recientes)",
-      valor: correosNoLeidos.length,
-      icono: <Mail size={20} className="text-amber-600 dark:text-amber-400" />,
+      titulo: "Novedades recientes",
+      valor: novedadesVisibles.length,
+      icono: <Bell size={20} className="text-amber-600 dark:text-amber-400" />,
       bg: "bg-amber-50 dark:bg-amber-500/20",
-      link: "/dashboard/correos"
+      link: "/dashboard/novedades"
     },
     {
       titulo: "Notas Guardadas",
@@ -212,28 +211,28 @@ export default function HomeView({
             </div>
           </motion.section>
 
-          {/* Correos */}
+          {/* Novedades */}
           <motion.section variants={item} className="flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Mail size={18} className="text-amber-500" /> Correos
+                <Bell size={18} className="text-amber-500" /> Novedades
               </h2>
-              <Link href="/dashboard/correos" className="text-xs font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1 dark:text-amber-400 dark:hover:text-amber-300">
-                Bandeja <ArrowRight size={14} />
+              <Link href="/dashboard/novedades" className="text-xs font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1 dark:text-amber-400 dark:hover:text-amber-300">
+                Ver todas <ArrowRight size={14} />
               </Link>
             </div>
             
             <div className="flex flex-col gap-3 flex-1">
-              {ultimosCorreos.length === 0 ? (
+              {ultimasNovedades.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-8 border border-slate-200 border-dashed rounded-xl bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50 text-slate-500">
                   <CheckCircle2 size={24} className="mb-2 text-slate-300 dark:text-slate-600" />
-                  <span className="text-sm">Sin correos nuevos</span>
+                  <span className="text-sm">Sin novedades recientes</span>
                 </div>
               ) : (
-                ultimosCorreos.map((correo) => (
-                  <Link href={`/dashboard/correos?id=${correo.id}`} key={correo.id} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-amber-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
-                    <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{correo.asunto || "(Sin asunto)"}</p>
-                    <p className="text-xs text-slate-500 truncate">{correo.remitente}</p>
+                ultimasNovedades.map((novedad) => (
+                  <Link href="/dashboard/novedades" key={novedad.id} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-amber-300 transition-colors block dark:bg-slate-800 dark:border-slate-700">
+                    <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 truncate">{novedad.titulo}</p>
+                    <p className="text-xs text-slate-500 truncate">{novedad.curso ?? novedad.origen}</p>
                   </Link>
                 ))
               )}

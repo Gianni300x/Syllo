@@ -9,7 +9,7 @@ import {
   CalendarDays,
   ListChecks,
   LogOut,
-  Mail,
+  Bell,
   NotebookPen,
   RefreshCw,
   Home,
@@ -20,7 +20,7 @@ import { CursoItem } from "@/features/archivados/components/curso-item";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 
-export type Seccion = "inicio" | "tareas" | "correos" | "notas" | "calendario";
+export type Seccion = "inicio" | "tareas" | "novedades" | "notas" | "calendario";
 
 /**
  * ¿Estamos en `lg+`? Hace falta en JS y no solo en CSS porque `inert` no
@@ -70,8 +70,8 @@ export default function Sidebar({
   const pathname = usePathname();
   const [fotoFallo, setFotoFallo] = useState(false);
   const esEscritorio = useEsEscritorio();
-  const seccion: Seccion = pathname?.startsWith("/dashboard/correos")
-    ? "correos"
+  const seccion: Seccion = pathname?.startsWith("/dashboard/novedades") || pathname?.startsWith("/dashboard/correos")
+    ? "novedades"
     : pathname?.startsWith("/dashboard/notas")
       ? "notas"
       : pathname?.startsWith("/dashboard/calendario")
@@ -167,11 +167,11 @@ export default function Sidebar({
           activo={seccion === "tareas"}
         />
         <EnlaceSeccion
-          href="/dashboard/correos"
-          icono={<Mail size={16} />}
-          etiqueta="Correos"
+          href="/dashboard/novedades"
+          icono={<Bell size={16} />}
+          etiqueta="Novedades"
           onNavegar={onCerrarMenu}
-          activo={seccion === "correos"}
+          activo={seccion === "novedades"}
         />
         <EnlaceSeccion
           href="/dashboard/notas"

@@ -6,7 +6,7 @@
  * Normaliza un string para comparar y buscar: sin mayúsculas, sin tildes y sin
  * espacios en los bordes.
  *
- * Estaba copiado en `correos.ts` y en `dashboard.tsx`; con el buscador de
+ * Se comparte entre los buscadores de Novedades, Tareas y Notas; con el de
  * Notas iban a ser tres.
  */
 export function normalizar(texto: string): string {

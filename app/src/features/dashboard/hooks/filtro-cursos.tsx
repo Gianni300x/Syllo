@@ -6,7 +6,7 @@ import { createContext, useContext } from "react";
  * Estado del filtro de cursos, compartido por todas las secciones: vive en el
  * layout (`<PanelShell>`), así no se pierde ni se re-crea al navegar entre las
  * dos secciones. Cada página publica además su propio conteo por curso
- * (pendientes en Tareas, no leídos en Correos).
+ * (pendientes en Tareas y novedades por materia).
  *
  * También expone los cursos archivados (persistidos en DB) y las acciones para
  * archivar/restaurar, que disparan una server action y un refresh.

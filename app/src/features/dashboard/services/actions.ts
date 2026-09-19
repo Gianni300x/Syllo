@@ -4,12 +4,13 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 /**
  * Fuerza traer datos frescos en la próxima carga, descartando el
- * cache de `unstable_cache` de tareas, correos, notas, nombres de cursos,
+ * cache de `unstable_cache` de tareas, novedades, CVG, notas, nombres de cursos,
  * cursos archivados y estado propio de las tareas.
  */
 export async function actualizarDatos() {
   revalidateTag("tareas", "max");
-  revalidateTag("correos", "max");
+  revalidateTag("anuncios-classroom", "max");
+  revalidateTag("calendario-cvg", "max");
   revalidateTag("nombres-cursos", "max");
   revalidateTag("notas", "max");
   revalidateTag("cursos-archivados", "max");

@@ -163,8 +163,8 @@ export const feedsCalendario = pgTable("feeds_calendario", {
  *
  * Google Calendar pega a la URL del feed sin cookie, así que no hay forma de
  * llamar a Classroom en ese momento. La alternativa era guardar el
- * `refresh_token` de Google —que habilita todos los scopes concedidos, correo
- * incluido—; en vez de eso se guardan los datos ya resueltos: acá no hay
+ * `refresh_token` de Google —que habilitaría todos los permisos concedidos—;
+ * en vez de eso se guardan los datos ya resueltos: acá no hay
  * ninguna credencial.
  *
  * Se reescribe entera cada vez que el usuario abre el panel, y solo guarda las
@@ -174,6 +174,24 @@ export const snapshotTareas = pgTable("snapshot_tareas", {
   ownerEmail: text("owner_email").primaryKey(),
   tareas: jsonb("tareas").$type<TareaDelFeed[]>().notNull(),
   actualizadoEn: timestamp("actualizado_en", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+/**
+ * Suscripción personal al calendario del CVG.
+ *
+ * La URL de Moodle contiene un token que permite leer el calendario, por eso
+ * nunca se guarda en claro. `urlCifrada` usa AES-GCM con una clave derivada de
+ * `CVG_ENCRYPTION_KEY` (o de `AUTH_SECRET` como respaldo).
+ */
+export const calendariosCvg = pgTable("calendarios_cvg", {
+  ownerEmail: text("owner_email").primaryKey(),
+  urlCifrada: text("url_cifrada").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`),
 });
