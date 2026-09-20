@@ -46,12 +46,12 @@ type VistaLayout = "grid" | "lista";
 
 const TABS_MAP: { valor: Tab; etiqueta: string }[] = [
   { valor: "pendientes", etiqueta: "Pendientes" },
+  { valor: "vencidas", etiqueta: "Vencidas" },
+  { valor: "semana", etiqueta: "Esta semana" },
+  { valor: "completadas", etiqueta: "Completadas" },
   // Solo se muestra cuando hay al menos una tarea marcada como empezada.
   { valor: "empezadas", etiqueta: "Empezadas" },
-  { valor: "semana", etiqueta: "Esta semana" },
   { valor: "urgentes", etiqueta: "Urgentes" },
-  { valor: "vencidas", etiqueta: "Vencidas" },
-  { valor: "completadas", etiqueta: "Completadas" },
   // Solo se muestra cuando hay al menos un curso archivado.
   { valor: "archivados", etiqueta: "Archivados" },
 ];

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { RubberSegment } from "@/components/ui/rubber-segment";
 import ConexionCvg from "@/features/cvg/components/conexion-cvg";
 import type { EstadoCalendarioCvg } from "@/features/cvg/types";
 import { useFiltroCursos } from "@/features/dashboard/hooks/filtro-cursos";
@@ -109,32 +110,12 @@ export default function Novedades({
         )}
 
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div
-            role="group"
+          <RubberSegment
+            items={["Todos", "Classroom", "CVG"]}
+            value={origen}
+            onValueChange={setOrigen}
             aria-label="Filtrar novedades por origen"
-            className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto"
-          >
-            {(["Todos", "Classroom", "CVG"] as const).map((opcion) => {
-              const activo = origen === opcion;
-              return (
-                <Button
-                  key={opcion}
-                  type="button"
-                  size="default"
-                  variant={activo ? "default" : "outline"}
-                  aria-pressed={activo}
-                  onClick={() => setOrigen(opcion)}
-                  className={
-                    activo
-                      ? "shadow-sm"
-                      : "text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  }
-                >
-                  {opcion}
-                </Button>
-              );
-            })}
-          </div>
+          />
 
           <div className="relative w-full sm:max-w-sm">
             <Search

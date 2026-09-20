@@ -11,7 +11,12 @@ import {
   ArrowRight,
   Sun
 } from "lucide-react";
-import { Tarea, claveTarea, estaCompletada } from "@/features/tareas/services/classroom";
+import {
+  Tarea,
+  claveTarea,
+  estaCompletada,
+  fechaVencimiento,
+} from "@/features/tareas/services/classroom";
 import type { Novedad } from "@/features/novedades/types";
 import { Nota, fechaRelativa } from "@/features/notas/services/notas";
 import {
@@ -74,6 +79,18 @@ export default function HomeView({
   // Lo que el alumno fijó encabeza el resumen del día; después, por entrega.
   const ultimasTareas = ordenarPorPrioridad(tareasPendientes).slice(0, 4);
 
+  // Inicio sirve para mirar lo que viene. Los eventos personales que ya
+  // pasaron siguen disponibles en Calendario, pero no ocupan este resumen.
+  const eventosProximos = useMemo(() => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    return visibles.eventos.filter((evento) => {
+      const fecha = fechaVencimiento(evento.vencimiento);
+      return fecha === null || fecha >= hoy;
+    });
+  }, [visibles.eventos]);
+
   const ultimasNovedades = novedadesVisibles.slice(0, 4);
 
   const ultimasNotas = notas.slice(0, 4);
@@ -131,7 +148,7 @@ export default function HomeView({
 
         {/* Mini Calendar Preview */}
         <motion.div variants={item}>
-          <MiniCalendar tareas={[...visibles.tareas, ...visibles.eventos]} />
+          <MiniCalendar tareas={[...visibles.tareas, ...eventosProximos]} />
         </motion.div>
 
         {/* Stats Grid */}

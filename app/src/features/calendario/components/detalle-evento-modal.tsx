@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { editarEventoAction, eliminarEventoAction } from "@/features/calendario/services/eventos-actions";
 import { motion, AnimatePresence } from "motion/react";
 import type { Tarea } from "@/features/tareas/services/classroom";
+import { DeleteButton } from "@/components/ui/delete-button";
 
 /** `YYYY-MM-DD` para prellenar el input `type="date"`. */
 function fechaInput(vencimiento: Tarea["vencimiento"]): string {
@@ -23,7 +24,6 @@ export default function DetalleEventoModal({
   onCerrar: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false);
   // Ver la nota en `nuevo-evento-modal.tsx`: el error va dentro del modal.
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -46,24 +46,25 @@ export default function DetalleEventoModal({
     }
   }
 
-  async function onEliminar() {
-    if (!evento?.eventoId) return;
+  async function onEliminar(): Promise<boolean> {
+    if (!evento?.eventoId) return false;
     setIsLoading(true);
     setError(null);
     try {
       await eliminarEventoAction(evento.eventoId);
       router.refresh();
-      onCerrar();
+      window.setTimeout(onCerrar, 650);
+      return true;
     } catch (err) {
       console.error(err);
       setError("No pudimos eliminar el evento. Probá de nuevo.");
+      return false;
     } finally {
       setIsLoading(false);
     }
   }
 
   function cerrar() {
-    setConfirmandoEliminar(false);
     setError(null);
     onCerrar();
   }
@@ -169,35 +170,11 @@ export default function DetalleEventoModal({
               </div>
 
               <div className="flex items-center justify-between gap-2 border-t border-slate-200 px-6 py-4 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 mt-auto">
-                {confirmandoEliminar ? (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-500 dark:text-slate-400">¿Eliminar?</span>
-                    <button
-                      type="button"
-                      onClick={onEliminar}
-                      disabled={isLoading}
-                      className="rounded-md px-1.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
-                    >
-                      {isLoading ? <Loader2 size={13} className="animate-spin" /> : "Sí"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmandoEliminar(false)}
-                      className="rounded-md px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 cursor-pointer"
-                    >
-                      No
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmandoEliminar(true)}
-                    title="Eliminar evento"
-                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 cursor-pointer"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                )}
+                <DeleteButton
+                  aria-label="Eliminar evento"
+                  disabled={isLoading}
+                  onConfirm={onEliminar}
+                />
 
                 <div className="flex items-center gap-2">
                   <button

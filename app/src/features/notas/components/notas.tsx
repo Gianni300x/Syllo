@@ -4,6 +4,7 @@ import {
   useActionState,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +18,6 @@ import {
   Plus,
   Search,
   Share2,
-  Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -42,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { DeleteButton } from "@/components/ui/delete-button";
 import {
   Select,
   SelectContent,
@@ -351,8 +352,8 @@ function TarjetaNota({
   cursos: string[];
   renombres: Record<string, string>;
 }) {
-  const [confirmando, setConfirmando] = useState(false);
   const [estado, accion, pendiente] = useActionState(eliminarNota, INICIAL);
+  const formEliminarRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const error = mensajeError(estado.error);
 
@@ -417,48 +418,15 @@ function TarjetaNota({
             <Download size={14} />
           </Button>
 
-          {confirmando ? (
-            <form action={accion} className="flex items-center gap-1">
-              <input type="hidden" name="id" value={nota.id} />
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                ¿Eliminar?
-              </span>
-              <Button
-                type="submit"
-                disabled={pendiente}
-                variant="ghost"
-                size="xs"
-                className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
-              >
-                {pendiente ? (
-                  <Loader2 size={13} className="animate-spin" />
-                ) : (
-                  "Sí"
-                )}
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setConfirmando(false)}
-                variant="ghost"
-                size="xs"
-                className="text-slate-500 dark:text-slate-400"
-              >
-                No
-              </Button>
-            </form>
-          ) : (
-            <Button
-              type="button"
-              onClick={() => setConfirmando(true)}
-              variant="ghost"
-              size="icon-sm"
-              title="Eliminar nota"
+          <form ref={formEliminarRef} action={accion}>
+            <input type="hidden" name="id" value={nota.id} />
+            <DeleteButton
+              size="compacto"
               aria-label="Eliminar nota"
-              className="text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-            >
-              <Trash2 size={14} />
-            </Button>
-          )}
+              disabled={pendiente}
+              onConfirm={() => formEliminarRef.current?.requestSubmit()}
+            />
+          </form>
         </div>
       </div>
 
@@ -491,8 +459,8 @@ function VisorNota({
   renombres: Record<string, string>;
 }) {
   const [copiado, setCopiado] = useState(false);
-  const [confirmando, setConfirmando] = useState(false);
   const [estado, accion, pendiente] = useActionState(eliminarNota, INICIAL);
+  const formEliminarRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -580,47 +548,14 @@ function VisorNota({
             <span>Editar</span>
           </Button>
 
-          {confirmando ? (
-            <form action={accion} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 p-1 dark:border-red-500/30 dark:bg-red-500/10">
-              <input type="hidden" name="id" value={nota.id} />
-              <span className="px-1 text-xs text-red-700 dark:text-red-300">
-                ¿Eliminar?
-              </span>
-              <Button
-                type="submit"
-                disabled={pendiente}
-                variant="destructive"
-                size="xs"
-              >
-                {pendiente ? (
-                  <Loader2 size={13} className="animate-spin" />
-                ) : (
-                  "Sí"
-                )}
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setConfirmando(false)}
-                variant="ghost"
-                size="xs"
-                className="text-slate-500 dark:text-slate-400"
-              >
-                No
-              </Button>
-            </form>
-          ) : (
-            <Button
-              type="button"
-              onClick={() => setConfirmando(true)}
-              variant="outline"
-              size="icon-sm"
-              title="Eliminar nota"
+          <form ref={formEliminarRef} action={accion}>
+            <input type="hidden" name="id" value={nota.id} />
+            <DeleteButton
               aria-label="Eliminar nota"
-              className="text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-            >
-              <Trash2 size={15} />
-            </Button>
-          )}
+              disabled={pendiente}
+              onConfirm={() => formEliminarRef.current?.requestSubmit()}
+            />
+          </form>
         </div>
       </div>
 
