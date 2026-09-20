@@ -656,7 +656,7 @@ function EditorNota({
   );
   // Base UI (como Radix) no permite value="" en un SelectItem, así que el
   // "Sin curso" usa este centinela y se traduce a "" recién al mandar el form.
-  const SIN_CURSO = "__general__";
+  const SIN_CURSO = "Personal/General";
   const [cursoValor, setCursoValor] = useState(
     nota?.curso ?? cursoSugerido ?? SIN_CURSO,
   );
